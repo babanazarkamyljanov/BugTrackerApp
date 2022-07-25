@@ -1,0 +1,53 @@
+﻿@model Comment
+<form id="myForm" asp-route-id="@ViewData["id"]" method="post" asp-action="AddComment" data-ajax="true">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-group">
+        <label asp-for="@Model.Message" class="control-label"></label>
+        <input asp-for="@Model.Message" class="form-control" />
+        <span asp-validation-for="@Model.Message" class="text-danger"></span>
+    </div>
+    <div style="margin-top: 15px;" class="form-group">
+        <input type="submit" value="Add Comment" class="btn btn-secondary btn-sm" />
+    </div>
+</form>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Commentator</th>
+            <th>Comment</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody id="commentsTableBody">
+        <!--
+            I used SignalR to show comments in real time after adding new comment
+            The logic to write table body is written in the wwwroot/js/commonHubScript.js file
+        -->
+    </tbody>
+</table>
+
+<div id="prevNext">
+    <!-- 
+        this div contains previous page and next page buttons for comments table. 
+        the button implementations are in the wwwroot/js/commonHubScript.js file
+    -->
+</div>
+
+@{
+    var bugId = ViewData["id"];
+}
+<!-- I stored bugId in the hidden input's value. It is used to get this value from external js file using element id -->
+<input type="hidden" id="bugId" value="@bugId" />
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+<script>
+    var frm = document.getElementById('myForm');
+    $('#myForm').submit(function (e) {
+        $.ajax({
+            success: function () {
+                console.log('Add comment was successful');
+                frm.reset();
+            }
+        })
+    })
+</script>

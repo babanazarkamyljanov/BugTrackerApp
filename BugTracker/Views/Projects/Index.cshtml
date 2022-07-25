@@ -1,0 +1,94 @@
+﻿@model IEnumerable<Project>
+
+@{
+    ViewData["Title"] = "Index";
+    //int val = 1;
+}
+ <link rel="stylesheet" type="text/css" href="~/css/index.css"/>
+
+<div class="container">
+    <div class="index-container index-title">
+        <h3>Projects</h3>
+    </div>
+    <div class="index-container index-search">
+        <div class="form-group search-field">
+            <span class="add-on"><i class="fa fa-search" aria-hidden="true"></i></span>
+            <input type="text" id="Search" placeholder="Search projects" class="form-control search-input" />
+        </div>
+        <div class="form-group">
+            <a asp-action="Create" class="btn add-btn">Create New</a>
+        </div>
+    </div>
+
+    <div class="index-container index-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Title)
+        @*                <a style="margin-left: 3px;" asp-action="Index" asp-route-sortBy="@ViewBag.SortTitle">
+                            <i class="fa-solid fa-sort"></i>
+                        </a>*@
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Description)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.Priority)
+                    </th>
+                    <th>
+                        @Html.DisplayNameFor(model => model.CreatedDate)
+        @*                <a style="margin-left: 3px;" asp-action="Index" asp-route-sortBy="@ViewBag.SortDate">
+                            <i class="fa-solid fa-sort"></i>
+                        </a>*@
+                    </th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model) 
+            {
+                <tr class="Search">
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Title)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Description)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Priority)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.CreatedDate)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.ProjectId">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.ProjectId">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.ProjectId">Delete</a>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        function Contains(text_one, text_two) {
+            if (text_one.indexOf(text_two) != -1) {
+                return true;
+            }
+        }
+        $("#Search").keyup(function() {
+            var searchText = $("#Search").val().toLowerCase();
+            $(".Search").each(function() {
+                if (!Contains($(this).text().toLowerCase(), searchText)) {
+                    $(this).hide();
+                } else {
+                    $(this).show();
+                }
+            })
+        })
+    })
+</script>

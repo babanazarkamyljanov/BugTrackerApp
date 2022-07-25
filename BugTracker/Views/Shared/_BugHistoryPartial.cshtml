@@ -1,0 +1,34 @@
+﻿@model BugDetailsViewModel
+<table class="table">
+    <thead>
+        <tr>
+            <th>Property</th>
+            <th>Old Value</th>
+            <th>New Value</th>
+            <th>Date Changed</th>
+        </tr>
+    </thead>
+    <tbody id="historyBody">
+        <!--
+            I used SignalR to show history in real time after changes
+            The logic to write table body is written in the wwwroot/js/details.js file
+        -->
+    </tbody>
+</table>
+<div id="prevNextHistory">
+
+</div>
+@*@{
+    var prevDisabled = !Model.PaginatedHistory.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.PaginatedHistory.HasNextPage ? "disabled" : "";
+}
+<a asp-action="Details"
+    asp-route-pageNumber="@(Model.PaginatedHistory.PageIndex-1)"
+    class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-action="Details"
+    asp-route-pageNumber="@(Model.PaginatedHistory.PageIndex+1)"
+    class="btn btn-default @nextDisabled">
+    Next
+</a>*@

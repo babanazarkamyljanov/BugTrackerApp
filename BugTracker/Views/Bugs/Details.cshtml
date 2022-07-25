@@ -1,0 +1,124 @@
+﻿@model BugDetailsViewModel
+@{
+    ViewData["id"] = @Model.Bug.BugId;
+    ViewData["files"] = @Model.PaginatedComments;
+}
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Details</title>
+        <style>
+            .custom-box {
+                display: flex;
+                justify-content: center;
+                flex-wrap: wrap;
+                gap: 75px;
+            }
+            .custom-container {
+                width: 700px;
+                height: 450px;
+                border: 1px solid blue;
+                
+                border-radius: 5px;
+                box-shadow: 5px 10px 5px gray;
+                padding: 10px;
+            }
+            .box-title {
+                display: flex;
+                justify-content: center;
+                text-align: center;
+            }
+            .box-title a {
+                margin: 5px 0 0 20px;
+                font-size: 16px; 
+                text-decoration: none;
+            }
+            .details-container {
+                padding-left: 50px;
+                display: flex;
+                gap: 150px;
+            }
+            th {
+                padding-top: 30px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="custom-box">
+            <!-- Bug main details container -->
+            <div class="custom-container">
+                <div class="box-title">
+                    <h3>Bug Details</h3>
+                    <a asp-action="Edit" asp-route-id="@Model.Bug.BugId">Edit</a>
+                </div>
+                <div class="details-container">
+                    <div class="left-side" id="leftSide">
+                        <!--
+                            I used SignalR to show the data in real time after crud operations.
+                            This div contains a table, and the logic for this table is written
+                            in the wwwroot/js/commonHubScript.js file
+                        -->
+                    </div>
+
+                    <div class="right-side" id="rightSide">
+                       <!--
+                            I used SignalR to show the data in real time after crud operations.
+                            This div contains a table, and the logic for this table is written
+                            in the wwwroot/js/commonHubScript.js file
+                        -->
+                    </div>
+                </div>
+            </div>
+            
+            <!--- Bug history container-->
+            <div class="custom-container">
+                <div class="box-title">
+                    <h3>Bug History</h3>
+                </div>
+                <partial name="_BugHistoryPartial" model="@Model">
+            </div>
+    
+            <!-- Bug comments container -->
+            <div class="custom-container" style="margin-bottom: 40px;">
+                <div class="box-title">
+                    <h3>Make a comment?</h3>
+                </div>
+                <partial name="_AddCommentPartial" model="@Model.Comment" view-data="ViewData">
+            </div>
+    
+
+            <!-- Bug attached files container -->
+            <div class="custom-container" style="margin-bottom: 40px;">
+                <div class="box-title">
+                    <h3>Attach file?</h3>
+                </div>
+                <partial name="_FileUploadPartial" model="@Model.FileOfBug" view-data="ViewData">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>File</th>
+                        </tr>
+                    </thead>
+                    <tbody id="filesBody">
+                        <!--
+                            I used SignalR to show files in real time after adding new file
+                            The logic to write table body is written in the wwwroot/js/commonHubScript.js file
+                        -->
+                    </tbody>
+                </table>
+                <div id="prevNextFiles">
+                        <!-- 
+                            this div contains previous page and next page buttons for files table. 
+                            the button implementations are in the wwwroot/js/commonHubScript.js file
+                        -->
+                </div>
+            </div>
+
+        </div>
+
+        @section Scripts {
+            @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+        }
+    </body>
+</html>

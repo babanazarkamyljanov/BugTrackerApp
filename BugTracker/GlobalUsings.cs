@@ -1,0 +1,10 @@
+﻿global using BugTracker.Models;
+global using BugTracker.ViewModels;
+global using BugTracker.Hubs;
+global using BugTracker.Data;
+global using Microsoft.AspNetCore.Identity;
+global using Microsoft.AspNetCore.Mvc;
+global using Microsoft.AspNetCore.SignalR;
+global using Microsoft.EntityFrameworkCore;
+global using System.ComponentModel.DataAnnotations;
+global using System.ComponentModel.DataAnnotations.Schema;

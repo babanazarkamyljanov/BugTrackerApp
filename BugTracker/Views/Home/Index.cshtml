@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Dashboard</title>
+    <script src="~/js/echarts.js"></script>
+    <style>
+        .my-cont {
+            padding: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        @@media (max-width: 992px) {
+            .my-cont {
+                flex-direction: column;
+            }
+        }
+    </style>
+  </head>
+  <body>
+    <!-- Prepare a DOM with a defined width and height for ECharts -->
+    <div class="container my-cont" style="">
+        <div id="projects" style="width:500px;height:450px;"></div>
+        <div id="bugs" style="width:500px;height:450px;"></div>
+    </div>
+    <script type="text/javascript">
+      // Initialize the echarts instance based on the prepared dom
+      var myChart = echarts.init(document.getElementById('projects'));
+
+      // Specify the configuration items and data for the chart
+      var option = {
+        title: {
+          text: 'Projects',
+          left: 'center'
+        },
+        tooltip: {
+            trigger: 'item'
+        },
+        legend: {
+            top: 'bottom'
+        },
+        labelLine: {
+            show: false
+        },
+        series: [
+          {
+            name: 'status',
+            type: 'pie',
+            label: {
+                show: false
+            },
+            labelLine: {
+                show: false
+            },
+            data: [
+                { value: 7, name: 'Active' },
+                { value: 0, name: 'Complete' },
+                { value: 2, name: 'Overdue' },
+                { value: 3, name: 'Close' },
+                { value: 3, name: 'Not Active' }
+            ],
+            emphasis: {
+                itemStyle: {
+                    shadowBlur: 10,
+                    shadowOffsetX: 0,
+                    shadowColor: 'rgba(0, 0, 0, 0.5)'
+                }
+            }
+          }
+        ]
+      };
+      // Display the chart using the configuration items and data just specified.
+      myChart.setOption(option);
+
+      // Initialize the echarts instance based on the prepared dom
+      var bugChart = echarts.init(document.getElementById('bugs'));
+
+      // Specify the configuration items and data for the chart
+      var option = {
+          title: {
+              text: 'Bugs',
+              left: 'center'
+          },
+          legend: {
+              top: 'bottom'
+          },
+                  tooltip: {
+            trigger: 'item'
+        },
+          toolbox: {
+              show: true,
+              feature: {
+                  mark: { show: true }
+              }
+          },
+          series: [
+          {
+              name: 'status',
+              type: 'pie',
+              radius: [60, 180],
+              center: ['50%', '50%'],
+              roseType: 'area',
+              itemStyle: {
+                  borderRadius: 8
+              },
+              label: {
+                  show: false
+              },
+              labelLine: {
+                  show: false
+              },
+              data: [
+                  { value: 7, name: 'Open' },
+                  { value: 5, name: 'Fixed' },
+                  { value: 3, name: 'Close' }
+              ]
+          }
+        ]
+      };
+
+      // Display the chart using the configuration items and data just specified.
+      bugChart.setOption(option);
+    </script>
+  </body>
+</html>

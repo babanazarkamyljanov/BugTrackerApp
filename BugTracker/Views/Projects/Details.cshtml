@@ -1,0 +1,85 @@
+﻿@model Project
+@inject UserManager<ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = "Details";
+}
+<link rel="stylesheet" type="text/css" href="~/css/projectDetails.css"/>
+
+<div class="container project-details">
+    <h3>Project details</h3>
+    <div class="row">
+        <div class="col-3">
+            <label>Title</label>
+        </div>
+        <div class="col-8">
+            <h5>@Model.Title</h5>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-3">
+            <label>Priority</label>
+        </div>
+        <div class="col-8">
+            <h5>@Model.Priority</h5>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-3">
+            <label>Project Manager</label>
+        </div>
+        <div class="col-8">
+            @{
+                var name = "";
+                var user = await UserManager.FindByIdAsync(Model.ManagerId);
+                if (user != null)
+                    name = user.FirstName + " " + user.LastName;
+            }
+            <h5>@name</h5>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-3">
+            <label>Submitted date</label>
+        </div>
+        <div class="col-8">
+            <h5>@Model.CreatedDate</h5>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-3">
+            <label>Description</label>
+        </div>
+        <div class="col-8">
+            <h5>@Model.Description</h5>
+        </div>
+    </div>
+</div>
+<div class="container project-details" style="margin-top: 15px;">
+    <h3>Assigned developers to this project</h3>
+    <table class="table">
+        <thead>
+            <tr>
+                 <th>Name</th>
+                 <th>Email</th>
+                 <th>Role</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach(var item in Model.AssignedUsersForProject)
+            {
+                <tr>
+                    <td>@item.AppUser.FirstName @item.AppUser.LastName</td>
+                    <td>@item.AppUser.Email</td>
+                    <td>Developer</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+@*
+    <div>
+        <a asp-action="Edit" asp-route-id="@Model.ProjectId">Edit</a> |
+        <a asp-action="Index">Back to List</a>
+    </div>
+*@

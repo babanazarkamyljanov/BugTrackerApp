@@ -1,0 +1,89 @@
+﻿@model IEnumerable<Bug>
+
+@{
+    ViewData["Title"] = "Index";
+}
+ <link rel="stylesheet" type="text/css" href="~/css/index.css"/>
+
+<div class="container">
+    <div class="index-container index-title">
+        <h3>Bugs</h3>
+    </div>
+
+    <div class="index-container index-search">
+        <div class="form-group search-field">
+            <span class="add-on"><i class="fa fa-search" aria-hidden="true"></i></span>
+            <input type="text" id="Search" placeholder="Search bugs" class="form-control search-input" />
+        </div>
+        <div class="form-group">
+            <a asp-action="Create" asp-controller="Bugs" class="btn add-btn">Add Bug</a>
+        </div>  
+    </div>
+
+    <div class="index-container index-table">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Project</th>
+                    <th>Added date</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in Model) 
+                {
+                    <tr class="Search">
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Title)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Description)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Priority)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.Status)
+                        </td>
+                        <td>
+                            @item.Project.Title
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => item.CreatedDate)
+                        </td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.BugId">Edit</a> |
+                            <a asp-action="Details" asp-route-id="@item.BugId">Details</a> |
+                            <a asp-action="Delete" asp-route-id="@item.BugId">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script>
+    $(document).ready(function() {
+        function Contains(text_one, text_two) {
+            if (text_one.indexOf(text_two) != -1) {
+                return true;
+            }
+        }
+        $("#Search").keyup(function() {
+            var searchText = $("#Search").val().toLowerCase();
+            $(".Search").each(function() {
+                if (!Contains($(this).text().toLowerCase(), searchText)) {
+                    $(this).hide();
+                } else {
+                    $(this).show();
+                }
+            })
+        })
+    })
+</script>

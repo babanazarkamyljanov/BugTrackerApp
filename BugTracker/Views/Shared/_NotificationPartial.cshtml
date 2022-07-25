@@ -1,0 +1,39 @@
+﻿
+<style>
+    #notifications {
+        display: none;
+        padding: 10px 5px 10px 5px;
+        width: 200px;
+        height: 400px;
+        z-index: 9;
+        background: #27D31C;
+        position: absolute;
+        border-radius: 5px;
+        left: -140px;
+        top: 0px;
+    }
+</style>
+
+<div style="position: absolute; right: 275px; top: 15px;">
+    <span style="cursor: pointer;" onclick="showNotifications()">
+        <i class="fa-solid fa-bell" style=""></i>
+    </span>
+    <div style="position: relative;">
+        <div id="notifications">
+        </div>
+    </div>
+</div>
+
+<script>
+    var expanded = false;
+    function showNotifications() {
+        var notifications = document.getElementById("notifications");
+        if(!expanded) {
+            notifications.style.display = "block";
+            expanded = true;
+        } else {
+            notifications.style.display = "none";
+            expanded= false;
+        }
+    }
+</script>
