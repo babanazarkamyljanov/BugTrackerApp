@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "vQxQDpk9D75EFSuTzLnKghq+NChsFfSRhAlxyL54MCQ=",
+  "Hash": "/AbLzJRoIgciW3xTJiCbOmIWkJuY/Hgdb4AOrp2bMls=",
   "Source": "BugTracker",
   "BasePath": "_content/BugTracker",
   "Mode": "Default",
@@ -1207,12 +1207,12 @@
       "OriginalItemSpec": "wwwroot\\js\\commonHubScript.js"
     },
     {
-      "Identity": "D:\\Programming\\Visual Studio Projects\\visual studio projects\\2022\\BugTrackerApp\\BugTracker\\wwwroot\\js\\echarts.js",
+      "Identity": "D:\\Programming\\Visual Studio Projects\\visual studio projects\\2022\\BugTrackerApp\\BugTracker\\wwwroot\\js\\notification.js",
       "SourceId": "BugTracker",
       "SourceType": "Discovered",
       "ContentRoot": "D:\\Programming\\Visual Studio Projects\\visual studio projects\\2022\\BugTrackerApp\\BugTracker\\wwwroot\\",
       "BasePath": "_content/BugTracker",
-      "RelativePath": "js/echarts.js",
+      "RelativePath": "js/notification.js",
       "AssetKind": "All",
       "AssetMode": "All",
       "AssetRole": "Primary",
@@ -1221,24 +1221,7 @@
       "AssetTraitValue": "",
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\js\\echarts.js"
-    },
-    {
-      "Identity": "D:\\Programming\\Visual Studio Projects\\visual studio projects\\2022\\BugTrackerApp\\BugTracker\\wwwroot\\js\\echarts.js.map",
-      "SourceId": "BugTracker",
-      "SourceType": "Discovered",
-      "ContentRoot": "D:\\Programming\\Visual Studio Projects\\visual studio projects\\2022\\BugTrackerApp\\BugTracker\\wwwroot\\",
-      "BasePath": "_content/BugTracker",
-      "RelativePath": "js/echarts.js.map",
-      "AssetKind": "All",
-      "AssetMode": "All",
-      "AssetRole": "Primary",
-      "RelatedAsset": "",
-      "AssetTraitName": "",
-      "AssetTraitValue": "",
-      "CopyToOutputDirectory": "Never",
-      "CopyToPublishDirectory": "PreserveNewest",
-      "OriginalItemSpec": "wwwroot\\js\\echarts.js.map"
+      "OriginalItemSpec": "wwwroot\\js\\notification.js"
     },
     {
       "Identity": "D:\\Programming\\Visual Studio Projects\\visual studio projects\\2022\\BugTrackerApp\\BugTracker\\wwwroot\\lib\\bootstrap\\dist\\css\\bootstrap.css",

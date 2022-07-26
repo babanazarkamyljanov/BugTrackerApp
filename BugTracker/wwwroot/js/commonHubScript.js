@@ -1,4 +1,7 @@
-﻿"use strict";
+﻿//import { LoadNotifications } from "./notification"
+"use strict";
+
+//const LoadNotifications = require('./notification')
 LoadProjects();
 LoadBugDetails();
 LoadNotifications();
@@ -34,6 +37,7 @@ connection.on("GetNotifications", function () {
 LoadProjects();
 LoadBugDetails();
 LoadNotifications();
+
 
 // Notifications
 function LoadNotifications() {

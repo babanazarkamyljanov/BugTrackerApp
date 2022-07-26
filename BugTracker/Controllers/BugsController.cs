@@ -46,77 +46,23 @@ public class BugsController : Controller
     // GET: BugsController/Details/5
     public async Task<IActionResult> Details(int id, int? pageNumberOfComments, int? pageNumberOfFiles, int? pageNumberOfHistories)
     {
-        var vm = new BugDetailsViewModel();
-        var bug = await context.Bugs
-            .Include(i => i.Project)
-            .Include(i => i.BugHistory)
-            .Include(i => i.Submitter)
-            .Include(i => i.AssignedUsersForBug)
-            .Include(i => i.Files)
-            .FirstOrDefaultAsync(b => b.BugId == id);
-
-        if (bug == null)
+        var result = await GetVM(id, pageNumberOfComments, pageNumberOfFiles, pageNumberOfHistories);
+        if (result == null)
         {
             return NotFound();
         }
-        vm.Bug = bug;
-        int pageSize = 3;
-
-        var comments = context.Comments.Where(c => c.BugId == id).Include(i => i.Author);
-        var result = await PaginatedList<Comment>.CreateAsync(comments.AsNoTracking(), pageNumberOfComments ?? 1, pageSize);
-        vm.PaginatedComments = result;
-        vm.CommentsPageIndex = result.PageIndex;
-        vm.CommentsTotalPages = result.TotalPages;
-
-        var files = context.Files.Where(c => c.BugId == id);
-        var result2 = await PaginatedList<FileOfBug>.CreateAsync(files.AsNoTracking(), pageNumberOfFiles ?? 1, pageSize);
-        vm.PaginatedFiles = result2;
-
-        var histories = context.BugHistories.Where(c => c.BugId == id);
-        var result3 = await PaginatedList<BugHistory>.CreateAsync(histories.AsNoTracking(), pageNumberOfHistories ?? 1, pageSize);
-        vm.PaginatedHistory = result3;
-
-        return View(vm);
+        return View(result);
     }
 
     [HttpGet]
     public async Task<IActionResult> GetBugDetails(int id, int? pageNumOfComments, int? pageNumOfFiles, int? pageNumOfHistories)
     {
-        Console.WriteLine("${0} {1}", id, pageNumOfComments);
-        var vm = new BugDetailsViewModel();
-        var bug = await context.Bugs
-            .Include(i => i.Project)
-            .Include(i => i.BugHistory)
-            .Include(i => i.Submitter)
-            .Include(i => i.AssignedUsersForBug)
-            .Include(i => i.Files)
-            .FirstOrDefaultAsync(b => b.BugId == id);
-
-        if(bug == null)
+        var result = await GetVM(id, pageNumOfComments, pageNumOfFiles, pageNumOfHistories);
+        if (result == null)
         {
-            return null;
+            return NotFound();
         }
-        vm.Bug = bug;
-
-        var comments = context.Comments.Where(c => c.BugId == id).Include(i => i.Author);
-        var result = await PaginatedList<Comment>.CreateAsync(comments.AsNoTracking(), pageNumOfComments ?? 1, 3);
-        vm.PaginatedComments = result;
-        vm.CommentsPageIndex = result.PageIndex;
-        vm.CommentsTotalPages = result.TotalPages;
-
-        var files = context.Files.Where(c => c.BugId == id);
-        var result2 = await PaginatedList<FileOfBug>.CreateAsync(files.AsNoTracking(), pageNumOfFiles ?? 1, 3);
-        vm.PaginatedFiles = result2;
-        vm.FilesPageIndex = result2.PageIndex;
-        vm.FilesTotalPages = result2.TotalPages;
-
-        var histories = context.BugHistories.Where(c => c.BugId == id);
-        var result3 = await PaginatedList<BugHistory>.CreateAsync(histories.AsNoTracking(), pageNumOfHistories ?? 1, 3);
-        vm.PaginatedHistory = result3;
-        vm.HistoryPageIndex = result3.PageIndex;
-        vm.HistoryTotalPages = result3.TotalPages;
-
-        return Ok(vm);
+        return Ok(result);
     }
 
     [HttpPost]
@@ -382,5 +328,46 @@ public class BugsController : Controller
         model.Users = users;
         model.Projects = context.Projects.ToList();
         return model;
+    }
+    // get BugDetailsViewModel with filled information
+    private async Task<BugDetailsViewModel> GetVM(int id, int? pageNumberOfComments, int? pageNumberOfFiles, int? pageNumberOfHistories)
+    {
+        var bug = await context.Bugs
+            .Include(i => i.Project)
+            .Include(i => i.BugHistory)
+            .Include(i => i.Submitter)
+            .Include(i => i.AssignedUsersForBug)
+            .Include(i => i.Files)
+            .FirstOrDefaultAsync(b => b.BugId == id);
+        if (bug == null)
+        {
+            return null;
+        }
+
+        int pageSize = 3;
+
+        var comments = context.Comments.Where(c => c.BugId == id).Include(i => i.Author);
+        var result = await PaginatedList<Comment>.CreateAsync(comments.AsNoTracking(), pageNumberOfComments ?? 1, pageSize);
+
+        var files = context.Files.Where(c => c.BugId == id);
+        var result2 = await PaginatedList<FileOfBug>.CreateAsync(files.AsNoTracking(), pageNumberOfFiles ?? 1, pageSize);
+
+        var histories = context.BugHistories.Where(c => c.BugId == id);
+        var result3 = await PaginatedList<BugHistory>.CreateAsync(histories.AsNoTracking(), pageNumberOfHistories ?? 1, pageSize);
+
+        var vm = new BugDetailsViewModel
+        {
+            Bug = bug,
+            PaginatedComments = result,
+            CommentsPageIndex = result.PageIndex,
+            CommentsTotalPages = result.TotalPages,
+            PaginatedFiles = result2,
+            FilesPageIndex = result2.PageIndex,
+            FilesTotalPages = result2.TotalPages,
+            PaginatedHistory = result3,
+            HistoryPageIndex = result3.PageIndex,
+            HistoryTotalPages = result3.TotalPages
+        };
+        return vm;
     }
 }
