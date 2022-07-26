@@ -364,3 +364,9 @@ FodyWeavers.xsd
 
 # Migrations
 BugTracker/Migrations
+
+# bin
+BugTracker/bin
+
+# obj
+BugTracker/obj
