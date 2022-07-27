@@ -1,11 +1,14 @@
 # Migrations
-BugTracker/Migrations
+BugTracker/Migrations/
 
 # bin
-BugTracker/bin
+BugTracker/bin/
 
 # obj
-BugTracker/obj
+BugTracker/obj/
 
 # .vs
 .vs/
+
+# files that attached to the bug
+BugTracker/wwwroot/files/
