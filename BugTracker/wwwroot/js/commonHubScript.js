@@ -227,7 +227,7 @@ function LoadBugDetails() {
                 console.log(v.Description)
                 tr += `<tr>
                 <td>${v.Description}</td>
-                <td><a href="~/Files/'${v.FileName}'">${v.FileName}</a></td>
+                <td><a href="~/files/'${v.FileName}'">${v.FileName}</a></td>
                 </tr>`
             })
             $("#filesBody").html(tr);

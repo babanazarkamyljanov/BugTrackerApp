@@ -73,7 +73,7 @@ public class BugsController : Controller
         if(ModelState.IsValid)
         {
             //save to wwwroot / File folder
-            string UploadsFolder = Path.Combine(hostEnvironment.WebRootPath, "Files");
+            string UploadsFolder = Path.Combine(hostEnvironment.WebRootPath, "files");
             //unique file name
             string fileName = Path.GetFileNameWithoutExtension(model.File.FileName) +
                                 DateTime.Now.ToString("yymmssfff") +
