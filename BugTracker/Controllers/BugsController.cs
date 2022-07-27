@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 
 namespace BugTracker.Controllers;
 
@@ -7,10 +6,10 @@ public class BugsController : Controller
 {
     private readonly ApplicationDbContext context;
     public UserManager<ApplicationUser> userManager;
-
     public IHttpContextAccessor httpContextAccessor;
     public IWebHostEnvironment hostEnvironment;
     private readonly IHubContext<CommonHub> bugDetailsHub;
+
     public BugsController(ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
         IHttpContextAccessor httpContextAccessor,
