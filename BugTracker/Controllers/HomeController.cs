@@ -21,7 +21,6 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
-        //var res = Notification();
         return View();
     }
     [HttpGet]
@@ -35,17 +34,6 @@ public class HomeController : Controller
         }
         return Ok(model);
     }
-    //public async Task<PartialViewResult> Notification()
-    //{
-    //    List<Notification> model = new List<Notification>();
-    //    if(signInManager.IsSignedIn(User))
-    //    {
-    //        var userId = userManager.GetUserId(User);
-    //        model = await context.Notifications.Where(n => n.AssignedUserID == userId).ToListAsync();
-    //    }
-    //    return PartialView("~/Views/Shared/_NotificationPartial.cshtml", model);
-    //}
-
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

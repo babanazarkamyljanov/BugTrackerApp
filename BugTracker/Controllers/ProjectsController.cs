@@ -40,7 +40,7 @@ public class ProjectsController : Controller
         return View(projects);
     }
 
-    // this method is called from SignalR hubjs
+    // this method is called by SignalR hubjs connection
     [HttpGet]
     public async Task<IActionResult> GetProjectsIndex()
     {
