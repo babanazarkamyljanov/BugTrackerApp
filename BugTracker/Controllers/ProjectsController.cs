@@ -2,17 +2,11 @@
 
 public class ProjectsController : Controller
 {
-    private readonly ApplicationDbContext context;
-    private UserManager<ApplicationUser> userManager;
-    private readonly IHubContext<CommonHub> projectIndexHub;
+    private readonly IProjectRepository projectRepository;
 
-    public ProjectsController(ApplicationDbContext context,
-        UserManager<ApplicationUser> userManager,
-        IHubContext<CommonHub> projectIndexHub)
+    public ProjectsController(IProjectRepository projectRepository)
     {
-        this.context = context;
-        this.userManager = userManager;
-        this.projectIndexHub = projectIndexHub;
+        this.projectRepository = projectRepository;
     }
 
     // GET: ProjectsController
@@ -42,43 +36,33 @@ public class ProjectsController : Controller
         //        break;
 
         //}
-        return View(await context.Projects.ToListAsync());
+        var projects = await projectRepository.GetAll().ToListAsync();
+        return View(projects);
     }
 
+    // this method is called from SignalR hubjs
     [HttpGet]
-    public IActionResult GetProjectsIndex()
+    public async Task<IActionResult> GetProjectsIndex()
     {
-        var result = context.Projects.ToList();
+        var result = await projectRepository.GetAll().ToListAsync();
         return Ok(result);
     }
 
     // GET: ProjectsController/Details/5
-    public async Task<IActionResult> Details(int id,string userId, bool isRead)
+    public async Task<IActionResult> Details(int id)
     {
-        var project = await context.Projects
-            .Include(i => i.AssignedUsersForProject)
-                .ThenInclude(p => p.AppUser)
-            .FirstOrDefaultAsync(m => m.ProjectId == id);
-
+        var project = await projectRepository.Get(id);
         if (project == null)
         {
             return NotFound();
         }
-
         return View(project);
     }
 
     // GET: ProjectsController/Create
     public IActionResult Create()
     {
-        var users = new List<AppUserViewModel>();
-        foreach (var user in userManager.Users)
-        {
-            users.Add(new AppUserViewModel()
-            { UserId = user.Id, UserEmail = user.Email, IsSelected = false });
-        }
-        var model = new CreateProjectViewModel();
-        model.Users = users;
+        var model = projectRepository.AddGet();
         return View(model);
     }
 
@@ -89,32 +73,11 @@ public class ProjectsController : Controller
     {
         if (ModelState.IsValid)
         {
-            Notification notification = new Notification();
-
-            context.Projects.Add(model.Project);
-            await context.SaveChangesAsync();
-            var id = context.Projects.Max(p => p.ProjectId);
-
-            foreach (var user in model.Users)
-            {
-                if(user.IsSelected)
-                {
-                    // assigned users for new project
-                    var appUserProject = new AppUserProject();
-                    appUserProject.AppUserId = user.UserId;
-                    appUserProject.ProjectId = id;
-                    context.AppUserProject.Add(appUserProject);
-
-                    // notify the developer when project assigned to him
-                    notification.AssignedUserID = user.UserId;
-                    notification.Controller = "Projects";
-                    notification.DetailsID = id;
-                    context.Notifications.Add(notification);
-                }
-            }
-            await context.SaveChangesAsync();
-            await projectIndexHub.Clients.All.SendAsync("LoadProjectsIndex");
-            return RedirectToAction(nameof(Index));
+            var result = await projectRepository.Add(model);
+            if(result == "success")
+                return RedirectToAction(nameof(Index));
+            else
+                Console.WriteLine(result);
         }
         return View(model);
     }
@@ -122,35 +85,12 @@ public class ProjectsController : Controller
     // GET: ProjectsController/Edit/5
     public async Task<IActionResult> Edit(int id)
     {
-        var project = await context.Projects.FindAsync(id);
-        if(project == null)
+        var result = await projectRepository.UpdateGet(id);
+        if(result == null)
         {
             return NotFound();
         }
-
-        var users = new List<AppUserViewModel>();
-        foreach (var user in userManager.Users)
-        {
-            var result = from item in context.AppUserProject
-                         where item.AppUserId == user.Id && item.ProjectId == project.ProjectId
-                         select item;
-
-            if(result.Any())
-                users.Add(new AppUserViewModel() 
-                { 
-                    UserId = user.Id, UserEmail = user.Email, IsSelected = true 
-                });
-            else
-                users.Add(new AppUserViewModel()
-                { 
-                    UserId = user.Id, UserEmail = user.Email, IsSelected = false 
-                });
-        }
-        var model = new CreateProjectViewModel();
-        model.Project = project;
-        model.Users = users;
-
-        return View(model);
+        return View(result);
     }
 
     // POST: ProjectsController/Edit/5
@@ -164,47 +104,13 @@ public class ProjectsController : Controller
         }
         if(ModelState.IsValid)
         {
-            try
-            {
-                context.Update(model.Project);
-
-                foreach (var user in model.Users)
-                {
-                    AppUserProject temp = new AppUserProject();
-                    // if user is not selected and it already exists in the database
-                    // then delete it from table
-                    if(context.AppUserProject.Any(a => a.AppUserId == user.UserId && a.ProjectId == id) &&
-                        user.IsSelected == false)
-                    {
-                        temp.AppUserId = user.UserId;
-                        temp.ProjectId = id;
-                        context.AppUserProject.Remove(temp);
-                    }
-                    // if user is selected and it doeasn't exist in the database
-                    // then add it to the table
-                    else if (!context.AppUserProject.Any(a => a.AppUserId == user.UserId && a.ProjectId == id) &&
-                        user.IsSelected == true)
-                    {
-                        temp.ProjectId = id;
-                        temp.AppUserId = user.UserId;
-                        context.AppUserProject.Add(temp);
-                    }
-                }
-                await context.SaveChangesAsync();
-                await projectIndexHub.Clients.All.SendAsync("LoadProjectsIndex");
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if(!context.Projects.Any(p => p.ProjectId == id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-            return RedirectToAction(nameof(Index));
+            var result = await projectRepository.Update(id, model);
+            if (result == "success")
+                return RedirectToAction(nameof(Index));
+            else if (result == "NotFound")
+                return NotFound();
+            else
+                Console.WriteLine(result);
         }
         return View(model);
     }
@@ -212,15 +118,11 @@ public class ProjectsController : Controller
     // GET: ProjectsController/Delete/5
     public async Task<IActionResult> Delete(int id)
     {
-        var project = await context.Projects
-            .Include(i => i.AssignedUsersForProject)
-                .ThenInclude(o => o.AppUser)
-            .FirstOrDefaultAsync(p => p.ProjectId == id);
+        var project = await projectRepository.Get(id);
         if(project == null)
         {
             return NotFound();
         }
-
         return View(project);
     }
 
@@ -229,18 +131,9 @@ public class ProjectsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
-        var project = await context.Projects
-            .Include(i => i.AssignedUsersForProject)
-            .FirstOrDefaultAsync(p => p.ProjectId == id);
-        if (project == null)
-        {
+        var result = await projectRepository.Delete(id);
+        if (result == null)
             return NotFound();
-        }
-
-        context.AppUserProject.Remove(project.AssignedUsersForProject.FirstOrDefault());
-        context.Projects.Remove(project);
-        await context.SaveChangesAsync();
-        await projectIndexHub.Clients.All.SendAsync("LoadProjectsIndex");
         return RedirectToAction(nameof(Index));
     }
 }

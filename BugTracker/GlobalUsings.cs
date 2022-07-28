@@ -2,6 +2,7 @@
 global using BugTracker.ViewModels;
 global using BugTracker.Hubs;
 global using BugTracker.Data;
+global using BugTracker.Repository;
 global using Microsoft.AspNetCore.Identity;
 global using Microsoft.AspNetCore.Mvc;
 global using Microsoft.AspNetCore.SignalR;
