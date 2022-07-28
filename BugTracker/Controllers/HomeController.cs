@@ -27,7 +27,7 @@ public class HomeController : Controller
     [HttpGet]
     public async Task<IActionResult> GetNotifications()
     {
-        List<Notification> model = new List<Notification>();
+        List<Notification> model = new();
         if (signInManager.IsSignedIn(User))
         {
             var userId = userManager.GetUserId(User);
@@ -45,10 +45,6 @@ public class HomeController : Controller
     //    }
     //    return PartialView("~/Views/Shared/_NotificationPartial.cshtml", model);
     //}
-    public IActionResult Privacy()
-    {
-        return View();
-    }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
