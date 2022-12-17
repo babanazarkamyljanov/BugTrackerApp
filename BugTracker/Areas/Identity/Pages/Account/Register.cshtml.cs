@@ -117,7 +117,7 @@ public class RegisterModel : PageModel
             var user = CreateUser();
             user.FirstName = Input.FirstName;
             user.LastName = Input.LastName;
-            var role = Input.RoleName;
+            string role = Input.RoleName == null ? "Admin" : Input.RoleName;
 
             
             await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);

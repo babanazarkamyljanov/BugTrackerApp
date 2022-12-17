@@ -12,3 +12,11 @@ BugTracker/obj/
 
 # files that attached to the bug
 BugTracker/wwwroot/files/
+
+BugTracker/.config
+
+BugTracker/Properties/PublishProfiles
+BugTracker/Properties/ServiceDependencies
+BugTracker/Properties/serviceDependencies.json
+BugTracker/Properties/serviceDependencies.zstubugtracker - Web Deploy.json
+BugTracker/Properties/serviceDependencies.zstubugtracker - Web Deploy.json.user

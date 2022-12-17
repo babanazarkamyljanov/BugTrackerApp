@@ -7,7 +7,7 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
         : base(options)
     {
-
+        Database.EnsureCreated();
     }
     public DbSet<Bug> Bugs { get; set; }
     public DbSet<Project> Projects { get; set; }
