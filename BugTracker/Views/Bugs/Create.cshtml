@@ -103,10 +103,19 @@
                             <input asp-for="@Model.Bug.Priority" class="form-control" />
                             <span asp-validation-for="@Model.Bug.Priority" class="text-danger"></span>
                         </div>
+                        @{
+                            List<string> statusList = new List<string>();
+                            statusList.Add("Open");
+                            statusList.Add("Build In Progress");
+                            statusList.Add("Code Review");
+                            statusList.Add("Functional Testing");
+                            statusList.Add("Fixed");
+                            statusList.Add("Closed");
+                            SelectList statusSelectList = new SelectList(statusList, "Key");
+                        }
                         <div class="form-group">
-                            <label asp-for="@Model.Bug.Status" class="control-label"></label>
-                            <input asp-for="@Model.Bug.Status" class="form-control" />
-                            <span asp-validation-for="@Model.Bug.Status" class="text-danger"></span>
+                            <label asp-for="@Model.Bug.Status">Status</label>
+                            <select class="form-control" asp-for="@Model.Bug.Status" asp-items="@statusSelectList"></select>
                         </div>
                     </div>
                     <div class="right-side">
@@ -139,12 +148,11 @@
                             }
 
                             SelectList selectList = new SelectList(dict, "Key", "Value");
-                            
-                            <div class="form-group">
-                                <label asp-for="@Model.Bug.ProjectId">Select Project</label>
-                                <select class="form-control" asp-for="@Model.Bug.ProjectId" asp-items="@selectList"></select>
-                            </div>
                         }
+                        <div class="form-group">
+                            <label asp-for="@Model.Bug.ProjectId">Select Project</label>
+                            <select class="form-control" asp-for="@Model.Bug.ProjectId" asp-items="@selectList"></select>
+                        </div>
                     </div>
                 </div>
 

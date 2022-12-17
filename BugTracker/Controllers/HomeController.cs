@@ -21,6 +21,21 @@ public class HomeController : Controller
 
     public IActionResult Index()
     {
+        var ds = new DashboardViewModel();
+
+        // count each status quantity 
+        ds.Bug_Open = context.Bugs.Where(b => b.Status == "Open").Count();
+        ds.Bug_BuildInProgress = context.Bugs.Where(b => b.Status == "Build In Progress").Count();
+        ds.Bug_CodeReview = context.Bugs.Where(b => b.Status == "Code Review").Count();
+        ds.Bug_FunctionalTesting = context.Bugs.Where(b => b.Status == "Functional Testing").Count();
+        ds.Bug_Fixed = context.Bugs.Where(b => b.Status == "Fixed").Count();
+        ds.Bug_Closed = context.Bugs.Where(b => b.Status == "Closed").Count();
+   
+        ds.Project_Active = context.Projects.Where(p => p.Status == "Active").Count();
+        ds.Project_InProgress = context.Projects.Where(p => p.Status == "In Progress").Count();
+        ds.ProjectCompleted = context.Projects.Where(p => p.Status == "Completed").Count();
+        ds.Project_NotActive = context.Projects.Where(p => p.Status == "Not Active").Count();
+        ds.Project_Closed = context.Projects.Where(p => p.Status == "Closed").Count();
         return View();
     }
     [HttpGet]

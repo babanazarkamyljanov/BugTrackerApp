@@ -16,6 +16,9 @@ public class Project
     [Display(Name ="Priority")]
     public string Priority { get; set; }
 
+    [Required]
+    public string Status { get; set; }
+
     [Display(Name ="Submitted date")]
     public DateTime CreatedDate { get; set; }
 
