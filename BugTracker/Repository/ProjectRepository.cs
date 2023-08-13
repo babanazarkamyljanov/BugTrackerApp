@@ -5,77 +5,77 @@ public class ProjectRepository : IProjectRepository
     private readonly ApplicationDbContext context;
     private readonly UserManager<ApplicationUser> userManager;
     private readonly IHubContext<CommonHub> projectIndexHub;
+    private readonly IHttpContextAccessor httpContextAccessor;
 
     // constructor
-    public ProjectRepository(ApplicationDbContext context, IHubContext<CommonHub> projectIndexHub, UserManager<ApplicationUser> userManager)
+    public ProjectRepository(ApplicationDbContext context, IHubContext<CommonHub> projectIndexHub, UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor)
     {
         this.context = context;
         this.projectIndexHub = projectIndexHub;
         this.userManager = userManager;
+        this.httpContextAccessor = httpContextAccessor;
     }
 
     // get all projects
-    public IQueryable<Project> GetAll()
+    public async Task<List<Project>> GetAll()
     {
-        return context.Projects;
+        var userId = GetLoggedInUserId();
+
+        List<Project> projects = await context
+                                            .Projects
+                                            .Include(i => i.ProjectManager)
+                                            .AsNoTracking()
+                                            .ToListAsync();
+
+        return projects;
     }
 
     // get project by id
-    public async Task<Project> Get(int id)
+    public async Task<Project> GetProject(Guid id)
     {
         var project = await context.Projects
-            .Include(i => i.AssignedUsersForProject)
-                .ThenInclude(o => o.AppUser)
-            .FirstOrDefaultAsync(p => p.ProjectId == id);
+            .Include(i => i.ProjectBugs)
+            .Include(i => i.ProjectManager)
+            .AsSplitQuery()
+            .FirstOrDefaultAsync(p => p.Id == id);
         return project;
     }
 
     // add new project
     // GET
-    public CreateProjectViewModel AddGet()
+    public async Task<CreateProjectViewModel> AddGet()
     {
-        var users = new List<AppUserViewModel>();
-        foreach (var user in userManager.Users)
-        {
-            users.Add(new AppUserViewModel() { UserId = user.Id, UserEmail = user.Email, IsSelected = false });
-        }
-        var model = new CreateProjectViewModel
-        {
-            Users = users
-        };
+        var model = await CreateVM();
         return model;
     }
 
     // add new project
     // POST
-    public async Task<string> Add(CreateProjectViewModel model)
+    public async Task<string> AddPost(CreateProjectViewModel model)
     {
         try
         {
-            Notification notification = new();
+            model.Project.CreatedById = GetLoggedInUserId();
             context.Projects.Add(model.Project);
             await context.SaveChangesAsync();
-            var id = context.Projects.Max(p => p.ProjectId);
 
-            foreach (var user in model.Users)
+            // notify the user when project assigned to him
+            Notification notification = new()
             {
-                if (user.IsSelected)
-                {
-                    // assigned users for new project
-                    var appUserProject = new AppUserProject();
-                    appUserProject.AppUserId = user.UserId;
-                    appUserProject.ProjectId = id;
-                    context.AppUserProject.Add(appUserProject);
-
-                    // notify the developer when project assigned to him
-                    notification.AssignedUserID = user.UserId;
-                    notification.Controller = "Projects";
-                    notification.DetailsID = id;
-                    context.Notifications.Add(notification);
-                }
-            }
+                AssignedUserID = model.Project.ManagerId,
+                Controller = "Projects",
+                DetailsID = model.Project.Id.ToString(),
+                IsRead = false
+            };
+            context.Notifications.Add(notification);
             await context.SaveChangesAsync();
-            await projectIndexHub.Clients.All.SendAsync("LoadProjectsIndex");
+
+            // increment user notification count
+            var user = await userManager.FindByIdAsync(model.Project.ManagerId);
+            user.NotificationCount++;
+            await userManager.UpdateAsync(user);
+
+            await projectIndexHub.Clients.User(model.Project.ManagerId).SendAsync("GetNotifications", user.NotificationCount);
             return "success";
         }
         catch (Exception e)
@@ -87,80 +87,32 @@ public class ProjectRepository : IProjectRepository
 
     // edit project
     // GET
-    public async Task<CreateProjectViewModel> UpdateGet(int id)
+    public async Task<CreateProjectViewModel> UpdateGet(Guid id)
     {
         var project = await context.Projects.FindAsync(id);
         if (project == null)
         {
             return null;
         }
-
-        var users = new List<AppUserViewModel>();
-        foreach (var user in userManager.Users)
-        {
-            var result = from item in context.AppUserProject
-                         where item.AppUserId == user.Id && item.ProjectId == project.ProjectId
-                         select item;
-
-            if (result.Any())
-                users.Add(new AppUserViewModel()
-                {
-                    UserId = user.Id,
-                    UserEmail = user.Email,
-                    IsSelected = true
-                });
-            else
-                users.Add(new AppUserViewModel()
-                {
-                    UserId = user.Id,
-                    UserEmail = user.Email,
-                    IsSelected = false
-                });
-        }
-        var model = new CreateProjectViewModel
-        {
-            Project = project,
-            Users = users
-        };
+        var model = await CreateVM();
+        model.Project = project;
         return model;
     }
 
     // edit project
     // POST
-    public async Task<string> Update(int id, CreateProjectViewModel model)
+    public async Task<string> UpdatePost(Guid id, CreateProjectViewModel model)
     {
         try
         {
             context.Update(model.Project);
-            foreach (var user in model.Users)
-            {
-                AppUserProject temp = new();
-                // if user is not selected and it is already exists in the database
-                // then delete it from database
-                if (context.AppUserProject.Any(a => a.AppUserId == user.UserId && a.ProjectId == id) &&
-                    user.IsSelected == false)
-                {
-                    temp.AppUserId = user.UserId;
-                    temp.ProjectId = id;
-                    context.AppUserProject.Remove(temp);
-                }
-                // if user is selected and it doesn't exist in the database
-                // then add it to the database
-                else if (!context.AppUserProject.Any(a => a.AppUserId == user.UserId && a.ProjectId == id) &&
-                    user.IsSelected == true)
-                {
-                    temp.ProjectId = id;
-                    temp.AppUserId = user.UserId;
-                    context.AppUserProject.Add(temp);
-                }
-            }
             await context.SaveChangesAsync();
             await projectIndexHub.Clients.All.SendAsync("LoadProjectsIndex");
             return "success";
         }
         catch (DbUpdateConcurrencyException e)
         {
-            if (!context.Projects.Any(p => p.ProjectId == id))
+            if (!context.Projects.Any(p => p.Id == id))
             {
                 return "NotFound";
             }
@@ -170,31 +122,68 @@ public class ProjectRepository : IProjectRepository
                 throw;
             }
         }
-
-    }
-
-    // details of project
-    public async Task<Project> Details(int id)
-    {
-        var project = await context.Projects
-            .Include(i => i.AssignedUsersForProject)
-            .ThenInclude(p => p.AppUser)
-            .FirstOrDefaultAsync(m => m.ProjectId == id);
-        return project;
     }
 
     // delete project
-    public async Task<Project> Delete(int id)
+    public async Task<string> Delete(Guid id)
     {
-        var project = await Get(id);
+        var project = await GetProject(id);
         if (project == null)
         {
-            return project;
+            return null;
         }
-        context.AppUserProject.Remove(project.AssignedUsersForProject.FirstOrDefault());
-        context.Projects.Remove(project);
-        await context.SaveChangesAsync();
-        await projectIndexHub.Clients.All.SendAsync("LoadProjectsIndex");
-        return project;
+        try
+        {
+            context.Projects.Remove(project);
+            await context.SaveChangesAsync();
+            await projectIndexHub.Clients.All.SendAsync("LoadProjectsIndex");
+            return "success";
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.ToString());
+        }
+    }
+
+    // method for creating viewmodel
+    private async Task<CreateProjectViewModel> CreateVM()
+    {
+        var model = new CreateProjectViewModel();
+        
+        // get current user
+        string userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        ApplicationUser currentUser = userManager.Users.FirstOrDefault(u => u.Id == userId);
+
+        // find all users within the same organization
+        var organizationUsers = await userManager
+                                    .Users
+                                    .Where(u => u.OrganizationId == currentUser.OrganizationId)
+                                    .ToListAsync();
+
+        // add users with project manager role into managers list
+        foreach (var user in organizationUsers)
+        {
+            if(await userManager.IsInRoleAsync(user, "Project Manager"))
+            {
+                model.Managers.Add(user);
+            }
+        }
+
+        // if no users in manager role, just add the current user
+        if (model.Managers.Count == 0)
+            model.Managers.Add(currentUser);
+
+        return model;
+    }
+
+
+    // get logged in user id
+    private string GetLoggedInUserId()
+    {
+        return httpContextAccessor
+                                .HttpContext
+                                .User
+                                .FindFirst(ClaimTypes.NameIdentifier)
+                                .Value;
     }
 }

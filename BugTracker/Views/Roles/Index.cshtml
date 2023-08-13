@@ -1,0 +1,68 @@
+﻿@using Microsoft.AspNetCore.Identity;
+@model IEnumerable<IdentityRole>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Roles</title>
+</head>
+<body>
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Roles</h1>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+        <form asp-controller="Roles" asp-action="AddRole" method="post">
+            <div class="input-group" style="gap: 10px;">
+                <input name="roleName" placeholder="Role Name" class="form-control w-25">
+                <span class="input-group-btn">
+                    <button class="btn btn-info">Add New Role</button>
+                </span>
+            </div>
+        </form>
+        <table class="table table-striped" id="roleTable">
+            <thead>
+                <tr>
+                    <th>Role</th>
+                    <th style="width:15%">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var role in Model)
+                {
+                    <tr>
+                        <td>
+                            @role.Name
+                        </td>
+                        <td>
+                            <div class="btn-group" style="max-width: 35px !important;">
+                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                    Action
+                                </button>
+                                <div class="dropdown-menu shadow animated--grow-in">
+                                    <a asp-controller="Roles" asp-action="ManageUsersInRole" asp-route-roleId="@role.Id" class="dropdown-item">
+                                        <i class="fas fa-pencil-alt"></i> Manage Users
+                                    </a>
+
+                                    <a style='margin-right:16px' asp-controller="Permissions" asp-action="Index" asp-route-roleId="@role.Id" class="dropdown-item">
+                                        <i class="fas fa-wrench"></i> Permissions
+                                    </a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </section>
+    <!-- /.content -->
+</body>
+</html>

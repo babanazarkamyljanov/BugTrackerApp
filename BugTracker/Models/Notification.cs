@@ -10,7 +10,7 @@ public class Notification
     public ApplicationUser AssignedUser { get; set; }
 
     public string Controller { get; set; }
-    public int DetailsID { get; set; }
+    public string DetailsID { get; set; }
     public Notification()
     {
         IsRead = false;

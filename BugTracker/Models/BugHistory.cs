@@ -10,6 +10,9 @@ public class BugHistory
     [Required]
     public string NewValue { get; set; }
     public DateTime DateChanged { get; set; }
+    [ForeignKey("ChangedBy")]
+    public string ChangedById { get; set; }
+    public ApplicationUser ChangedBy { get; set; }
 
     [ForeignKey("Bug")]
     public int BugId { get; set; }

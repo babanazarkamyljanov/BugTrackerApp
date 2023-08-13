@@ -2,12 +2,11 @@
 
 public interface IProjectRepository
 {
-    IQueryable<Project> GetAll();
-    Task<Project> Get(int id);
-    CreateProjectViewModel AddGet();
-    Task<string> Add(CreateProjectViewModel model);
-    Task<CreateProjectViewModel> UpdateGet(int id);
-    Task<string> Update(int id, CreateProjectViewModel model);
-    Task<Project> Details(int id);
-    Task<Project> Delete(int id);
+    Task<List<Project>> GetAll();
+    Task<Project> GetProject(Guid id);
+    Task<CreateProjectViewModel> AddGet();
+    Task<string> AddPost(CreateProjectViewModel model);
+    Task<CreateProjectViewModel> UpdateGet(Guid id);
+    Task<string> UpdatePost(Guid id, CreateProjectViewModel model);
+    Task<string> Delete(Guid id);
 }

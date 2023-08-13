@@ -1,0 +1,40 @@
+﻿@model BugTracker.ViewModels.ManageAccount.ChangeAvatarViewModel
+
+@{
+    Layout = "~/Views/Shared/MyLayout/_ManageLayout.cshtml";
+    ViewData["userId"] = Model.Id;
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Account</title>
+</head>
+<body>
+    <!-- Avatar Photo -->
+    <div class="row">
+        <div class="col-md-2 text-center">
+            @if (Model.AvatarPhotoBytes is null)
+            {
+                <img src="~/img/default-avatar.png" alt="user-avatar" class="img-circle img-fluid">
+            }
+            else
+            {
+                <img src="@ViewBag.UserAvatar" alt="user-avatar" class="img-circle img-fluid">
+            }
+        </div>
+        <div class="col-md-10">
+            <form asp-asp-controller="Manage" asp-action="ChangeAvatar" enctype="multipart/form-data" method="post">
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <input asp-for="@Model.Id" value="@Model.Id" hidden />
+                <div class="form-group">
+                    <label asp-for="AvatarPhoto" class="control-label">Uplaod Avatar</label>
+                    <input asp-for="AvatarPhoto" accept=".png, .jpg, .jpeg" />
+                    <span asp-validation-for="AvatarPhoto" class="text-danger"></span>
+                </div>
+                <button type="submit" class="btn btn-md btn-primary">Submit</button>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

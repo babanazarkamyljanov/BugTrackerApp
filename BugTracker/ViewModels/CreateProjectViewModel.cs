@@ -3,9 +3,13 @@
 public class CreateProjectViewModel
 {
     public Project Project { get; set; }
-    public List<AppUserViewModel> Users { get; set; }
+    //public List<AppUserViewModel> Users { get; set; }
+    public List<ApplicationUser> Assignee { get; set; }
+    public List<ApplicationUser> Managers { get; set; }
     public CreateProjectViewModel()
     {
-        Users = new List<AppUserViewModel>();
+        Assignee = new List<ApplicationUser>();
+        Managers = new List<ApplicationUser>();
+        //Users = new List<AppUserViewModel>();
     }
 }

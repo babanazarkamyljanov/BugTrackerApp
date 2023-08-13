@@ -10,14 +10,16 @@ public class ApplicationUser : IdentityUser
     [StringLength(30, ErrorMessage = "The last name should have a maximum of 30 characters")]
     public string LastName { get; set; }
 
+    [ForeignKey("Organization")]
+    public Guid OrganizationId { get; set; }
+    public Organization Organization { get; set; }
+
+    public int NotificationCount { get; set; }
+
+    public byte[] AvatarPhoto { get; set; }
+
+    [NotMapped]
+    public string UserRoles { get; set; }
     [NotMapped]
     public string RoleName { get; set; }
-    public ICollection<AppUserBug> AppUsersForBugs { get; set; }
-    public ICollection<AppUserProject> AppUsersForProjects { get; set; }
-
-    public ApplicationUser()
-    {
-        AppUsersForBugs = new List<AppUserBug>();
-        AppUsersForProjects = new List<AppUserProject>();
-    }
 }

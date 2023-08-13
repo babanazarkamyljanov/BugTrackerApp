@@ -1,12 +1,17 @@
-﻿namespace BugTracker.Controllers;
+﻿using BugTracker.Authorization;
 
+namespace BugTracker.Controllers;
+
+[Authorize]
 public class BugsController : Controller
 {
     private readonly IBugRepository bugRepository;
+    private readonly IAuthorizationService authorizationService;
 
-    public BugsController(IBugRepository bugRepository)
+    public BugsController(IBugRepository bugRepository, IAuthorizationService authorizationService)
     {
         this.bugRepository = bugRepository;
+        this.authorizationService = authorizationService;
     }
 
     // GET: BugsController
@@ -17,21 +22,28 @@ public class BugsController : Controller
     }
 
     // GET: BugsController/Details/5
-    public async Task<IActionResult> Details(int id, int? pageNumberOfComments, int? pageNumberOfFiles, int? pageNumberOfHistories)
+    [HttpGet]
+    public async Task<IActionResult> Details(int id)
     {
-        var result = await bugRepository.GetVM(id, pageNumberOfComments, pageNumberOfFiles, pageNumberOfHistories);
-        if (result == null)
+        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.BugOperations.Read);
+        if (!isAuthorized.Succeeded)
+        {
+            return RedirectToAction("AccessDenied", "Account");
+        }
+
+        var bug = await bugRepository.GetBugDetails(id);
+        if (bug == null)
         {
             return NotFound();
         }
-        return View(result);
+        return View(bug);
     }
 
     // this method is called by SignalR hubjs connection
     [HttpGet]
-    public async Task<IActionResult> GetBugDetails(int id, int? pageNumOfComments, int? pageNumOfFiles, int? pageNumOfHistories)
+    public async Task<IActionResult> GetBugDetails(int id)
     {
-        var result = await bugRepository.GetVM(id, pageNumOfComments, pageNumOfFiles, pageNumOfHistories);
+        var result = await bugRepository.GetBugDetails(id);
         if (result == null)
         {
             return NotFound();
@@ -43,11 +55,11 @@ public class BugsController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize]
-    public async Task<IActionResult> UploadFile(FileOfBug model, int id)
+    public async Task<IActionResult> UploadFile(BugDetailsViewModel model, int id)
     {
         if(ModelState.IsValid)
         {
-            var result = await bugRepository.UploadFile(model, id);
+            var result = await bugRepository.UploadFile(model.BugFile, id);
             if (result == "success")
                 return RedirectToAction("Details", new { @id = id });
             else
@@ -74,10 +86,16 @@ public class BugsController : Controller
     }
 
     // GET: BugsController/Create
-    public IActionResult Create()
+    public async Task<IActionResult> Create()
     {
-        var model = bugRepository.CreateBugVM("create", 0);
-        return View(model);
+        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.BugOperations.Create);
+        if (!isAuthorized.Succeeded)
+        {
+            return RedirectToAction("AccessDenied", "Account");
+        }
+
+        var result = await bugRepository.AddGet();
+        return View(result);
     }
 
     // POST: BugsController/Create
@@ -86,9 +104,15 @@ public class BugsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateBugViewModel model)
     {
-        if(ModelState.IsValid)
+        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.BugOperations.Create);
+        if (!isAuthorized.Succeeded)
         {
-            var result = await bugRepository.Add(model);
+            return RedirectToAction("AccessDenied", "Account");
+        }
+
+        if (ModelState.IsValid)
+        {
+            var result = await bugRepository.AddPost(model);
             if (result == "success")
                 return RedirectToAction(nameof(Index));
             else
@@ -100,14 +124,18 @@ public class BugsController : Controller
     // GET: BugsController/Edit/5
     public async Task<IActionResult> Edit(int id)
     {
-        var bug = await bugRepository.Get(id);
-        if (bug == null)
+        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.BugOperations.Update);
+        if (!isAuthorized.Succeeded)
+        {
+            return RedirectToAction("AccessDenied", "Account");
+        }
+
+        var result = await bugRepository.UpdateGet(id);
+        if (result == null)
         {
             return NotFound();
         }
-        var model = bugRepository.CreateBugVM("edit", id);
-        model.Bug = bug;
-        return View(model);
+        return View(result);
     }
 
     // POST: BugsController/Edit/5
@@ -115,13 +143,19 @@ public class BugsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, CreateBugViewModel model)
     {
-        if(ModelState.IsValid)
+        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.BugOperations.Update);
+        if (!isAuthorized.Succeeded)
+        {
+            return RedirectToAction("AccessDenied", "Account");
+        }
+
+        if (ModelState.IsValid)
         {
             if (id != model.Bug.BugId)
             {
                 return NotFound();
             }
-            var result = await bugRepository.Update(id, model);
+            var result = await bugRepository.UpdatePost(id, model);
             if (result == "success")
                 return RedirectToAction(nameof(Index));
             else if (result == "NotFound")
@@ -132,24 +166,15 @@ public class BugsController : Controller
         return View(model);
     }
 
-    // GET: BugsController/Delete/5
-    public ActionResult Delete(int id)
+    // Delete
+    public async Task<ActionResult> DeleteConfirmed(int id)
     {
-        return View();
-    }
+        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.BugOperations.Delete);
+        if (!isAuthorized.Succeeded)
+        {
+            return RedirectToAction("AccessDenied", "Account");
+        }
 
-    // POST: BugsController/Delete/5
-    [HttpPost]
-    [ValidateAntiForgeryToken]
-    public ActionResult Delete(int id, IFormCollection collection)
-    {
-        try
-        {
-            return RedirectToAction(nameof(Index));
-        }
-        catch
-        {
-            return View();
-        }
+        return Json(await bugRepository.Delete(id));
     }
 }

@@ -1,125 +1,249 @@
 ﻿@model BugDetailsViewModel
 @{
     ViewData["id"] = @Model.Bug.BugId;
-    ViewData["files"] = @Model.PaginatedComments;
 }
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Details</title>
-        <style>
-            .custom-box {
-                display: flex;
-                justify-content: center;
-                flex-wrap: wrap;
-                @*gap: 75px;*@
-            }
-            .custom-container {
-                width: 1000px;
-                height: 450px;
-                margin: 15px;
-                border: 1px solid gray;
-                
-                border-radius: 5px;
-                @*box-shadow: 5px 10px 5px gray;*@
-                padding: 10px;
-            }
-            .box-title {
-                display: flex;
-                justify-content: center;
-                text-align: center;
-            }
-            .box-title a {
-                margin: 5px 0 0 20px;
-                font-size: 16px; 
-                text-decoration: none;
-            }
-            .details-container {
-                padding-left: 50px;
-                display: flex;
-                gap: 150px;
-            }
-            th {
-                padding-top: 30px;
-            }
-        </style>
+        <title>Bug Details</title>
     </head>
     <body>
-        <div class="custom-box">
-            <!-- Bug main details container -->
-            <div class="custom-container">
-                <div class="box-title">
-                    <h3>Bug Details</h3>
-                    <a asp-action="Edit" asp-route-id="@Model.Bug.BugId">Edit</a>
+    <section class="content">
+        <!-- Bug Details -->
+        <div class="card card-secondary">
+            <div class="card-header">
+                <h3 class="card-title">Bug Details</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
                 </div>
-                <div class="details-container">
-                    <div class="left-side" id="leftSide">
-                        <!--
-                            I used SignalR to show the data in real time after crud operations.
-                            This div contains a table, and the logic for this table is written
-                            in the wwwroot/js/commonHubScript.js file
-                        -->
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Basic details-->
+                    <div class="col-12 col-lg-4 order-1">
+                        <h3 class="text-success">Basic Details</h3>
+                        <p class="text-lg">
+                            Title
+                            <b class="d-block text-blue">@Model.Bug.Title</b>
+                        </p>
+                        <p class="text-lg">
+                            Project
+                            <b class="d-block text-blue">@Model.Bug.Project.Title</b>
+                        </p>
+                        <p class="text-lg">
+                            Status
+                            <b class="d-block text-blue">@Model.Bug.Status</b>
+                        </p>
+                        <p class="text-lg">
+                            Priority
+                            <b class="d-block text-blue">@Model.Bug.Priority</b>
+                        </p>
+                    </div>
+                    <!-- People -->
+                    <div class="col-12 col-lg-4 order-2">
+                        <h3 class="text-success">People</h3>
+                        <p class="text-lg">
+                            Assignee
+                            <ul class="list-inline">
+                                <li class="list-inline-item">
+                                    @if (@Model.Bug.AssignedUser.AvatarPhoto is null)
+                                    {
+                                        <img src="~/img/default-avatar.png" class="table-avatar" width="30" height="30" alt="User Image">
+                                    }
+                                    else
+                                    {
+                                        string src = "data:image/png;base64," + Convert.ToBase64String(Model.Bug.AssignedUser.AvatarPhoto, 0, Model.Bug.AssignedUser.AvatarPhoto.Length);
+                                        <img src="@src" class="table-avatar" width="30" height="30" alt="User Image">
+                                    }
+                                </li>
+                                <li class="list-inline-item">
+                                    <b class="d-block text-blue">@Model.Bug.AssignedUser.UserName</b>
+                                </li>
+                            </ul>
+                        </p>
+                        <p class="text-lg">
+                            Submitter
+                            <ul class="list-inline">
+                                <li class="list-inline-item">
+                                    @if (@Model.Bug.Submitter.AvatarPhoto is null)
+                                    {
+                                        <img src="~/img/default-avatar.png" class="table-avatar" width="30" height="30" alt="User Image">
+                                    }
+                                    else
+                                    {
+                                        string src = "data:image/png;base64," + Convert.ToBase64String(Model.Bug.Submitter.AvatarPhoto, 0, Model.Bug.Submitter.AvatarPhoto.Length);
+                                        <img src="@src" class="table-avatar" width="30" height="30" alt="User Image">
+                                    }
+                                </li>
+                                <li class="list-inline-item">
+                                    <b class="d-block text-blue">@Model.Bug.Submitter.UserName</b>
+                                </li>
+                            </ul>
+                        </p>
                     </div>
 
-                    <div class="right-side" id="rightSide">
-                       <!--
-                            I used SignalR to show the data in real time after crud operations.
-                            This div contains a table, and the logic for this table is written
-                            in the wwwroot/js/commonHubScript.js file
-                        -->
+                    <!-- Date -->
+                    <div class="col-12 col-lg-4 order-3">
+                        <h3 class="text-success">Date</h3>
+                        <p class="text-lg">
+                            Created Date
+                            <b class="d-block text-blue">@Model.Bug.CreatedDate</b>
+                        </p>
+                    </div>
+                    <br />
+                    <div class="col-12 col-lg-12 order-4">
+                        <p class="text-lg">
+                            Description
+                            <b class="d-block text-blue">@Html.Raw(Model.Bug.Description)</b>
+                        </p>
                     </div>
                 </div>
             </div>
-            
-            <!--- Bug history container-->
-            <div class="custom-container">
-                <div class="box-title">
-                    <h3>Bug History</h3>
-                </div>
-                <partial name="_BugHistoryPartial" model="@Model">
-            </div>
-    
-            <!-- Bug comments container -->
-            <div class="custom-container">
-                <div class="box-title">
-                    <h3>Make a comment?</h3>
-                </div>
-                <partial name="_AddCommentPartial" model="@Model.Comment" view-data="ViewData">
-            </div>
-    
-
-            <!-- Bug attached files container -->
-            <div class="custom-container">
-                <div class="box-title">
-                    <h3>Attach file?</h3>
-                </div>
-                <partial name="_FileUploadPartial" model="@Model.FileOfBug" view-data="ViewData">
-                <table class="table">
-                    <thead>
-                        <tr>
-                            <th>Description</th>
-                            <th>File</th>
-                        </tr>
-                    </thead>
-                    <tbody id="filesBody">
-                        <!--
-                            I used SignalR to show files in real time after adding new file
-                            The logic to write table body is written in the wwwroot/js/commonHubScript.js file
-                        -->
-                    </tbody>
-                </table>
-                <div id="prevNextFiles">
-                        <!-- 
-                            this div contains previous page and next page buttons for files table. 
-                            the button implementations are in the wwwroot/js/commonHubScript.js file
-                        -->
-                </div>
-            </div>
-
         </div>
 
+        <!-- Bug attached files -->
+        <div class="card" style="width: 100%;">
+            <div class="card-header">
+                <h3 class="card-title">Attached files</h3>
+            </div>
+
+            <div class="card-body">
+                <form id="fileForm" 
+                    asp-route-id="@Model.Bug.BugId" 
+                    asp-action="UploadFile" 
+                    method="post"
+                    data-ajax="true"
+                    enctype="multipart/form-data">
+                    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                    <div class="form-group">
+                        <input asp-for="@Model.BugFile.File" accept="file/*" />
+                        <span asp-validation-for="@Model.BugFile.File" class="text-danger"></span>
+                    </div>
+                    <div class="form-group">
+                        <input type="submit" value="Upload" class="btn btn-info btn-md" />
+                    </div>
+                </form>
+                <br />
+
+
+                <div style="display: flex; gap: 15px;" id="filesDiv">
+                    @* SignalR will handle to get files *@
+                </div>
+            </div>
+        </div>
+
+        <!--- Bug comments and history -->
+        <div class="card" style="width: 100%;">
+            <div class="card-header">
+                <ul class="nav nav-pills">
+                    <li class="nav-item"><a class="nav-link active" href="#comments" data-toggle="tab">Comments</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#history" data-toggle="tab">Bug History</a></li>
+                </ul>
+            </div>
+
+            <div class="card-body">
+                <div class="tab-content">
+                    <!--- Bug comments -->
+                    <div class="active tab-pane" id="comments">
+                        <form id="commentForm"
+                              asp-route-id="@Model.Bug.BugId"
+                              asp-action="AddComment"
+                              method="post"
+                              data-ajax="true"
+                              style="margin-bottom: 20px;">
+                            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                            <div class="form-group">
+                                <input asp-for="@Model.Comment.Message" class="form-control" />
+                                <span asp-validation-for="@Model.Comment.Message" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Add Comment" class="btn btn-info btn-md" />
+                            </div>
+                        </form>
+
+                        <br />
+                        <div id="commentsCount">
+                            @* SignalR will handle comments count *@
+                        </div>
+
+                        <div class="post" id="commentPost">
+                            @* SignalR will handle to get comments *@
+                        </div>
+                    </div>
+
+                    <!--- Bug history -->
+                    <div class="tab-pane" id="history">
+                        <table class="table table-striped" id="roleTable">
+                            <thead>
+                                <tr>
+                                    <th>Changed By</th>
+                                    <th>Property</th>
+                                    <th>Old Value</th>
+                                    <th>New Value</th>
+                                    <th>Date Changed</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var hist in Model.History)
+                                {
+                                    <tr>
+                                        <td>
+                                            @hist.ChangedBy.UserName
+                                        </td>
+                                        <td>
+                                            @hist.Property
+                                        </td>
+                                        <td>
+                                            @Html.Raw(hist.OldValue)
+                                        </td>
+                                        <td>
+                                            @Html.Raw(hist.NewValue)
+                                        </td>
+                                        <td>
+                                            @hist.DateChanged
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <input type="hidden" id="bugId" value="@Model.Bug.BugId" />
+        </section>
+
+        <!-- jQuery -->
+        <script src="~/plugins/jquery/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js"></script>
         @section Scripts {
             @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
         }
+
+        <script>
+            var commentForm = document.getElementById('commentForm');
+            $('#commentForm').submit(function (e) {
+                $.ajax({
+                    success: function () {
+                        console.log('Add comment was successful');
+                        commentForm.reset();
+                    }
+                })
+            })
+
+        var fileForm = document.getElementById('fileForm');
+            $('#fileForm').submit(function (e) {
+                $.ajax({
+                    success: function () {
+                        console.log('Add file was successful');
+                        fileForm.reset();
+                    }
+                })
+            })
+        </script>
+
     </body>
 </html>

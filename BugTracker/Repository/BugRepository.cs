@@ -35,7 +35,7 @@ public class BugRepository : IBugRepository
     // get all bugs
     public IQueryable<Bug> GetAll()
     {
-        return context.Bugs.Include(b => b.Project);
+        return context.Bugs.Include(b => b.Project).Include(b => b.AssignedUser);
     }
     
     // get bug by id
@@ -45,7 +45,7 @@ public class BugRepository : IBugRepository
     }
 
     // attach file to the bug
-    public async Task<string> UploadFile(FileOfBug model, int id)
+    public async Task<string> UploadFile(BugFile model, int id)
     {
         try
         {
@@ -64,7 +64,6 @@ public class BugRepository : IBugRepository
             await model.File.CopyToAsync(new FileStream(filePath, FileMode.Create));
 
             // sql server does inserting identity key value, so we assign id to 0
-            model.Id = 0;
             model.BugId = id;
 
             //add to database and save
@@ -86,7 +85,6 @@ public class BugRepository : IBugRepository
         try
         {
             comment.BugId = id;
-            comment.Id = 0;
             string userId = HttpContextAccessorProp.HttpContext.
                 User.FindFirst(ClaimTypes.NameIdentifier).Value;
             comment.AuthorId = userId;
@@ -103,28 +101,25 @@ public class BugRepository : IBugRepository
     }
 
     // Add new bug
-    public async Task<string> Add(CreateBugViewModel model)
+    // GET
+    public async Task<CreateBugViewModel> AddGet()
+    {
+        var model = await CreateBugVM();
+        return model;
+    }
+
+    // Add new bug
+    // POST
+    public async Task<string> AddPost(CreateBugViewModel model)
     {
         try
         {
-            string userId = HttpContextAccessorProp.HttpContext.
-                User.FindFirst(ClaimTypes.NameIdentifier).Value;
+            model.Bug.Status = "Open";
+            model.Bug.CreatedDate = DateTime.Now;
+            string userId = HttpContextAccessorProp.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
             model.Bug.SubmitterId = userId;
 
             context.Bugs.Add(model.Bug);
-            await context.SaveChangesAsync();
-            var id = model.Bug.BugId;
-
-            foreach (var user in model.Users)
-            {
-                if (user.IsSelected)
-                {
-                    var appUserBug = new AppUserBug();
-                    appUserBug.AppUserId = user.UserId;
-                    appUserBug.BugId = id;
-                    context.AppUserBug.Add(appUserBug);
-                }
-            }
             await context.SaveChangesAsync();
             await bugDetailsHub.Clients.All.SendAsync("GetBugDetails");
             return "success";
@@ -136,78 +131,100 @@ public class BugRepository : IBugRepository
         }
     }
 
-    // edit bug
-    public async Task<string> Update(int id, CreateBugViewModel model)
+    // Edit bug
+    // GET
+    public async Task<CreateBugViewModel> UpdateGet(int id)
+    {
+        var model = await CreateBugVM();
+        var bug = await context.Bugs.FindAsync(id);
+        if (bug == null)
+        {
+            return null;
+        }
+        model.Bug = bug;
+        return model;
+    }
+    
+    // Edit bug
+    // POST
+    public async Task<string> UpdatePost(int id, CreateBugViewModel model)
     {
         var bug = await context.Bugs.AsNoTracking().FirstOrDefaultAsync(b => b.BugId == id);
         try
         {
             // Update edited Bug in the database
             context.Bugs.Update(model.Bug);
-            foreach (var user in model.Users)
-            {
-                AppUserBug temp = new AppUserBug();
-                // if user is not selected and it already exists in the database
-                // then delete it from table
-                if (context.AppUserBug.Any(a => a.AppUserId == user.UserId && a.BugId == id) &&
-                    user.IsSelected == false)
-                {
-                    temp.BugId = id;
-                    temp.AppUserId = user.UserId;
-                    context.AppUserBug.Remove(temp);
-                }
-                // if user is selected and it doesn't exist in the database
-                // then add it to the table
-                else if (!context.AppUserBug.Any(a => a.AppUserId == user.UserId && a.BugId == id) &&
-                    user.IsSelected == true)
-                {
-                    temp.BugId = id;
-                    temp.AppUserId = user.UserId;
-                    context.AppUserBug.Add(temp);
-                }
-            }
             await context.SaveChangesAsync();
             await bugDetailsHub.Clients.All.SendAsync("GetBugDetails");
 
             //Add changes to BugHistories table
-            var bugHistory = new BugHistory();
-            bugHistory.BugId = id;
+            var currentUser = await GetCurrentUser();
+            var bugHistory = new BugHistory
+            {
+                BugId = id,
+                ChangedById = currentUser.Id
+            };
+
             if (bug.Title != model.Bug.Title)
             {
+                bugHistory.Id = 0;
                 bugHistory.Property = "Title";
                 bugHistory.OldValue = bug.Title;
                 bugHistory.NewValue = model.Bug.Title;
-                context.BugHistories.Add(bugHistory);
+                context.BugHistory.Add(bugHistory);
+                await context.SaveChangesAsync();
             }
-            else if (bug.Description != model.Bug.Description)
+            if (bug.Description != model.Bug.Description)
             {
+                bugHistory.Id = 0;
                 bugHistory.Property = "Description";
                 bugHistory.OldValue = bug.Description;
                 bugHistory.NewValue = model.Bug.Description;
-                context.BugHistories.Add(bugHistory);
+                context.BugHistory.Add(bugHistory);
+                await context.SaveChangesAsync();
             }
-            else if (bug.Status != model.Bug.Status)
+            if (bug.Status != model.Bug.Status)
             {
+                bugHistory.Id = 0;
                 bugHistory.Property = "Status";
                 bugHistory.OldValue = bug.Status;
                 bugHistory.NewValue = model.Bug.Status;
-                context.BugHistories.Add(bugHistory);
+                context.BugHistory.Add(bugHistory);
+                await context.SaveChangesAsync();
             }
-            else if (bug.Priority != model.Bug.Priority)
+            if (bug.Priority != model.Bug.Priority)
             {
+                bugHistory.Id = 0;
                 bugHistory.Property = "Priority";
                 bugHistory.OldValue = bug.Priority;
                 bugHistory.NewValue = model.Bug.Priority;
-                context.BugHistories.Add(bugHistory);
+                context.BugHistory.Add(bugHistory);
+                await context.SaveChangesAsync();
             }
-            else if (bug.ProjectId != model.Bug.ProjectId)
+            if (bug.ProjectId != model.Bug.ProjectId)
             {
+                bugHistory.Id = 0;
                 bugHistory.Property = "ProjectId";
                 bugHistory.OldValue = bug.ProjectId.ToString();
                 bugHistory.NewValue = model.Bug.ProjectId.ToString();
-                context.BugHistories.Add(bugHistory);
+                context.BugHistory.Add(bugHistory);
+                await context.SaveChangesAsync();
             }
-            await context.SaveChangesAsync();
+            if (bug.AssignedUserId != model.Bug.AssignedUserId)
+            {
+                var oldAssignee = await userManager.Users.SingleOrDefaultAsync(u => u.Id == bug.AssignedUserId);
+                var newAssignee = await userManager.Users.SingleOrDefaultAsync(u => u.Id == model.Bug.AssignedUserId);
+                if (oldAssignee != null && newAssignee != null)
+                {
+                    bugHistory.Id = 0;
+                    bugHistory.Property = "Assignee";
+                    bugHistory.OldValue = oldAssignee.UserName;
+                    bugHistory.NewValue = newAssignee.UserName;
+                    context.BugHistory.Add(bugHistory);
+                    await context.SaveChangesAsync();
+                }
+            }
+            
             await bugDetailsHub.Clients.All.SendAsync("GetBugDetails");
             return "success";
         }
@@ -225,87 +242,85 @@ public class BugRepository : IBugRepository
         }
     }
 
+    // Delete bug
+    public async Task<string> Delete(int id)
+    {
+        var bug = await Get(id);
+        if(bug == null)
+        {
+            return null;
+        }
+
+        try
+        {
+            context.Bugs.Remove(bug);
+            await context.SaveChangesAsync();
+            return "success";
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.ToString());
+        }
+    }
+
     // return ViewModel for creation of new bug with some filled information
-    public CreateBugViewModel CreateBugVM(string view, int id)
+    public async Task<CreateBugViewModel> CreateBugVM()
     {
         var model = new CreateBugViewModel();
-        var users = new List<AppUserViewModel>();
+        string userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
+        ApplicationUser currentUser = await userManager.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
-        if (view == "create")
+        // get users within same organization
+        var organizationUsers = userManager.Users.Where(u => u.OrganizationId == currentUser.OrganizationId);
+        if(organizationUsers.Any())
         {
-            foreach (var user in userManager.Users)
-            {
-                users.Add(new AppUserViewModel()
-                { UserId = user.Id, UserEmail = user.Email, IsSelected = false });
-            }
+            model.AssigneeList = organizationUsers.ToList();
         }
-        else if (view == "edit")
+        else
         {
-            foreach (var user in userManager.Users)
-            {
-                var result = from item in context.AppUserBug
-                             where item.AppUserId == user.Id && item.BugId == id
-                             select item;
-                if (result.Any())
-                    users.Add(new AppUserViewModel()
-                    {
-                        UserId = user.Id,
-                        UserEmail = user.Email,
-                        IsSelected = true
-                    });
-                else
-                    users.Add(new AppUserViewModel()
-                    {
-                        UserId = user.Id,
-                        UserEmail = user.Email,
-                        IsSelected = false
-                    });
-            }
+            model.AssigneeList.Add(currentUser);
         }
-        model.Users = users;
         model.Projects = context.Projects.ToList();
         return model;
     }
 
-    // return BugDetailsViewModel with some filled information
-    public async Task<BugDetailsViewModel> GetVM(int id, int? pageNumberOfComments, int? pageNumberOfFiles, int? pageNumberOfHistories)
+    // get bug details
+    public async Task<BugDetailsViewModel> GetBugDetails(int id)
     {
         var bug = await context.Bugs
             .Include(i => i.Project)
             .Include(i => i.BugHistory)
+            .ThenInclude(h => h.ChangedBy)
+            .Include(i => i.AssignedUser)
             .Include(i => i.Submitter)
-            .Include(i => i.AssignedUsersForBug)
             .Include(i => i.Files)
+            .Include(i => i.Comments)
+            .ThenInclude(c => c.Author)
+            .AsSplitQuery()
             .FirstOrDefaultAsync(b => b.BugId == id);
         if (bug == null)
         {
             return null;
         }
 
-        int pageSize = 3;
-
-        var comments = context.Comments.Where(c => c.BugId == id).Include(i => i.Author);
-        var result = await PaginatedList<Comment>.CreateAsync(comments.AsNoTracking(), pageNumberOfComments ?? 1, pageSize);
-
-        var files = context.Files.Where(c => c.BugId == id);
-        var result2 = await PaginatedList<FileOfBug>.CreateAsync(files.AsNoTracking(), pageNumberOfFiles ?? 1, pageSize);
-
-        var histories = context.BugHistories.Where(c => c.BugId == id);
-        var result3 = await PaginatedList<BugHistory>.CreateAsync(histories.AsNoTracking(), pageNumberOfHistories ?? 1, pageSize);
-
         var vm = new BugDetailsViewModel
         {
             Bug = bug,
-            PaginatedComments = result,
-            CommentsPageIndex = result.PageIndex,
-            CommentsTotalPages = result.TotalPages,
-            PaginatedFiles = result2,
-            FilesPageIndex = result2.PageIndex,
-            FilesTotalPages = result2.TotalPages,
-            PaginatedHistory = result3,
-            HistoryPageIndex = result3.PageIndex,
-            HistoryTotalPages = result3.TotalPages
+            Comments = bug.Comments,
+            Files = bug.Files,
+            History = bug.BugHistory
         };
         return vm;
+    }
+
+    // get current user
+    private async Task<ApplicationUser> GetCurrentUser()
+    {
+        var id = httpContextAccessor
+                                .HttpContext
+                                .User
+                                .FindFirst(ClaimTypes.NameIdentifier)
+                                .Value;
+        return await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
     }
 }

@@ -14,10 +14,6 @@
     <link rel="stylesheet" type="text/css" href="~/css/LayoutStyle.css"/>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <style>
-
-    </style>
-
 </head>
 <body>
     <div class="my-container">
@@ -26,8 +22,7 @@
                 <li style="background: transparent;" class="my-li">
                     <a class="my-a" href="#">
                         <span class="icon"><i style="font-size:24px;" class="fa-solid fa-bug"></i></span>
-                        <span class="title">Bug Tracker</span>
-                        @*<span class="title"><h2>Bug Tracker</h2></span>*@
+                        <span class="title"><h2>Bug Tracker</h2></span>
                     </a>
                 </li>
                 <li class="my-li">
@@ -49,9 +44,21 @@
                     </a>
                 </li>
                 <li class="my-li">
-                    <a asp-controller="Home" asp-action="Contacts" class="my-a @Url.MakeActiveClass("Home","Contacts")">
+                    <a asp-controller="" asp-action="Index" class="my-a @Url.MakeActiveClass("","Index")">
                         <span class="icon"><i class="fa-solid fa-address-book"></i></span>
-                        <span class="title"><h3>Manage Contacts</h3></span>
+                        <span class="title"><h3>Chat</h3></span>
+                    </a>
+                </li>
+                <li class="my-li">
+                    <a asp-controller="" asp-action="Index" class="my-a @Url.MakeActiveClass("","Index")">
+                        <span class="icon"><i class="fa-solid fa-address-book"></i></span>
+                        <span class="title"><h3>Timesheet</h3></span>
+                    </a>
+                </li>
+                <li class="my-li">
+                    <a asp-controller="Teams" asp-action="Index" class="my-a @Url.MakeActiveClass("Teams","Index")">
+                        <span class="icon"><i class="fa-solid fa-address-book"></i></span>
+                        <span class="title"><h3>Teams</h3></span>
                     </a>
                 </li>
                 <li class="my-li">
@@ -65,7 +72,7 @@
         <div class="main">
             <div class="top-bar">
                 <div class="toggle" onclick="toggleMenu();"></div>
-                <partial name="_NotificationPartial"/>
+                @*<partial name="_NotificationPartial"/>*@
 
                 <partial name="_LoginPartial" />
             </div>

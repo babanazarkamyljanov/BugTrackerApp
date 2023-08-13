@@ -1,0 +1,35 @@
+﻿@{
+    Layout = "~/Views/Shared/MyLayout/_ManageLayout.cshtml";
+    ViewData["userId"] = Model.Id;
+}
+@model BugTracker.ViewModels.ManageAccount.DeleteAccountViewModel
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Delete</title>
+</head>
+<body>
+    <div class="alert alert-warning" role="alert">
+        <p>
+            <strong>Deleting this data will permanently remove the account, and this cannot be recovered.</strong>
+        </p>
+    </div>
+    <div>
+        <form id="delete-user" asp-controller="Manage" asp-action="Delete" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+            
+            @if (@Model.RequirePassword)
+            {
+                <input asp-for="@Model.RequirePassword" hidden />
+                <input asp-for="@Model.Id" hidden />
+                <div class="form-group">
+                    <label asp-for="@Model.Password" class="form-label"></label>
+                    <input asp-for="@Model.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Please enter account password." />
+                    <span asp-validation-for="@Model.Password" class="text-danger"></span>
+                </div>
+            }
+            <button class="btn btn-md btn-danger" type="submit">Delete data and close account</button>
+        </form>
+    </div>
+</body>
+</html>

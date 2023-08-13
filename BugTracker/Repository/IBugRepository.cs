@@ -4,10 +4,13 @@ public interface IBugRepository
 {
     IQueryable<Bug> GetAll();
     Task<Bug> Get(int id);
-    Task<string> Add(CreateBugViewModel model);
-    Task<string> Update(int id, CreateBugViewModel model);
-    Task<string> UploadFile(FileOfBug model, int id);
+    Task<CreateBugViewModel> AddGet();
+    Task<string> AddPost(CreateBugViewModel model);
+    Task<CreateBugViewModel> UpdateGet(int id);
+    Task<string> UpdatePost(int id, CreateBugViewModel model);
+    Task<string> Delete(int id);
+    Task<string> UploadFile(BugFile model, int id);
     Task<string> AddComment(Comment comment, int id);
-    Task<BugDetailsViewModel> GetVM(int id, int? pageNumberOfComments, int? pageNumberOfFiles, int? pageNumberOfHistories);
-    CreateBugViewModel CreateBugVM(string view, int id);
+    Task<CreateBugViewModel> CreateBugVM();
+    Task<BugDetailsViewModel> GetBugDetails(int id);
 }

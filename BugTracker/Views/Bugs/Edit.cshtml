@@ -5,183 +5,148 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Create</title>
-    <style>
-        .row {
-            margin-left: 20px;
-        }
-        .left-right-container {
-            width: 100%;
-            display: flex;
-            gap: 50px;
-        }
-        .right-side {
-            margin-top: 45px;
-        }
-        .form-group {
-            width: 400px;
-            margin-top: 20px;
-        }
-        .selectBox {
-            position: relative;
-        }
-        .selectBox select {
-            min-width: 400px;
-            height: 40px;
-            font-weight: bold;
-        }
-        .overSelect {
-            position: absolute;
-            left: 0;
-            right: 0;
-            top: 0;
-            bottom: 0;
-        }
-        #checkboxes {
-            display: none;
-            position: absolute;
-            background: #C5F9FF;
-            z-index: 8;
-            border: 1px #dadada solid;
-        }
-        #checkboxes label {
-            display: block;
-        }
-        #checkboxes label:hover {
-            background-color: #1e90ff;
-        }
-        .select-input:focus {
-            box-shadow: none;
-        }
-        @@media (max-width: 1220px) {
-            .form-group {
-                width: 400px;
-            }
-        }
-        @@media (max-width: 1170px) {
-            .form-group {
-                width: 300px;
-            }
-            .selectBox select {
-                min-width: 300px;
-            }
-        }
-        @@media (max-width: 680px) {
-            .left-right-container {
-                flex-direction: column;
-            }
-            .right-side {
-                margin-top: 0px;
-            }
-            .form-group {
-                width: 450px;
-                height: 40px;
-            }
-            .selectBox select {
-                min-width: 450px;
-            }
-        }
-    </style>
+    <title>Bug Create</title>
 </head>
 <body>
-    <h1 style="margin-left: 20px;">Add Bug</h1>
-    <hr />
-    <div class="row">
-        <div class="col-md-4">
-            <form asp-action="Edit">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="@Model.Bug.BugId" />
-                <input type="hidden" asp-for="@Model.Bug.SubmitterId" />
-                <input type="hidden" asp-for="@Model.Bug.CreatedDate" />
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>Create a new Bug</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a asp-controller="Projects" asp-action="Index">Bugs</a></li>
+                        <li class="breadcrumb-item active">Create</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
 
-                <div class="left-right-container">
-                    <div class="left-side">
-                        <div class="form-group">
-                            <label asp-for="@Model.Bug.Title" class="control-label"></label>
-                            <input asp-for="@Model.Bug.Title" class="form-control" />
-                            <span asp-validation-for="@Model.Bug.Title" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="@Model.Bug.Description" class="control-label"></label>
-                            <input asp-for="@Model.Bug.Description" class="form-control" />
-                            <span asp-validation-for="@Model.Bug.Description" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="@Model.Bug.Priority" class="control-label"></label>
-                            <input asp-for="@Model.Bug.Priority" class="form-control" />
-                            <span asp-validation-for="@Model.Bug.Priority" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="@Model.Bug.Status" class="control-label"></label>
-                            <input asp-for="@Model.Bug.Status" class="form-control" />
-                            <span asp-validation-for="@Model.Bug.Status" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="right-side">
-                        <div class="multiselect">
-                            <div class="selectBox" onclick="showCheckboxes()">
-                                <select>
-                                    <option>Select Members</option>
-                                </select>
-                                <div class="overSelect"></div>
-                            </div>
-                            <div class="form-group" id="checkboxes">
-                                @for(int i = 0; i < @Model.Users.Count; i++)
-                                {
-                                    <div class="form-check m-1">
-                                        <input type="hidden" asp-for="@Model.Users[i].UserId">
-                                        <input type="hidden" asp-for="@Model.Users[i].UserEmail">
-                                        <input class="form-check-input" asp-for="@Model.Users[i].IsSelected">
-                                        <label class="form-check-label" asp-for="@Model.Users[i].IsSelected">
-                                            @Model.Users[i].UserEmail
-                                        </label>
-                                    </div>
-                                }
+    <!-- Main content -->
+    <section class="content">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="@Model.Bug.BugId" />
+            <input type="hidden" asp-for="@Model.Bug.SubmitterId" />
+            <input type="hidden" asp-for="@Model.Bug.CreatedDate" />
+            <div class="row">
+                <!-- General details -->
+                <div class="col-md-6">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">General</h3>
+
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
                             </div>
                         </div>
-                        @{
-                            Dictionary<int, string> dict = new Dictionary<int, string>();
-                            foreach (var project in Model.Projects)
-                            {
-                                dict.Add(project.ProjectId, project.Title);
-                            }
-
-                            SelectList selectList = new SelectList(dict, "Key", "Value");
-                            
+                        <div class="card-body">
                             <div class="form-group">
-                                <label asp-for="@Model.Bug.ProjectId">Select Project</label>
-                                <select class="form-control select-input" asp-for="@Model.Bug.ProjectId" asp-items="@selectList"></select>
+                                <label asp-for="@Model.Bug.Title">Bug Title</label>
+                                <input asp-for="@Model.Bug.Title" type="text" class="form-control">
+                                <span asp-validation-for="@Model.Bug.Title" class="text-danger"></span>
                             </div>
-                        }
+                            <div class="form-group">
+                                <label asp-for="@Model.Bug.Priority">Priority</label>
+                                <select asp-for="@Model.Bug.Priority" class="form-control custom-select">
+                                    <option selected disabled>Select Priority</option>
+                                    <option>Low</option>
+                                    <option>Medium</option>
+                                    <option>High</option>
+                                </select>
+                                <span asp-validation-for="@Model.Bug.Priority" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.Bug.Status">Status</label>
+                                <select asp-for="@Model.Bug.Status" class="form-control custom-select">
+                                    <option selected disabled>Select Status</option>
+                                    <option>Open</option>
+                                    <option>Build In Progress</option>
+                                    <option>Code Review</option>
+                                    <option>Testing In Progress</option>
+                                    <option>Resolved</option>
+                                    <option>Closed</option>
+                                </select>
+                                <span asp-validation-for="@Model.Bug.Status" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.Bug.Description">Bug Description</label>
+                                <textarea id="descriptionEditor" asp-for="@Model.Bug.Description" class="form-control" rows="4"></textarea>
+                                <span asp-validation-for="@Model.Bug.Description" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
                     </div>
+                    <!-- /.card -->
                 </div>
 
-                <div class="form-group">
-                    <input type="submit" value="Edit" class="btn btn-primary" />
-                </div>
-                <div>
-                    <a asp-action="Index">Back to List</a>
-                </div>
-            </form>
-        </div>
-    </div>
+                <!-- select Assignee and Project -->
+                <div class="col-md-6">
+                    <div class="card card-secondary">
+                        <div class="card-header">
+                            <h3 class="card-title">Other Details</h3>
 
-
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                @{
+                                    var assigneeList = new List<SelectListItem>();
+                                    foreach (var user in Model.AssigneeList)
+                                    {
+                                        assigneeList.Add(new SelectListItem { Value = user.Id, Text = user.Email });
+                                    }
+                                }
+                                <label asp-for="@Model.Bug.AssignedUserId">Assignee</label>
+                                <select asp-for="@Model.Bug.AssignedUserId" asp-items="@assigneeList" class="form-control custom-select"></select>
+                                <span asp-validation-for="@Model.Bug.AssignedUserId" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                @{
+                                    var projectList = new List<SelectListItem>();
+                                    foreach (var project in Model.Projects)
+                                    {
+                                        projectList.Add(new SelectListItem { Value = project.Id.ToString(), Text = project.Title });
+                                    }
+                                }
+                                <label asp-for="@Model.Bug.ProjectId">Project</label>
+                                <select asp-for="@Model.Bug.ProjectId" asp-items="@projectList" class="form-control custom-select"></select>
+                                <span asp-validation-for="@Model.Bug.ProjectId" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+                </div>
+                <div class="col-12">
+                    <a asp-controller="Bugs" asp-action="Index" class="btn btn-secondary">Cancel</a>
+                    <input type="submit" value="Update" class="btn btn-success">
+                </div>
+            </div>
+        </form>
+    </section>
+    <!-- /.content -->
+    <!-- jQuery -->
+    <script src="~/plugins/jquery/jquery.min.js"></script>
     <script>
-        var expanded = false;
-        function showCheckboxes() {
-            var checkboxes = document.getElementById("checkboxes");
-            if(!expanded) {
-                checkboxes.style.display = "block";
-                expanded = true;
-            } else {
-                checkboxes.style.display = "none";
-                expanded= false;
-            }
-        }
+        $(function () {
+            // Summernote
+            $('#descriptionEditor').summernote()
+        })
     </script>
     @section Scripts {
-        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
     }
 </body>
 </html>

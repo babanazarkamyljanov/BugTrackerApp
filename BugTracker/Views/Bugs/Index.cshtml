@@ -1,89 +1,229 @@
 ﻿@model IEnumerable<Bug>
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bugs</title>
 
-@{
-    ViewData["Title"] = "Index";
-}
- <link rel="stylesheet" type="text/css" href="~/css/index.css"/>
-
-<div class="container">
-    <div class="index-container index-title">
-        <h3>Bugs</h3>
-    </div>
-
-    <div class="index-container index-search">
-        <div class="form-group search-field">
-            <span class="add-on"><i class="fa fa-search" aria-hidden="true"></i></span>
-            <input type="text" id="Search" placeholder="Search bugs" class="form-control search-input" />
-        </div>
-        <div class="form-group">
-            <a asp-action="Create" asp-controller="Bugs" class="btn add-btn">Add Bug</a>
-        </div>  
-    </div>
-
-    <div class="index-container index-table">
-        <table class="table">
-            <thead>
-                <tr>
-                    <th>Title</th>
-                    <th>Description</th>
-                    <th>Priority</th>
-                    <th>Status</th>
-                    <th>Project</th>
-                    <th>Added date</th>
-                    <th></th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var item in Model) 
-                {
-                    <tr class="Search">
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Title)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Description)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Priority)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.Status)
-                        </td>
-                        <td>
-                            @item.Project.Title
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => item.CreatedDate)
-                        </td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@item.BugId">Edit</a> |
-                            <a asp-action="Details" asp-route-id="@item.BugId">Details</a> |
-                            <a asp-action="Delete" asp-route-id="@item.BugId">Delete</a>
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-
-</div>
-<script src="~/lib/jquery/dist/jquery.min.js"></script>
-<script>
-    $(document).ready(function() {
-        function Contains(text_one, text_two) {
-            if (text_one.indexOf(text_two) != -1) {
-                return true;
-            }
+    <style>
+        #deleteConfirmBox {
+            z-index: 9;
+            display: none;
+            width: 400px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
-        $("#Search").keyup(function() {
-            var searchText = $("#Search").val().toLowerCase();
-            $(".Search").each(function() {
-                if (!Contains($(this).text().toLowerCase(), searchText)) {
-                    $(this).hide();
-                } else {
-                    $(this).show();
+
+        button.btn.btn-secondary.buttons-csv.buttons-html5.btn-info.csvButton,
+        button.btn.btn-secondary.buttons-excel.buttons-html5.excelButton {
+            border-top-left-radius: 5px;
+            border-bottom-left-radius: 5px;
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+
+        button.btn.btn-secondary.buttons-excel.buttons-html5.excelButton {
+            margin-left: 10px;
+        }
+
+        button.btn.btn-secondary.btn-success.addButton {
+            margin-left: 10px;
+            border-radius: 5px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Content Header (Page header) -->
+    <section class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h1>All Bugs</h1>
+                </div>
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Bugs</a></li>
+                        <li class="breadcrumb-item active">Index</li>
+                    </ol>
+                </div>
+            </div>
+        </div><!-- /.container-fluid -->
+    </section>
+
+    <!-- Main content -->
+    <section class="content">
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Bugs</h3>
+
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-body">
+                <table id="example1" class="table table-striped projects">
+                    <thead>
+                        <tr>
+                            <th style="width: 20%">
+                                Title
+                            </th>
+                            <th style="width: 5%">
+                                Project Key
+                            </th>
+                            <th style="width: 30%">
+                                Assignee
+                            </th>
+                            <th>
+                                Priority
+                            </th>
+                            <th class="no-sort">
+                                Progress
+                            </th>
+                            <th style="width: 8%" class="text-center">
+                                Status
+                            </th>
+                            <th class="no-sort text-right" style="width: 20%">
+                                Actions
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <a asp-controller="Bugs" asp-action="Details" asp-route-id="@item.BugId">@item.Title</a>
+                                    <br />
+                                    <small>Created @item.CreatedDate</small>
+                                </td>
+                                <td>
+                                    <a asp-controller="Projects" asp-action="Details" asp-route-id="@item.Project.Id">@item.Project.ProjectKey</a>
+                                </td>
+                                <td>
+                                    <ul class="list-inline">
+                                        <li class="list-inline-item">
+                                            @if (item.AssignedUser.AvatarPhoto is null)
+                                            {
+
+                                                <img src="~/img/default-avatar.png" class="table-avatar" alt="User Image">
+
+                                            }
+                                            else
+                                            {
+                                                string src = "data:image/png;base64,"
+                                                + Convert.ToBase64String(item.AssignedUser.AvatarPhoto, 0, item.AssignedUser.AvatarPhoto.Length);
+                                                <img src="@src" class="table-avatar" alt="User Image">
+                                            }
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <h6>@item.AssignedUser.UserName</h6>
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <h6>@item.Priority</h6>
+                                </td>
+                                <td class="project_progress">
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar bg-green" role="progressbar" aria-valuenow="57" aria-valuemin="0" aria-valuemax="100" style="width: 57%">
+                                        </div>
+                                    </div>
+                                    <small>
+                                        57% Complete
+                                    </small>
+                                </td>
+                                <td class="project-state">
+                                    <span class="badge badge-success">@item.Status</span>
+                                </td>
+                                <td class="project-actions text-right">
+                                    <a title="View" class="btn btn-primary btn-sm" asp-controller="Bugs" asp-action="Details" asp-route-id="@item.BugId">
+                                        <i class="fa-solid fa-eye">
+                                        </i>
+                                        
+                                    </a>
+                                    <a title="edit" class="btn btn-info btn-sm" asp-controller="Bugs" asp-action="Edit" asp-route-id="@item.BugId">
+                                        <i class="fas fa-pencil-alt">
+                                        </i>
+                                        
+                                    </a>
+                                    <a title="delete" href="#" class="btn btn-danger btn-sm" onclick="showConfirmDelete('@item.BugId')">
+                                        <i class="fas fa-trash">
+                                        </i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.card-body -->
+        </div>
+        <!-- /.card -->
+
+        <!-- delete confirm popup box, initially hidden -->
+        <div class="card card-info" id="deleteConfirmBox">
+            <div class="card-header">
+                <h4>Are you sure want to delete?</h4>
+            </div>
+            <div class="card-body">
+                <button onclick="submitDelete()" class="btn btn-danger btn-lg">Yes</button>
+                <a href="#" class="btn btn-primary btn-lg float-right" onclick="hideDeleteConfirm()">No</a>
+            </div>
+        </div>
+        <input type="hidden" id="bugId" />
+    </section>
+    <!-- /.content -->
+    <!-- jQuery -->
+    <script src="~/plugins/jquery/jquery.min.js"></script>
+    <script>
+        $(function () {
+            $("#example1").DataTable({
+                "responsive": true, "lengthChange": false, "autoWidth": false,
+                "columnDefs": [ {
+                    "targets": "no-sort",
+                    "orderable": false
+                }],
+                "buttons": [
+                    { extend: 'csv', className: 'btn-info csvButton' },
+                    { extend: 'excel', className: 'excelButton' },
+                    {
+                        text: 'Add new bug',
+                        className: 'btn-success addButton',
+                        action: function (e, dt, node, config) {
+                            window.location.href = "/Bugs/Create"
+                        }
+                    }]
+            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+        });
+
+        function showConfirmDelete(id) {
+            document.getElementById("bugId").value = id
+            $('#deleteConfirmBox').show()
+        }
+        function hideDeleteConfirm() {
+            $('#deleteConfirmBox').hide()
+        }
+        function submitDelete() {
+            var id = document.getElementById("bugId").value
+            $.ajax({
+                type: 'POST',
+                url: '/Bugs/DeleteConfirmed',
+                data: { "id": id },
+                success: function (response) {
+                    hideDeleteConfirm()
+                    // refresh page
+                    window.location.reload();
+                },
+                error: function (response) {
+                    console.log(response)
                 }
             })
-        })
-    })
-</script>
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+﻿@model RegisterViewModel
+@inject RoleManager<IdentityRole> RoleManager
+@inject UserManager<ApplicationUser> UserManager
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create User</title>
+</head>
+<body>
+    <!-- Main content -->
+    <section style="margin-top: 10px;" class="content">
+        <form asp-action="CreateUser">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="row">
+                <div class="col col-md-6">
+                    <div class="card card-primary">
+                        <div class="card-header">
+                            <h3 class="card-title">Create a new user</h3>
+                        </div>
+                        <div class="card-body">
+                            <div class="form-group">
+                                <label asp-for="@Model.FirstName">First Name</label>
+                                <input asp-for="@Model.FirstName" class="form-control" autocomplete="firstname" type="text" aria-required="true">
+                                <span asp-validation-for="@Model.FirstName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.LastName">Last Name</label>
+                                <input asp-for="@Model.LastName" type="text" class="form-control" autocomplete="firstname" aria-required="true">
+                                <span asp-validation-for="@Model.LastName" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.Email">Email</label>
+                                <input asp-for="@Model.Email" type="text" class="form-control" autocomplete="email" aria-required="true">
+                                <span asp-validation-for="@Model.Email" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.Password"></label>
+                                <input asp-for="@Model.Password" class="form-control" autocomplete="new-password" aria-required="true" />
+                                <span asp-validation-for="@Model.Password" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <label asp-for="@Model.ConfirmPassword"></label>
+                                <input asp-for="@Model.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" />
+                                <span asp-validation-for="@Model.ConfirmPassword" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                @{
+                                    var roles = RoleManager.Roles;
+                                    var roleList = new List<SelectListItem>();
+                                    foreach (var role in roles)
+                                    {
+                                        roleList.Add(new SelectListItem { Value = role.Name, Text = role.Name });
+                                    }
+                                }
+                                <label asp-for="@Model.Roles">Role</label>
+                                <select class="form-control select2" asp-for="@Model.Roles" multiple="multiple" asp-items="@roleList"></select>
+                                <span asp-validation-for="@Model.Roles" class="text-danger"></span>
+                            </div>
+                            <div class="form-group">
+                                <input type="submit" value="Create" class="btn btn-success">
+                                <a asp-controller="Organization" asp-action="Index" class="btn btn-secondary">Cancel</a>
+                            </div>
+                        </div>
+                        <!-- /.card-body -->
+                    </div>
+                    <!-- /.card -->
+                </div>
+            </div>
+        </form>
+    </section>
+    <!-- /.content -->
+    <!-- jQuery -->
+    <script src="~/plugins/jquery/jquery.min.js"></script>
+    <script>
+        $(function () {
+            $('.select2').select2()
+        })
+    </script>
+    @section Scripts {
+        @{
+            await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        }
+    }
+</body>
+</html>
+

@@ -1,42 +1,26 @@
-﻿namespace BugTracker.Controllers;
+﻿
+using BugTracker.Authorization;
 
+namespace BugTracker.Controllers;
+
+[Authorize]
 public class ProjectsController : Controller
 {
     private readonly IProjectRepository projectRepository;
+    private readonly IAuthorizationService authorizationService;
 
-    public ProjectsController(IProjectRepository projectRepository)
+    public ProjectsController(
+        IProjectRepository projectRepository,
+        IAuthorizationService authorizationService)
     {
         this.projectRepository = projectRepository;
+        this.authorizationService = authorizationService;
     }
 
-    // GET: ProjectsController
+    // GET: Projects
     public async Task<IActionResult> Index()
     {
-        //string sortBy
-        //ViewBag.SortTitle = sortBy == "Title" ? "Title desc" : "Title";
-        //ViewBag.SortDate = sortBy == "Date" ? "Date desc" : "Date";
-
-        //var projects = context.Projects.AsQueryable();
-        //switch (sortBy)
-        //{
-        //    case "Title desc":
-        //        projects = projects.OrderByDescending(p => p.Title);
-        //        break;
-        //    case "Title":
-        //        projects = projects.OrderBy(p => p.Title);
-        //        break;
-        //    case "Date desc":
-        //        projects = projects.OrderByDescending(p => p.CreatedDate);
-        //        break;
-        //    case "Date":
-        //        projects = projects.OrderBy(p => p.CreatedDate);
-        //        break;
-        //    default:
-        //        projects = projects.OrderBy(p => p.Title);
-        //        break;
-
-        //}
-        var projects = await projectRepository.GetAll().ToListAsync();
+        var projects = await projectRepository.GetAll();
         return View(projects);
     }
 
@@ -44,14 +28,20 @@ public class ProjectsController : Controller
     [HttpGet]
     public async Task<IActionResult> GetProjectsIndex()
     {
-        var result = await projectRepository.GetAll().ToListAsync();
+        var result = await projectRepository.GetAll();
         return Ok(result);
     }
 
-    // GET: ProjectsController/Details/5
-    public async Task<IActionResult> Details(int id)
+    // GET: Projects/Details/5
+    public async Task<IActionResult> Details(Guid id, string user, bool isRead)
     {
-        var project = await projectRepository.Get(id);
+        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Read);
+        if (!isAuthorized.Succeeded)
+        {
+            return RedirectToAction("AccessDenied", "Account");
+        }
+
+        var project = await projectRepository.GetProject(id);
         if (project == null)
         {
             return NotFound();
@@ -59,21 +49,33 @@ public class ProjectsController : Controller
         return View(project);
     }
 
-    // GET: ProjectsController/Create
-    public IActionResult Create()
+    // GET: Projects/Create
+    public async Task<IActionResult> Create()
     {
-        var model = projectRepository.AddGet();
+        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Create);
+        if (!isAuthorized.Succeeded)
+        {
+            return RedirectToAction("AccessDenied", "Account");
+        }
+
+        var model = await projectRepository.AddGet();
         return View(model);
     }
 
-    // POST: ProjectsController/Create
+    // POST: Projects/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateProjectViewModel model)
     {
+        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Create);
+        if (!isAuthorized.Succeeded)
+        {
+            return RedirectToAction("AccessDenied", "Account");
+        }
+
         if (ModelState.IsValid)
         {
-            var result = await projectRepository.Add(model);
+            var result = await projectRepository.AddPost(model);
             if(result == "success")
                 return RedirectToAction(nameof(Index));
             else
@@ -82,9 +84,15 @@ public class ProjectsController : Controller
         return View(model);
     }
 
-    // GET: ProjectsController/Edit/5
-    public async Task<IActionResult> Edit(int id)
+    // GET: Projects/Edit/5
+    public async Task<IActionResult> Edit(Guid id)
     {
+        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Update);
+        if (!isAuthorized.Succeeded)
+        {
+            return RedirectToAction("AccessDenied", "Account");
+        }
+
         var result = await projectRepository.UpdateGet(id);
         if(result == null)
         {
@@ -93,18 +101,24 @@ public class ProjectsController : Controller
         return View(result);
     }
 
-    // POST: ProjectsController/Edit/5
+    // POST: Projects/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, CreateProjectViewModel model)
+    public async Task<IActionResult> Edit(Guid id, CreateProjectViewModel model)
     {
-        if(id != model.Project.ProjectId)
+        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Update);
+        if (!isAuthorized.Succeeded)
+        {
+            return RedirectToAction("AccessDenied", "Account");
+        }
+
+        if (id != model.Project.Id)
         {
             return NotFound();
         }
         if(ModelState.IsValid)
         {
-            var result = await projectRepository.Update(id, model);
+            var result = await projectRepository.UpdatePost(id, model);
             if (result == "success")
                 return RedirectToAction(nameof(Index));
             else if (result == "NotFound")
@@ -115,25 +129,17 @@ public class ProjectsController : Controller
         return View(model);
     }
 
-    // GET: ProjectsController/Delete/5
-    public async Task<IActionResult> Delete(int id)
-    {
-        var project = await projectRepository.Get(id);
-        if(project == null)
-        {
-            return NotFound();
-        }
-        return View(project);
-    }
 
-    // POST: ProjectsController/Delete/5
-    [HttpPost, ActionName("Delete")]
-    [ValidateAntiForgeryToken]
-    public async Task<IActionResult> DeleteConfirmed(int id)
+    // POST: Projects/Delete/5
+    [HttpPost]
+    public async Task<ActionResult> DeleteConfirmed(Guid id)
     {
-        var result = await projectRepository.Delete(id);
-        if (result == null)
-            return NotFound();
-        return RedirectToAction(nameof(Index));
+        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Delete);
+        if (!isAuthorized.Succeeded)
+        {
+            return RedirectToAction("AccessDenied", "Account");
+        }
+
+        return Json(await projectRepository.Delete(id));
     }
 }

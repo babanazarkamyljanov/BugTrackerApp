@@ -1,20 +1,69 @@
-﻿
+﻿@inject NotificationService ns
 <style>
-    #notifications {
+/*    #notifications {
         display: none;
         padding: 10px 5px 10px 5px;
         width: 200px;
         height: 400px;
         z-index: 9;
-        background: #27D31C;
+        background: white;
         position: absolute;
         border-radius: 5px;
+        border: 1px solid gray;
+        left: -140px;
+        top: 0px;
+    }*/
+
+    #notifications {
+        display: none;
+        padding: 10px 5px 10px 5px;
+        margin-top: 30px;
+        width: 250px;
+        height: 400px;
+        z-index: 5;
+        background: white;
+        position: absolute;
+        border-radius: 5px;
+        border: 1px solid gray;
         left: -140px;
         top: 0px;
     }
+
+    #notifHeader {
+        font-size: 24px;
+    }
 </style>
 
-<div style="position: absolute; right: 275px; top: 15px;">
+
+<div style="position: relative; top: 10px;">
+    <span style="cursor: pointer; font-size: 24px;" onclick="showNotifications()">
+        <i class="fa-solid fa-bell" style="color: darkblue;"></i>
+        <span id="notifCount" style="color: red; position: relative; bottom: 5px;"></span>
+    </span>
+    <div id="notifications">
+        <h3 id="notifHeader"></h3>
+        <div id="notifBody">
+
+        </div>
+    </div>
+</div>
+
+<script>
+    var expanded = false;
+    function showNotifications() {
+        var notificationsDiv = document.getElementById("notifications");
+        if (!expanded) {
+            notificationsDiv.style.display = "block";
+            expanded = true;
+        } else {
+            notificationsDiv.style.display = "none";
+            expanded = false;
+        }
+        //var result = @await ns.ResetNotificationCount()
+    }
+</script>
+
+@*<div style="position: absolute; right: 275px; top: 15px;">
     <span style="cursor: pointer;" onclick="showNotifications()">
         <i class="fa-solid fa-bell" style=""></i>
     </span>
@@ -22,9 +71,10 @@
         <div id="notifications">
         </div>
     </div>
-</div>
+</div>*@
 
-<script>
+
+@*<script>
     var expanded = false;
     function showNotifications() {
         var notifications = document.getElementById("notifications");
@@ -36,4 +86,4 @@
             expanded= false;
         }
     }
-</script>
+</script>*@

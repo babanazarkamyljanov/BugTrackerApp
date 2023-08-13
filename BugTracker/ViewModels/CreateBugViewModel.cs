@@ -3,12 +3,12 @@
 public class CreateBugViewModel
 {
     public Bug Bug { get; set; }
-    public List<AppUserViewModel> Users { get; set; }
+    public List<ApplicationUser> AssigneeList { get; set; }
     public List<Project> Projects { get; set; }
 
     public CreateBugViewModel()
     {
-        Users = new List<AppUserViewModel>();
+        AssigneeList = new List<ApplicationUser>();
         Projects = new List<Project>();
     }
 }
