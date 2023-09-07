@@ -2,11 +2,7 @@
 
 public class OrganizationViewModel
 {
-    public Organization Organization { get; set; }
-    public ICollection<User> OrganizationUsers { get; set; }
+    public Organization Organization { get; set; } = null!;
 
-    public OrganizationViewModel()
-    {
-        OrganizationUsers = new List<User>();
-    }
+    public ICollection<User> Users { get; set; } = null!;
 }

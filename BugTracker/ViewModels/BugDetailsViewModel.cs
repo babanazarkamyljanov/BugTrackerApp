@@ -2,13 +2,15 @@
 
 public class BugDetailsViewModel
 {
-    public Bug Bug { get; set; }
+    public Bug Bug { get; set; } = null!;
 
-    public Comment Comment { get; set; }
+    public BugComment Comment { get; set; } = null!;
 
-    public Models.File BugFile { get; set; }
+    public BugFile File { get; set; } = null!;
 
-    public List<Comment> Comments { get; set; }
-    public List<Models.File> Files { get; set; }
-    public List<History> History { get; set; }
+    public List<BugComment> Comments { get; set; } = null!;
+
+    public List<BugFile> Files { get; set; } = null!;
+
+    public List<BugHistory> History { get; set; } = null!;
 }

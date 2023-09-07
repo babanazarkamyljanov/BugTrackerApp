@@ -1,6 +1,6 @@
 ﻿namespace BugTracker.Models;
 
-public class Comment
+public class BugComment
 {
     [Key]
     public int Id { get; set; }

@@ -9,8 +9,8 @@ public interface IBugRepository
     Task<CreateBugViewModel> UpdateGet(int id);
     Task<string> UpdatePost(int id, CreateBugViewModel model);
     Task<string> Delete(int id);
-    Task<string> UploadFile(Models.File model, int id);
-    Task<string> AddComment(Comment comment, int id);
+    Task<string> UploadFile(Models.BugFile model, int id);
+    Task<string> AddComment(BugComment comment, int id);
     Task<CreateBugViewModel> CreateBugVM();
     Task<BugDetailsViewModel> GetBugDetails(int id);
 }

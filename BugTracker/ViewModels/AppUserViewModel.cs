@@ -2,7 +2,7 @@
 
 public class AppUserViewModel
 {
-    public string UserId { get; set; }
-    public string UserEmail { get; set; }
+    public string UserId { get; set; } = string.Empty;
+    public string UserEmail { get; set; } = string.Empty;
     public bool IsSelected { get; set; }
 }

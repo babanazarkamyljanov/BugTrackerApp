@@ -2,13 +2,9 @@
 
 public class CreateBugViewModel
 {
-    public Bug Bug { get; set; }
-    public List<User> AssigneeList { get; set; }
-    public List<Project> Projects { get; set; }
+    public Bug Bug { get; set; } = null!;
 
-    public CreateBugViewModel()
-    {
-        AssigneeList = new List<User>();
-        Projects = new List<Project>();
-    }
+    public List<User> AssigneeList { get; set; } = null!;
+
+    public List<Project> Projects { get; set; } = null!;
 }

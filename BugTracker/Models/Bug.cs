@@ -24,23 +24,23 @@ public class Bug
 
     [ForeignKey("Project")]
     public Guid ProjectId { get; set; }
-    public Project Project { get; set; }
+    public Project Project { get; set; } = null!;
 
     [ForeignKey("Organization")]
     public Guid OrganizationId { get; set; }
     public Organization Organization { get; set; } = null!;
 
     [ForeignKey("CreatedBy")]
-    public string CreatedById { get; set; }
-    public User CreatedBy { get; set; }
+    public string CreatedById { get; set; } = string.Empty;
+    public User CreatedBy { get; set; } = null!;
 
     [ForeignKey("AssignedUser")]
-    public string AssignedUserId { get; set; }
-    public User AssignedUser { get; set; }
+    public string AssignedUserId { get; set; } = string.Empty;
+    public User AssignedUser { get; set; } = null!;
 
-    public List<History> History { get; set; } = null!;
+    public ICollection<BugHistory> History { get; set; } = null!;
 
-    public List<Comment> Comments { get; set; } = null!;
+    public ICollection<BugComment> Comments { get; set; } = null!;
 
-    public List<File> Files { get; set; } = null!;
+    public ICollection<BugFile> Files { get; set; } = null!;
 }

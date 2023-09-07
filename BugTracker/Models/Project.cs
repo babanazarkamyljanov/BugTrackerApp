@@ -4,7 +4,7 @@
 public class Project
 {
     [Key]
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
     [Display(Name = "Title")]
@@ -27,25 +27,19 @@ public class Project
     public string Status { get; set; } = string.Empty;
 
     [Display(Name = "Created date")]
-    public DateTime CreatedDate { get; set; }
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
 
     [ForeignKey("Organization")]
     public Guid OrganizationId { get; set; }
     public Organization Organization { get; set; } = null!;
 
     [ForeignKey("Manager")]
-    public string ManagerId { get; set; }
-    public User Manager { get; set; }
+    public string ManagerId { get; set; } = string.Empty;
+    public User Manager { get; set; } = null!;
 
     [ForeignKey("CreatedBy")]
-    public string CreatedById { get; set; }
-    public User CreatedBy { get; set; }
+    public string CreatedById { get; set; } = string.Empty;
+    public User CreatedBy { get; set; } = null!;
 
-    public ICollection<Bug> Bugs { get; set; }
-
-    public Project()
-    {
-        Id = new Guid();
-        CreatedDate = DateTime.Now;
-    }
+    public ICollection<Bug> Bugs { get; set; } = null!;
 }

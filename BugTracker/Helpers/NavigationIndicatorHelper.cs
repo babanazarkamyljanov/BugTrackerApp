@@ -7,13 +7,14 @@ public static class NavigationIndicatorHelper
         try
         {
             string result = "active";
-            string controllerName = urlHelper.ActionContext.RouteData.Values["controller"].ToString();
-            string methodName = urlHelper.ActionContext.RouteData.Values["action"].ToString();
+            var controllerName = urlHelper.ActionContext.RouteData.Values["controller"].ToString();
+            var methodName = urlHelper.ActionContext.RouteData.Values["action"].ToString();
+
             if (string.IsNullOrEmpty(controllerName))
                 return null;
-            if(controllerName.Equals(controller, StringComparison.OrdinalIgnoreCase))
+            if (controllerName.Equals(controller, StringComparison.OrdinalIgnoreCase))
             {
-                if(methodName.Equals(action, StringComparison.OrdinalIgnoreCase))
+                if (methodName.Equals(action, StringComparison.OrdinalIgnoreCase))
                 {
                     return result;
                 }

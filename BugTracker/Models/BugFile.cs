@@ -1,6 +1,6 @@
 ﻿namespace BugTracker.Models;
 
-public class File
+public class BugFile
 {
     [Key]
     public int Id { get; set; }

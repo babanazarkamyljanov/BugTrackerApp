@@ -46,6 +46,10 @@ public class OrganizationController : Controller
         var model = await context.Organizations
             .SingleOrDefaultAsync(o => o.Id == currentUser.OrganizationId);
 
+        if (model == null)
+        {
+            throw new ArgumentException("organization wans't found", nameof(currentUser.OrganizationId));
+        }
         // find all organization users
         var orgUsers = await userManager.Users
             .Where(u => u.OrganizationId == model.Id && u != currentUser)
@@ -68,7 +72,7 @@ public class OrganizationController : Controller
         var organizationVM = new OrganizationViewModel
         {
             Organization = model,
-            OrganizationUsers = orgUsers
+            Users = orgUsers
         };
 
         return View(organizationVM);

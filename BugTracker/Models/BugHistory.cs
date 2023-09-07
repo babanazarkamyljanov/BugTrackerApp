@@ -1,6 +1,6 @@
 ﻿namespace BugTracker.Models;
 
-public class History
+public class BugHistory
 {
     [Key]
     public int Id { get; set; }

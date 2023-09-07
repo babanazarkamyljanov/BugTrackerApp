@@ -59,7 +59,7 @@ public class BugsController : Controller
     {
         if (ModelState.IsValid)
         {
-            var result = await bugRepository.UploadFile(model.BugFile, id);
+            var result = await bugRepository.UploadFile(model.File, id);
             if (result == "success")
                 return RedirectToAction("Details", new { @id = id });
             else
@@ -72,7 +72,7 @@ public class BugsController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize]
-    public async Task<IActionResult> AddComment(Comment comment, int id)
+    public async Task<IActionResult> AddComment(BugComment comment, int id)
     {
         if (ModelState.IsValid)
         {

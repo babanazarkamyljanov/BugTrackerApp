@@ -43,7 +43,7 @@
                     <div class="col-lg-3 col-6">
                         <div class="small-box bg-warning">
                             <div class="inner">
-                                <h3>@Model.OrganizationUsers.Count</h3>
+                                <h3>@Model.Users.Count</h3>
                                 <p>Users</p>
                             </div>
                             <div class="icon">
@@ -66,7 +66,7 @@
             </div>
             <div class="card-body pb-0">
                 <div class="row">
-                    @foreach (var user in Model.OrganizationUsers)
+                    @foreach (var user in Model.Users)
                     {
                         <div class="col-12 col-sm-6 col-md-4 d-flex align-items-stretch flex-column">
                             <div class="card bg-light d-flex flex-fill">

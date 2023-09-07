@@ -119,8 +119,8 @@
                     enctype="multipart/form-data">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="form-group">
-                        <input asp-for="@Model.BugFile.FileHolder" accept="file/*" />
-                        <span asp-validation-for="@Model.BugFile.FileHolder" class="text-danger"></span>
+                        <input asp-for="@Model.File.FileHolder" accept="file/*" />
+                        <span asp-validation-for="@Model.File.FileHolder" class="text-danger"></span>
                     </div>
                     <div class="form-group">
                         <input type="submit" value="Upload" class="btn btn-info btn-md" />
