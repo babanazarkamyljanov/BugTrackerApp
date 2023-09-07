@@ -1,43 +1,47 @@
 ﻿namespace BugTracker.Models;
 
-[Index(nameof(ProjectKey), IsUnique = true)]
+[Index(nameof(Key), IsUnique = true)]
 public class Project
 {
     [Key]
     public Guid Id { get; set; }
 
     [Required]
-    [Display(Name ="Title")]
-    public string Title { get; set; }
+    [Display(Name = "Title")]
+    public string Title { get; set; } = string.Empty;
 
     [Required]
     [Display(Name = "Project Key")]
-    public string ProjectKey { get; set; }
+    public string Key { get; set; } = string.Empty;
 
     [Required]
-    [Display(Name ="Description")]
-    public string Description { get; set; }
+    [Display(Name = "Description")]
+    public string Description { get; set; } = string.Empty;
 
     [Required]
-    [Display(Name ="Priority")]
-    public string Priority { get; set; }
+    [Display(Name = "Priority")]
+    public string Priority { get; set; } = string.Empty;
 
     [Required]
     [Display(Name = "Status")]
-    public string Status { get; set; }
+    public string Status { get; set; } = string.Empty;
 
-    [Display(Name ="Submitted date")]
+    [Display(Name = "Created date")]
     public DateTime CreatedDate { get; set; }
 
-    [ForeignKey("ProjectManager")]
+    [ForeignKey("Organization")]
+    public Guid OrganizationId { get; set; }
+    public Organization Organization { get; set; } = null!;
+
+    [ForeignKey("Manager")]
     public string ManagerId { get; set; }
-    public ApplicationUser ProjectManager { get; set; }
+    public User Manager { get; set; }
 
     [ForeignKey("CreatedBy")]
     public string CreatedById { get; set; }
-    public ApplicationUser CreatedBy { get; set; }
+    public User CreatedBy { get; set; }
 
-    public ICollection<Bug> ProjectBugs { get; set; }
+    public ICollection<Bug> Bugs { get; set; }
 
     public Project()
     {

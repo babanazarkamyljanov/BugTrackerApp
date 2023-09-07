@@ -57,7 +57,7 @@ public class BugsController : Controller
     [Authorize]
     public async Task<IActionResult> UploadFile(BugDetailsViewModel model, int id)
     {
-        if(ModelState.IsValid)
+        if (ModelState.IsValid)
         {
             var result = await bugRepository.UploadFile(model.BugFile, id);
             if (result == "success")
@@ -67,7 +67,7 @@ public class BugsController : Controller
         }
         return RedirectToAction("Details", new { @id = id });
     }
-    
+
     // make a comment to the bug
     [HttpPost]
     [ValidateAntiForgeryToken]
@@ -151,7 +151,7 @@ public class BugsController : Controller
 
         if (ModelState.IsValid)
         {
-            if (id != model.Bug.BugId)
+            if (id != model.Bug.Id)
             {
                 return NotFound();
             }

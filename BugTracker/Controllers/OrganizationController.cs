@@ -6,18 +6,18 @@ namespace BugTracker.Controllers;
 public class OrganizationController : Controller
 {
     private readonly IHttpContextAccessor httpContextAccessor;
-    private readonly UserManager<ApplicationUser> userManager;
-    private readonly IUserStore<ApplicationUser> userStore;
-    private readonly IUserEmailStore<ApplicationUser> emailStore;
+    private readonly UserManager<User> userManager;
+    private readonly IUserStore<User> userStore;
+    private readonly IUserEmailStore<User> emailStore;
     private readonly ILogger<RegisterViewModel> logger;
     private readonly ApplicationDbContext context;
     private readonly IAuthorizationService authorizationService;
 
     public OrganizationController(
-        ApplicationDbContext context, 
-        IHttpContextAccessor httpContextAccessor, 
-        UserManager<ApplicationUser> userManager,
-        IUserStore<ApplicationUser> userStore,
+        ApplicationDbContext context,
+        IHttpContextAccessor httpContextAccessor,
+        UserManager<User> userManager,
+        IUserStore<User> userStore,
         ILogger<RegisterViewModel> logger,
         IAuthorizationService authorizationService)
     {
@@ -44,11 +44,11 @@ public class OrganizationController : Controller
 
         // find organization where current user is in this organization
         var model = await context.Organizations
-            .SingleOrDefaultAsync(o => o.OrganizationId == currentUser.OrganizationId);
+            .SingleOrDefaultAsync(o => o.Id == currentUser.OrganizationId);
 
         // find all organization users
         var orgUsers = await userManager.Users
-            .Where(u => u.OrganizationId == model.OrganizationId && u != currentUser)
+            .Where(u => u.OrganizationId == model.Id && u != currentUser)
             .ToListAsync();
 
         // fill user roles property
@@ -77,7 +77,7 @@ public class OrganizationController : Controller
     // POST
     // Change the name of organization
     [HttpPost]
-    public async Task<ActionResult> ChangeName(Guid id , string newName)
+    public async Task<ActionResult> ChangeName(Guid id, string newName)
     {
         var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.OrganizationManageOperations.Edit);
         if (!isAuthorized.Succeeded)
@@ -91,15 +91,15 @@ public class OrganizationController : Controller
         }
 
         var model = await context.Organizations.FindAsync(id);
-        if(model == null)
+        if (model == null)
         {
             return Json("Organization not found");
         }
 
         try
         {
-            
-            model.OrganizationName = newName;
+
+            model.Name = newName;
             context.Update(model);
             await context.SaveChangesAsync();
             return Json("change name succes");
@@ -144,7 +144,7 @@ public class OrganizationController : Controller
 
         if (ModelState.IsValid)
         {
-            var user = new ApplicationUser
+            var user = new User
             {
                 FirstName = model.FirstName,
                 LastName = model.LastName,
@@ -175,13 +175,13 @@ public class OrganizationController : Controller
         return View(model);
     }
 
-    private IUserEmailStore<ApplicationUser> GetEmailStore()
+    private IUserEmailStore<User> GetEmailStore()
     {
         if (!userManager.SupportsUserEmail)
         {
             throw new NotSupportedException("The default UI requires a user store with email support.");
         }
-        return (IUserEmailStore<ApplicationUser>)userStore;
+        return (IUserEmailStore<User>)userStore;
     }
 }
 

@@ -1,6 +1,6 @@
 ﻿@model CreateBugViewModel
 @inject RoleManager<IdentityRole> RoleManager
-@inject UserManager<ApplicationUser> UserManager
+@inject UserManager<User> UserManager
 
 <!DOCTYPE html>
 <html>
@@ -29,8 +29,8 @@
     <section class="content">
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="@Model.Bug.BugId" />
-            <input type="hidden" asp-for="@Model.Bug.SubmitterId" />
+            <input type="hidden" asp-for="@Model.Bug.Id" />
+            <input type="hidden" asp-for="@Model.Bug.CreatedById" />
             <input type="hidden" asp-for="@Model.Bug.CreatedDate" />
             <div class="row">
                 <!-- General details -->

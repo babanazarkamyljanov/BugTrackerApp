@@ -7,12 +7,12 @@ public class HomeController : Controller
 {
     private readonly ILogger<HomeController> _logger;
     private readonly ApplicationDbContext context;
-    private readonly SignInManager<ApplicationUser> signInManager;
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly SignInManager<User> signInManager;
+    private readonly UserManager<User> userManager;
     public HomeController(ILogger<HomeController> logger, 
         ApplicationDbContext context,
-        SignInManager<ApplicationUser> signInManager,
-        UserManager<ApplicationUser> userManager)
+        SignInManager<User> signInManager,
+        UserManager<User> userManager)
     {
         _logger = logger;
         this.context = context;

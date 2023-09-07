@@ -1,6 +1,6 @@
 ﻿@model CreateProjectViewModel
 @inject RoleManager<IdentityRole> RoleManager
-@inject UserManager<ApplicationUser> UserManager
+@inject UserManager<User> UserManager
 
 <!DOCTYPE html>
 <html>
@@ -30,7 +30,7 @@
         <form asp-action="Edit">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
             <input type="hidden" asp-for="@Model.Project.Id" />
-            <input type="hidden" asp-for="@Model.Project.ProjectKey" />
+            <input type="hidden" asp-for="@Model.Project.Key" />
             <input type="hidden" asp-for="@Model.Project.CreatedById" />
             <div class="row">
                 <!-- General details card -->

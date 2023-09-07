@@ -1,23 +1,23 @@
 ﻿using Microsoft.AspNetCore.WebUtilities;
-using System.Text.Encodings.Web;
 using System.Text;
+using System.Text.Encodings.Web;
 
 namespace BugTracker.Controllers;
 
 public class AccountController : Controller
 {
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IUserStore<ApplicationUser> _userStore;
-    private readonly IUserEmailStore<ApplicationUser> _emailStore;
+    private readonly SignInManager<User> _signInManager;
+    private readonly UserManager<User> _userManager;
+    private readonly IUserStore<User> _userStore;
+    private readonly IUserEmailStore<User> _emailStore;
     private readonly ILogger<RegisterViewModel> _logger;
     private readonly BugTracker.Services.IEmailSender _emailSender;
     private readonly ApplicationDbContext _context;
 
     public AccountController(
-        UserManager<ApplicationUser> userManager,
-        IUserStore<ApplicationUser> userStore,
-        SignInManager<ApplicationUser> signInManager,
+        UserManager<User> userManager,
+        IUserStore<User> userStore,
+        SignInManager<User> signInManager,
         ILogger<RegisterViewModel> logger,
         BugTracker.Services.IEmailSender emailSender,
         ApplicationDbContext context)
@@ -108,14 +108,13 @@ public class AccountController : Controller
                 // create a new organization for admin user
                 var organization = new Organization()
                 {
-                    OrganizationName = model.FirstName + model.LastName,
-                    CreatedById = user.Id,
+                    Name = model.FirstName + model.LastName,
                 };
                 _context.Organizations.Add(organization);
                 await _context.SaveChangesAsync();
 
                 // update user organizationId Column
-                user.OrganizationId = organization.OrganizationId;
+                user.OrganizationId = organization.Id;
                 await _userManager.UpdateAsync(user);
 
                 // add user to admin role
@@ -171,26 +170,26 @@ public class AccountController : Controller
         return View();
     }
 
-    private ApplicationUser CreateUser()
+    private User CreateUser()
     {
         try
         {
-            return Activator.CreateInstance<ApplicationUser>();
+            return Activator.CreateInstance<User>();
         }
         catch
         {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
+            throw new InvalidOperationException($"Can't create an instance of '{nameof(Models.User)}'. " +
+                $"Ensure that '{nameof(Models.User)}' is not an abstract class and has a parameterless constructor, or alternatively " +
                 $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
         }
     }
 
-    private IUserEmailStore<ApplicationUser> GetEmailStore()
+    private IUserEmailStore<User> GetEmailStore()
     {
         if (!_userManager.SupportsUserEmail)
         {
             throw new NotSupportedException("The default UI requires a user store with email support.");
         }
-        return (IUserEmailStore<ApplicationUser>)_userStore;
+        return (IUserEmailStore<User>)_userStore;
     }
 }

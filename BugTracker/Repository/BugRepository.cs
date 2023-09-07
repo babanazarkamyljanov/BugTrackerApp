@@ -6,7 +6,7 @@ public class BugRepository : IBugRepository
     private readonly IHubContext<CommonHub> bugDetailsHub;
     private IHttpContextAccessor httpContextAccessor;
     private readonly IWebHostEnvironment hostEnvironment;
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly UserManager<User> userManager;
 
     public IHttpContextAccessor HttpContextAccessorProp
     {
@@ -23,7 +23,7 @@ public class BugRepository : IBugRepository
         IHubContext<CommonHub> bugDetailsHub,
         IHttpContextAccessor httpContextAccessor,
         IWebHostEnvironment hostEnvironment,
-        UserManager<ApplicationUser> userManager)
+        UserManager<User> userManager)
     {
         this.context = context;
         this.bugDetailsHub = bugDetailsHub;
@@ -37,31 +37,31 @@ public class BugRepository : IBugRepository
     {
         return context.Bugs.Include(b => b.Project).Include(b => b.AssignedUser);
     }
-    
+
     // get bug by id
     public async Task<Bug> Get(int id)
     {
-        return await context.Bugs.FirstOrDefaultAsync(b => b.BugId == id);
+        return await context.Bugs.FirstOrDefaultAsync(b => b.Id == id);
     }
 
     // attach file to the bug
-    public async Task<string> UploadFile(BugFile model, int id)
+    public async Task<string> UploadFile(Models.File model, int id)
     {
         try
         {
             //save to wwwroot / File folder
             string UploadsFolder = Path.Combine(hostEnvironment.WebRootPath, "files");
             //unique file name
-            string fileName = Path.GetFileNameWithoutExtension(model.File.FileName) +
+            string fileName = Path.GetFileNameWithoutExtension(model.FileHolder.FileName) +
                                 DateTime.Now.ToString("yymmssfff") +
-                                Path.GetExtension(model.File.FileName);
+                                Path.GetExtension(model.FileHolder.FileName);
 
             //storing fileName to database
-            model.FileName = fileName;
+            model.Name = fileName;
 
             //copying file to wwwroot/ Files location
             string filePath = Path.Combine(UploadsFolder, fileName);
-            await model.File.CopyToAsync(new FileStream(filePath, FileMode.Create));
+            await model.FileHolder.CopyToAsync(new FileStream(filePath, FileMode.Create));
 
             // sql server does inserting identity key value, so we assign id to 0
             model.BugId = id;
@@ -117,7 +117,7 @@ public class BugRepository : IBugRepository
             model.Bug.Status = "Open";
             model.Bug.CreatedDate = DateTime.Now;
             string userId = HttpContextAccessorProp.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            model.Bug.SubmitterId = userId;
+            model.Bug.CreatedById = userId;
 
             context.Bugs.Add(model.Bug);
             await context.SaveChangesAsync();
@@ -144,12 +144,12 @@ public class BugRepository : IBugRepository
         model.Bug = bug;
         return model;
     }
-    
+
     // Edit bug
     // POST
     public async Task<string> UpdatePost(int id, CreateBugViewModel model)
     {
-        var bug = await context.Bugs.AsNoTracking().FirstOrDefaultAsync(b => b.BugId == id);
+        var bug = await context.Bugs.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
         try
         {
             // Update edited Bug in the database
@@ -159,10 +159,10 @@ public class BugRepository : IBugRepository
 
             //Add changes to BugHistories table
             var currentUser = await GetCurrentUser();
-            var bugHistory = new BugHistory
+            var bugHistory = new History
             {
                 BugId = id,
-                ChangedById = currentUser.Id
+                UpdatedById = currentUser.Id
             };
 
             if (bug.Title != model.Bug.Title)
@@ -224,13 +224,13 @@ public class BugRepository : IBugRepository
                     await context.SaveChangesAsync();
                 }
             }
-            
+
             await bugDetailsHub.Clients.All.SendAsync("GetBugDetails");
             return "success";
         }
         catch (DbUpdateConcurrencyException e)
         {
-            if (!context.Bugs.Any(b => b.BugId == id))
+            if (!context.Bugs.Any(b => b.Id == id))
             {
                 return "NotFound";
             }
@@ -246,7 +246,7 @@ public class BugRepository : IBugRepository
     public async Task<string> Delete(int id)
     {
         var bug = await Get(id);
-        if(bug == null)
+        if (bug == null)
         {
             return null;
         }
@@ -268,11 +268,11 @@ public class BugRepository : IBugRepository
     {
         var model = new CreateBugViewModel();
         string userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-        ApplicationUser currentUser = await userManager.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        User currentUser = await userManager.Users.FirstOrDefaultAsync(u => u.Id == userId);
 
         // get users within same organization
         var organizationUsers = userManager.Users.Where(u => u.OrganizationId == currentUser.OrganizationId);
-        if(organizationUsers.Any())
+        if (organizationUsers.Any())
         {
             model.AssigneeList = organizationUsers.ToList();
         }
@@ -289,15 +289,15 @@ public class BugRepository : IBugRepository
     {
         var bug = await context.Bugs
             .Include(i => i.Project)
-            .Include(i => i.BugHistory)
-            .ThenInclude(h => h.ChangedBy)
+            .Include(i => i.History)
+            .ThenInclude(h => h.UpdatedBy)
             .Include(i => i.AssignedUser)
-            .Include(i => i.Submitter)
+            .Include(i => i.CreatedBy)
             .Include(i => i.Files)
             .Include(i => i.Comments)
             .ThenInclude(c => c.Author)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(b => b.BugId == id);
+            .FirstOrDefaultAsync(b => b.Id == id);
         if (bug == null)
         {
             return null;
@@ -308,13 +308,13 @@ public class BugRepository : IBugRepository
             Bug = bug,
             Comments = bug.Comments,
             Files = bug.Files,
-            History = bug.BugHistory
+            History = bug.History
         };
         return vm;
     }
 
     // get current user
-    private async Task<ApplicationUser> GetCurrentUser()
+    private async Task<User> GetCurrentUser()
     {
         var id = httpContextAccessor
                                 .HttpContext

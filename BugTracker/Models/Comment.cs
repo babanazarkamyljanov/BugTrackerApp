@@ -2,20 +2,19 @@
 
 public class Comment
 {
+    [Key]
     public int Id { get; set; }
 
     [Required]
-    public string Message { get; set; }
+    public string Message { get; set; } = string.Empty;
+
     [ForeignKey("Author")]
-    public string AuthorId { get; set; }
-    public ApplicationUser Author { get; set; }
+    public string AuthorId { get; set; } = string.Empty;
+    public User Author { get; set; } = null!;
+
     [ForeignKey("Bug")]
     public int BugId { get; set; }
-    public Bug Bug { get; set; }
-    public DateTime CreatedDate { get; set; }
+    public Bug Bug { get; set; } = null!;
 
-    public Comment()
-    {
-        CreatedDate = DateTime.Now;
-    }
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
 }

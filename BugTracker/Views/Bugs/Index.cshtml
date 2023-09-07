@@ -97,12 +97,12 @@
                         {
                             <tr>
                                 <td>
-                                    <a asp-controller="Bugs" asp-action="Details" asp-route-id="@item.BugId">@item.Title</a>
+                                    <a asp-controller="Bugs" asp-action="Details" asp-route-id="@item.Id">@item.Title</a>
                                     <br />
                                     <small>Created @item.CreatedDate</small>
                                 </td>
                                 <td>
-                                    <a asp-controller="Projects" asp-action="Details" asp-route-id="@item.Project.Id">@item.Project.ProjectKey</a>
+                                    <a asp-controller="Projects" asp-action="Details" asp-route-id="@item.Project.Id">@item.Project.Key</a>
                                 </td>
                                 <td>
                                     <ul class="list-inline">
@@ -141,17 +141,17 @@
                                     <span class="badge badge-success">@item.Status</span>
                                 </td>
                                 <td class="project-actions text-right">
-                                    <a title="View" class="btn btn-primary btn-sm" asp-controller="Bugs" asp-action="Details" asp-route-id="@item.BugId">
+                                    <a title="View" class="btn btn-primary btn-sm" asp-controller="Bugs" asp-action="Details" asp-route-id="@item.Id">
                                         <i class="fa-solid fa-eye">
                                         </i>
                                         
                                     </a>
-                                    <a title="edit" class="btn btn-info btn-sm" asp-controller="Bugs" asp-action="Edit" asp-route-id="@item.BugId">
+                                    <a title="edit" class="btn btn-info btn-sm" asp-controller="Bugs" asp-action="Edit" asp-route-id="@item.Id">
                                         <i class="fas fa-pencil-alt">
                                         </i>
                                         
                                     </a>
-                                    <a title="delete" href="#" class="btn btn-danger btn-sm" onclick="showConfirmDelete('@item.BugId')">
+                                    <a title="delete" href="#" class="btn btn-danger btn-sm" onclick="showConfirmDelete('@item.Id')">
                                         <i class="fas fa-trash">
                                         </i>
                                     </a>

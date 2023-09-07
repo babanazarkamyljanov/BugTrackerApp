@@ -8,8 +8,8 @@ namespace BugTracker.Controllers;
 
 public class ManageController : Controller
 {
-    private readonly UserManager<ApplicationUser> userManager;
-    private readonly SignInManager<ApplicationUser> signInManager;
+    private readonly UserManager<User> userManager;
+    private readonly SignInManager<User> signInManager;
     private readonly BugTracker.Services.IEmailSender emailSender;
     private readonly ISmsSender smsSender;
     private readonly ILogger logger;
@@ -18,8 +18,8 @@ public class ManageController : Controller
     private readonly IAuthorizationService authorizationService;
 
     public ManageController(
-        UserManager<ApplicationUser> userManager,
-        SignInManager<ApplicationUser> signInManager,
+        UserManager<User> userManager,
+        SignInManager<User> signInManager,
         BugTracker.Services.IEmailSender emailSender,
         ISmsSender smsSender,
         ILoggerFactory loggerFactory,
@@ -391,7 +391,7 @@ public class ManageController : Controller
         ChangeAvatarSuccess,
         Error
     }
-    private Task<ApplicationUser> GetCurrentUserAsync()
+    private Task<User> GetCurrentUserAsync()
     {
         return userManager.GetUserAsync(HttpContext.User);
     }

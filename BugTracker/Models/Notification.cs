@@ -2,17 +2,16 @@
 
 public class Notification
 {
-    public int ID { get; set; }
-    public bool IsRead { get; set; }
+    [Key]
+    public int Id { get; set; }
+
+    public bool IsRead { get; set; } = false;
 
     [ForeignKey("AssignedUser")]
-    public string AssignedUserID { get; set; }
-    public ApplicationUser AssignedUser { get; set; }
+    public string AssignedUserID { get; set; } = string.Empty;
+    public User AssignedUser { get; set; } = null!;
 
-    public string Controller { get; set; }
-    public string DetailsID { get; set; }
-    public Notification()
-    {
-        IsRead = false;
-    }
+    public string Controller { get; set; } = string.Empty;
+
+    public string DetailsID { get; set; } = string.Empty;
 }

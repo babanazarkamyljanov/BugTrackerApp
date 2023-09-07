@@ -6,13 +6,13 @@ namespace BugTracker.Controllers;
 public class RolesController : Controller
 {
     private readonly RoleManager<IdentityRole> roleManager;
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly UserManager<User> userManager;
     private readonly IHttpContextAccessor httpContextAccessor;
     private readonly IAuthorizationService authorizationService;
 
     public RolesController(
         RoleManager<IdentityRole> roleManager,
-        UserManager<ApplicationUser> userManager,
+        UserManager<User> userManager,
         IHttpContextAccessor httpContextAccessor,
         IAuthorizationService authorizationService
         )
@@ -136,7 +136,7 @@ public class RolesController : Controller
     }
 
     // get current user
-    private async Task<ApplicationUser> GetCurrentUser()
+    private async Task<User> GetCurrentUser()
     {
         var id = httpContextAccessor
                                 .HttpContext

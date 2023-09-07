@@ -6,9 +6,9 @@ public class BugDetailsViewModel
 
     public Comment Comment { get; set; }
 
-    public BugFile BugFile { get; set; }
+    public Models.File BugFile { get; set; }
 
     public List<Comment> Comments { get; set; }
-    public List<BugFile> Files { get; set; }
-    public List<BugHistory> History { get; set; }
+    public List<Models.File> Files { get; set; }
+    public List<History> History { get; set; }
 }

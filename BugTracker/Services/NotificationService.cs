@@ -3,14 +3,14 @@
 public class NotificationService
 {
     private readonly ApplicationDbContext context;
-    private readonly SignInManager<ApplicationUser> signInManager;
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly SignInManager<User> signInManager;
+    private readonly UserManager<User> userManager;
     private IHttpContextAccessor httpContextAccessor;
     private readonly IHubContext<CommonHub> hubContext;
 
     public NotificationService(ApplicationDbContext context,
-        SignInManager<ApplicationUser> signInManager,
-        UserManager<ApplicationUser> userManager,
+        SignInManager<User> signInManager,
+        UserManager<User> userManager,
         IHttpContextAccessor httpContextAccessor,
         IHubContext<CommonHub> hubContext)
     {

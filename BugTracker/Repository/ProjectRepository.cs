@@ -3,12 +3,12 @@
 public class ProjectRepository : IProjectRepository
 {
     private readonly ApplicationDbContext context;
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly UserManager<User> userManager;
     private readonly IHubContext<CommonHub> projectIndexHub;
     private readonly IHttpContextAccessor httpContextAccessor;
 
     // constructor
-    public ProjectRepository(ApplicationDbContext context, IHubContext<CommonHub> projectIndexHub, UserManager<ApplicationUser> userManager, IHttpContextAccessor httpContextAccessor)
+    public ProjectRepository(ApplicationDbContext context, IHubContext<CommonHub> projectIndexHub, UserManager<User> userManager, IHttpContextAccessor httpContextAccessor)
     {
         this.context = context;
         this.projectIndexHub = projectIndexHub;
@@ -23,7 +23,7 @@ public class ProjectRepository : IProjectRepository
 
         List<Project> projects = await context
                                             .Projects
-                                            .Include(i => i.ProjectManager)
+                                            .Include(i => i.Manager)
                                             .AsNoTracking()
                                             .ToListAsync();
 
@@ -34,8 +34,8 @@ public class ProjectRepository : IProjectRepository
     public async Task<Project> GetProject(Guid id)
     {
         var project = await context.Projects
-            .Include(i => i.ProjectBugs)
-            .Include(i => i.ProjectManager)
+            .Include(i => i.Bugs)
+            .Include(i => i.Manager)
             .AsSplitQuery()
             .FirstOrDefaultAsync(p => p.Id == id);
         return project;
@@ -149,10 +149,10 @@ public class ProjectRepository : IProjectRepository
     private async Task<CreateProjectViewModel> CreateVM()
     {
         var model = new CreateProjectViewModel();
-        
+
         // get current user
         string userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-        ApplicationUser currentUser = userManager.Users.FirstOrDefault(u => u.Id == userId);
+        User currentUser = userManager.Users.FirstOrDefault(u => u.Id == userId);
 
         // find all users within the same organization
         var organizationUsers = await userManager
@@ -163,7 +163,7 @@ public class ProjectRepository : IProjectRepository
         // add users with project manager role into managers list
         foreach (var user in organizationUsers)
         {
-            if(await userManager.IsInRoleAsync(user, "Project Manager"))
+            if (await userManager.IsInRoleAsync(user, "Project Manager"))
             {
                 model.Managers.Add(user);
             }

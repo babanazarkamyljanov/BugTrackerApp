@@ -3,10 +3,10 @@
 public class OrganizationViewModel
 {
     public Organization Organization { get; set; }
-    public ICollection<ApplicationUser> OrganizationUsers { get; set; }
+    public ICollection<User> OrganizationUsers { get; set; }
 
     public OrganizationViewModel()
     {
-        OrganizationUsers = new List<ApplicationUser>();
+        OrganizationUsers = new List<User>();
     }
 }
