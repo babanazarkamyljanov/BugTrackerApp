@@ -48,10 +48,12 @@ public class UsersService : IUsersService
             throw new ArgumentException("Claim is null", nameof(claim));
         }
 
-        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == claim.Value);
+        var user = await _userManager.Users
+            .Where(u => u.Id == claim.Value)
+            .FirstOrDefaultAsync();
         if (user == null)
         {
-            throw new ArgumentException($"Current user wasn't found. {nameof(UsersService)}.{nameof(GetCurrentUserAsync)}");
+            throw new ArgumentException("Current logged user wasn't found in the db");
         }
 
         return user;
@@ -59,7 +61,7 @@ public class UsersService : IUsersService
 
     public async Task<User> GetUserByIdAsync(string id)
     {
-        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == id);
+        var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id.ToString() == id);
 
         if (user == null)
         {
@@ -80,5 +82,18 @@ public class UsersService : IUsersService
             throw new ArgumentException($"users weren't found {nameof(UsersService)}.{nameof(GetOrganizationUsersAsync)}");
         }
         return users;
+    }
+
+    public async Task<IdentityResult> UpdateAsync(User user)
+    {
+        var result = await _userManager.UpdateAsync(user);
+        if (result.Succeeded)
+        {
+            return result;
+        }
+        else
+        {
+            throw new InvalidOperationException($"Update user failed. {nameof(UsersService)}.{nameof(UpdateAsync)}");
+        }
     }
 }

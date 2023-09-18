@@ -111,7 +111,7 @@ public class BugRepository : IBugRepository
 
             model.Bug.Status = "Open";
             model.Bug.CreatedDate = DateTime.Now;
-            model.Bug.CreatedById = user.Id;
+            model.Bug.CreatedById = user.Id.ToString();
             context.Bugs.Add(model.Bug);
             await context.SaveChangesAsync();
             await bugDetailsHub.Clients.All.SendAsync("GetBugDetails");
@@ -159,7 +159,7 @@ public class BugRepository : IBugRepository
             var bugHistory = new BugHistory
             {
                 BugId = id,
-                UpdatedById = currentUser.Id
+                UpdatedById = currentUser.Id.ToString()
             };
 
             if (bug.Title != model.Bug.Title)

@@ -1,183 +1,143 @@
-﻿@model IEnumerable<Project>
+﻿@model IEnumerable<GetAllProjectDTO>
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Projects</title>
+<style>
+    button.btn.btn-secondary.buttons-csv.buttons-html5.btn-info.csvButton, 
+    button.btn.btn-secondary.buttons-excel.buttons-html5.excelButton {
+        border-top-left-radius: 5px;
+        border-bottom-left-radius: 5px;
+        border-top-right-radius: 5px;
+        border-bottom-right-radius: 5px;
+    }
+    button.btn.btn-secondary.buttons-excel.buttons-html5.excelButton {
+        margin-left: 10px;
+    }
 
-    <style>
-        #deleteConfirmBox {
-            z-index: 9;
-            display: none;
-            width: 400px;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-        }
+    button.btn.btn-secondary.btn-success.addButton {
+        margin-left: 10px;
+        border-radius: 5px;
+        border-radius: 5px;
+    }
+</style>
 
-        button.btn.btn-secondary.buttons-csv.buttons-html5.btn-info.csvButton, 
-        button.btn.btn-secondary.buttons-excel.buttons-html5.excelButton {
-            border-top-left-radius: 5px;
-            border-bottom-left-radius: 5px;
-            border-top-right-radius: 5px;
-            border-bottom-right-radius: 5px;
-        }
-        button.btn.btn-secondary.buttons-excel.buttons-html5.excelButton {
-            margin-left: 10px;
-        }
-
-        button.btn.btn-secondary.btn-success.addButton {
-            margin-left: 10px;
-            border-radius: 5px;
-            border-radius: 5px;
-        }
-    </style>
-</head>
-<body>
-    <!-- Content Header (Page header) -->
-    <section class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1>All Projects</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Projects</a></li>
-                        <li class="breadcrumb-item active">Index</li>
-                    </ol>
-                </div>
+<section class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1>All Projects</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Projects</a></li>
+                    <li class="breadcrumb-item active">Index</li>
+                </ol>
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Main content -->
-    <section class="content">
-        <div class="card">
-            <div class="card-header">
-                <h3 class="card-title">Projects</h3>
+<!-- Main content -->
+<section class="content">
+    <div class="card">
+        <div class="card-header">
+            <h3 class="card-title">Projects</h3>
 
-                <div class="card-tools">
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                </div>
+            <div class="card-tools">
+                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
+                    <i class="fas fa-minus"></i>
+                </button>
             </div>
-            <div class="card-body">
-                <table id="example1" class="table table-striped projects">
-                    <thead>
+        </div>
+        <div class="card-body">
+            <table id="example1" class="table table-striped projects">
+                <thead>
+                    <tr>
+                        <th style="width: 1%">
+                            Key
+                        </th>
+                        <th style="width: 20%">
+                            Title
+                        </th>
+                        <th style="width: 30%">
+                            Project Manager
+                        </th>
+                        <th>
+                            Priority
+                        </th>
+                        <th class="no-sort">
+                            Progress
+                        </th>
+                        <th style="width: 8%" class="text-center">
+                            Status
+                        </th>
+                        <th class="no-sort text-right" style="width: 20%">
+                            Actions
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model)
+                    {
                         <tr>
-                            <th style="width: 1%">
-                                Key
-                            </th>
-                            <th style="width: 20%">
-                                Title
-                            </th>
-                            <th style="width: 30%">
-                                Project Manager
-                            </th>
-                            <th>
-                                Priority
-                            </th>
-                            <th class="no-sort">
-                                Progress
-                            </th>
-                            <th style="width: 8%" class="text-center">
-                                Status
-                            </th>
-                            <th class="no-sort text-right" style="width: 20%">
-                                Actions
-                            </th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var item in Model)
-                        {
-                            <tr>
-                                <td>
-                                    <h6>@item.Key</h6>
-                                </td>
-                                <td>
-                                    <a asp-controller="Projects" asp-action="Details" asp-route-id="@item.Id">@item.Title</a>
-                                    <br />
-                                    <small>Created @item.CreatedDate</small>
-                                </td>
-                                <td>
-                                    <ul class="list-inline">
-                                        <li class="list-inline-item">
-                                            @if (item.Manager.AvatarPhoto is null)
-                                            {
-
-                                                <img src="~/img/default-avatar.png" class="table-avatar" alt="User Image">
-
-                                            }
-                                            else
-                                            {
-                                                string src = "data:image/png;base64," 
-                                                + Convert.ToBase64String(item.Manager.AvatarPhoto, 0, item.Manager.AvatarPhoto.Length);
-                                                <img src="@src" class="table-avatar" alt="User Image">
-                                            }
-                                        </li>
-                                        <li class="list-inline-item">
-                                            <h6>@item.Manager.UserName</h6>
-                                        </li>
-                                    </ul>
-                                </td>
-                                <td>
-                                    <h6>@item.Priority</h6>
-                                </td>
-                                <td class="project_progress">
-                                    <div class="progress progress-sm">
-                                        <div class="progress-bar bg-green" role="progressbar" aria-valuenow="57" aria-valuemin="0" aria-valuemax="100" style="width: 57%">
-                                        </div>
+                            <td>
+                                <h6>@item.Key</h6>
+                            </td>
+                            <td>
+                                <a asp-controller="Projects" asp-action="Details" asp-route-id="@item.Id">@item.Title</a>
+                                <br />
+                                <small>Created @item.CreatedDate</small>
+                            </td>
+                            <td>
+                                <ul class="list-inline">
+                                    <li class="list-inline-item">
+                                        @if (item.Manager.AvatarPhoto is null)
+                                        {
+                                            <img src="~/img/default-avatar.png" class="table-avatar" alt="User Image">
+                                        }
+                                        else
+                                        {
+                                            string src = "data:image/png;base64," 
+                                            + Convert.ToBase64String(item.Manager.AvatarPhoto, 0, item.Manager.AvatarPhoto.Length);
+                                            <img src="@src" class="table-avatar" alt="User Image">
+                                        }
+                                    </li>
+                                    <li class="list-inline-item">
+                                        <h6>@item.Manager.UserName</h6>
+                                    </li>
+                                </ul>
+                            </td>
+                            <td>
+                                <h6>@item.Priority</h6>
+                            </td>
+                            <td class="project_progress">
+                                <div class="progress progress-sm">
+                                    <div class="progress-bar bg-green" role="progressbar" aria-valuenow="57" aria-valuemin="0" aria-valuemax="100" style="width: 57%">
                                     </div>
-                                    <small>
-                                        57% Complete
-                                    </small>
-                                </td>
-                                <td class="project-state">
-                                    <span class="badge badge-success">@item.Status</span>
-                                </td>
-                                <td class="project-actions text-right">
-                                    <a class="btn btn-primary btn-sm" asp-controller="Projects" asp-action="Details" asp-route-id="@item.Id">
-                                        <i class="fa-solid fa-eye">
-                                        </i>
-                                    </a>
-                                    <a class="btn btn-info btn-sm" asp-controller="Projects" asp-action="Edit" asp-route-id="@item.Id">
-                                        <i class="fas fa-pencil-alt">
-                                        </i>
-                                    </a>
-                                    <a href="#" class="btn btn-danger btn-sm" onclick="showConfirmDelete('@item.Id')">
-                                        <i class="fas fa-trash">
-                                        </i>
-                                    </a>
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            </div>
-            <!-- /.card-body -->
+                                </div>
+                                <small>
+                                    57% Complete
+                                </small>
+                            </td>
+                            <td class="project-state">
+                                <span class="badge badge-success">@item.Status</span>
+                            </td>
+                            <td class="project-actions text-right">
+                                <a class="btn btn-primary btn-sm" asp-controller="Projects" asp-action="Details" asp-route-id="@item.Id">
+                                    <i class="fa-solid fa-eye">
+                                    </i>
+                                </a>
+                                <a class="btn btn-info btn-sm" asp-controller="Projects" asp-action="Edit" asp-route-id="@item.Id">
+                                    <i class="fas fa-pencil-alt">
+                                    </i>
+                                </a>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
         </div>
-        <!-- /.card -->
-
-        <!-- delete confirm popup box, initially hidden -->
-        <div class="card card-info" id="deleteConfirmBox">
-            <div class="card-header">
-                <h4>Are you sure want to delete?</h4>
-            </div>
-            <div class="card-body">
-                <button onclick="submitDelete()" class="btn btn-danger btn-lg">Yes</button>
-                <a href="#" class="btn btn-primary btn-lg float-right" onclick="hideDeleteConfirm()">No</a>
-            </div>
-        </div>
-        <input type="hidden" id="projectId" />
-    </section>
-    <!-- /.content -->
-
-    <!-- jQuery -->
-    <script src="~/plugins/jquery/jquery.min.js"></script>
+    </div>
+</section>
+@section Scripts {
     <script>
         $(function () {
             $("#example1").DataTable({
@@ -190,7 +150,7 @@
                     { extend: 'csv', className: 'btn-info csvButton' },
                     { extend: 'excel', className: 'excelButton' },
                     {
-                        text: 'Add new project',
+                        text: 'Add',
                         className: 'btn-success addButton',
                         action: function (e, dt, node, config) {
                             window.location.href = "/Projects/Create"
@@ -198,31 +158,5 @@
                 }]
             }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
         });
-
-        function showConfirmDelete(id) {
-            document.getElementById("projectId").value = id
-            $('#deleteConfirmBox').show()
-        }
-        function hideDeleteConfirm() {
-            $('#deleteConfirmBox').hide()
-        }
-        function submitDelete() {
-            var id = document.getElementById("projectId").value
-            $.ajax({
-                type: 'POST',
-                url: '/Projects/DeleteConfirmed',
-                data: { "id": id },
-                success: function(response) {
-                    hideDeleteConfirm()
-                    // refresh page
-                    window.location.reload();
-                },
-                error: function(response) {
-                    console.log(response)
-                }
-            })
-        }
     </script>
-</body>
-</html>
-
+}

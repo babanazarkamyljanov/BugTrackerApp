@@ -1,4 +1,4 @@
-﻿@model Project
+﻿@model GetProjectDTO
 
 <!DOCTYPE html>
 <html>
@@ -78,7 +78,7 @@
                                             }
                                         </li>
                                         <li class="list-inline-item">
-                                            <b class="d-block text-blue">@Model.Manager.FirstName @Model.Manager.LastName</b>
+                                            <b class="d-block text-blue">@Model.Manager.UserName</b>
                                         </li>
                                     </ul>
                                 </p>
@@ -97,7 +97,7 @@
                                             }
                                         </li>
                                         <li class="list-inline-item">
-                                            <b class="d-block text-blue">@Model.CreatedBy.FirstName @Model.CreatedBy.LastName</b>
+                                            <b class="d-block text-blue">@Model.CreatedBy.UserName</b>
                                         </li>
                                     </ul>
                                 </p>

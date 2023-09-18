@@ -2,7 +2,6 @@
 using BugTracker.ViewModels.ManageAccount;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
-using System.Drawing;
 
 namespace BugTracker.Controllers;
 
@@ -10,8 +9,6 @@ public class ManageController : Controller
 {
     private readonly UserManager<User> userManager;
     private readonly SignInManager<User> signInManager;
-    private readonly BugTracker.Services.IEmailSender emailSender;
-    private readonly ISmsSender smsSender;
     private readonly ILogger logger;
     private readonly ApplicationDbContext context;
     private readonly IWebHostEnvironment hostEnvironment;
@@ -20,8 +17,6 @@ public class ManageController : Controller
     public ManageController(
         UserManager<User> userManager,
         SignInManager<User> signInManager,
-        BugTracker.Services.IEmailSender emailSender,
-        ISmsSender smsSender,
         ILoggerFactory loggerFactory,
         ApplicationDbContext context,
         IWebHostEnvironment hostEnvironment,
@@ -29,8 +24,6 @@ public class ManageController : Controller
     {
         this.userManager = userManager;
         this.signInManager = signInManager;
-        this.emailSender = emailSender;
-        this.smsSender = smsSender;
         this.logger = loggerFactory.CreateLogger<ManageController>();
         this.context = context;
         this.hostEnvironment = hostEnvironment;
@@ -58,10 +51,10 @@ public class ManageController : Controller
             : message == ManageMessageId.AddPhoneSuccess ? "Your phone number was added."
             : message != null ? message
             : "";
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id.ToString() == id);
         var model = new IndexViewModel
         {
-            Id = user.Id,
+            Id = user.Id.ToString(),
             Username = user.UserName,
             PhoneNumber = user.PhoneNumber
         };
@@ -85,15 +78,15 @@ public class ManageController : Controller
             return View(model);
         }
 
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == model.Id);
-        if(user == null)
+        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id.ToString() == model.Id);
+        if (user == null)
         {
             return NotFound();
         }
 
         var code = await userManager.GenerateChangePhoneNumberTokenAsync(user, model.PhoneNumber);
         var result = await userManager.ChangePhoneNumberAsync(user, model.PhoneNumber, code);
-        if(result.Succeeded)
+        if (result.Succeeded)
         {
             return RedirectToAction(nameof(Index), new { id = model.Id, Message = ManageMessageId.AddPhoneSuccess });
         }
@@ -105,15 +98,15 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> ChangeEmail(string id)
     {
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
-        if(user == null)
+        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id.ToString() == id);
+        if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
         }
         var currentUser = await GetCurrentUserAsync();
 
         var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.AccountManageOperations.ChangeEmail);
-        if(!isAuthorized.Succeeded)
+        if (!isAuthorized.Succeeded)
         {
             return LocalRedirect("/Account/AccessDenied");
         }
@@ -132,17 +125,17 @@ public class ManageController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangeEmail(string id, ChangeEmailViewModel model)
     {
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id.ToString() == id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
         }
 
-        if(!ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
             return View(model);
         }
-        if(user.Email == model.NewEmail)
+        if (user.Email == model.NewEmail)
         {
             ModelState.AddModelError(nameof(model.NewEmail), "New email should be different.");
             return View(model);
@@ -175,7 +168,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> ChangePassword(string id)
     {
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id.ToString() == id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
@@ -204,7 +197,7 @@ public class ManageController : Controller
         {
             return View("Index", id);
         }
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id.ToString() == id);
         if (user != null)
         {
             var result = await userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
@@ -223,14 +216,14 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> ChangeAvatar(string id)
     {
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id.ToString() == id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
         }
 
         ViewData["userId"] = id;
-        if(user.AvatarPhoto != null)
+        if (user.AvatarPhoto != null)
         {
             ViewBag.UserAvatar = "data:image/png;base64," + Convert.ToBase64String(user.AvatarPhoto, 0, user.AvatarPhoto.Length);
         }
@@ -248,11 +241,11 @@ public class ManageController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangeAvatar(string id, ChangeAvatarViewModel model)
     {
-        if(!ModelState.IsValid)
+        if (!ModelState.IsValid)
         {
             return View(model);
         }
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id.ToString() == id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
@@ -261,7 +254,7 @@ public class ManageController : Controller
         using (var memoryStream = new MemoryStream())
         {
             await model.AvatarPhoto.CopyToAsync(memoryStream);
-            if(memoryStream.Length == 0)
+            if (memoryStream.Length == 0)
             {
                 ModelState.AddModelError(model.AvatarPhoto.Name, "file is empty");
                 return View(model);
@@ -283,7 +276,7 @@ public class ManageController : Controller
     public async Task<IActionResult> PersonalData(string id)
     {
         ViewData["id"] = id;
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id.ToString() == id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
@@ -302,7 +295,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> Delete(string id)
     {
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id.ToString() == id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
@@ -321,7 +314,7 @@ public class ManageController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirm(DeleteAccountViewModel model)
     {
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == model.Id);
+        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id.ToString() == model.Id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{model.Id}'.");
@@ -336,7 +329,7 @@ public class ManageController : Controller
             }
         }
 
-        var userAssignedBugs = await context.Bugs.Where(b => b.AssignedUser.Id == model.Id).ToListAsync();
+        var userAssignedBugs = await context.Bugs.Where(b => b.AssignedUser.Id.ToString() == model.Id).ToListAsync();
 
         bool isCurrentUser = false;
         if (user == await GetCurrentUserAsync())
@@ -361,7 +354,7 @@ public class ManageController : Controller
             throw new InvalidOperationException($"Unexpected error occurred deleting user.");
         }
 
-        if(isCurrentUser)
+        if (isCurrentUser)
         {
             await signInManager.SignOutAsync();
             return RedirectToAction("Account", "Login");

@@ -2,9 +2,7 @@
 
 public class CreateProjectViewModel
 {
-    public Project Project { get; set; } = null!;
+    public Project Project { get; set; } = new Project();
 
-    public List<User> Assignee { get; set; } = null!;
-
-    public List<User> Managers { get; set; } = null!;
+    public List<User> Managers { get; set; } = new List<User>();
 }

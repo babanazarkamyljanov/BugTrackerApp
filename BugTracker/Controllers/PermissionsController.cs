@@ -4,11 +4,11 @@ namespace BugTracker.Controllers;
 
 public class PermissionsController : Controller
 {
-    private readonly RoleManager<IdentityRole> roleManager;
+    private readonly RoleManager<Role> roleManager;
     private readonly IAuthorizationService authorizationService;
 
     public PermissionsController(
-        RoleManager<IdentityRole> roleManager,
+        RoleManager<Role> roleManager,
         IAuthorizationService authorizationService)
     {
         this.roleManager = roleManager;

@@ -9,4 +9,6 @@ public interface IUsersService
     Task<User> GetUserByIdAsync(string id);
 
     Task<List<User>> GetOrganizationUsersAsync(Guid id);
+
+    Task<IdentityResult> UpdateAsync(User user);
 }

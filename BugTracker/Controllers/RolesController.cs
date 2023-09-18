@@ -1,17 +1,16 @@
 ﻿using BugTracker.Authorization;
-using Microsoft.AspNetCore.Http;
 
 namespace BugTracker.Controllers;
 
 public class RolesController : Controller
 {
-    private readonly RoleManager<IdentityRole> roleManager;
+    private readonly RoleManager<Role> roleManager;
     private readonly UserManager<User> userManager;
     private readonly IHttpContextAccessor httpContextAccessor;
     private readonly IAuthorizationService authorizationService;
 
     public RolesController(
-        RoleManager<IdentityRole> roleManager,
+        RoleManager<Role> roleManager,
         UserManager<User> userManager,
         IHttpContextAccessor httpContextAccessor,
         IAuthorizationService authorizationService
@@ -46,7 +45,10 @@ public class RolesController : Controller
 
         if (roleName != null)
         {
-            await roleManager.CreateAsync(new IdentityRole(roleName));
+            await roleManager.CreateAsync(new Role()
+            {
+                Name = roleName,
+            });
         }
         return RedirectToAction("Index");
     }
@@ -76,7 +78,7 @@ public class RolesController : Controller
         {
             var userRoleViewModel = new UserRoleViewModel
             {
-                UserId = user.Id,
+                UserId = user.Id.ToString(),
                 UserName = user.UserName
             };
             if (await userManager.IsInRoleAsync(user, role.Name))
@@ -143,6 +145,6 @@ public class RolesController : Controller
                                 .User
                                 .FindFirst(ClaimTypes.NameIdentifier)
                                 .Value;
-        return await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        return await userManager.Users.SingleOrDefaultAsync(u => u.Id.ToString() == id);
     }
 }

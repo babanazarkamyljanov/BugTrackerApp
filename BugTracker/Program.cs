@@ -2,7 +2,6 @@ using BugTracker.Authorization;
 using BugTracker.Interfaces;
 using System.Text.Json.Serialization;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
 // add services to DI container
@@ -12,18 +11,16 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IUsersService, UsersService>();
-builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
+builder.Services.AddScoped<IRolesService, RolesService>();
+builder.Services.AddScoped<IProjectsService, ProjectsService>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<IBugRepository, BugRepository>();
 builder.Services.AddScoped<NotificationService>();
-builder.Services.AddHostedService<ScopedBackgroundService>();
-
+builder.Services.AddTransient<IViewsService, ViewsService>();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
 builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 
 builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddTransient<IEmailSender, AuthMessageSender>();
-builder.Services.AddTransient<ISmsSender, AuthMessageSender>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -40,7 +37,7 @@ builder.Services.AddDefaultIdentity<User>(options =>
         options.Password.RequireNonAlphanumeric = false;
         options.SignIn.RequireConfirmedAccount = false;
     })
-    .AddRoles<IdentityRole>()
+    .AddRoles<Role>()
     .AddDefaultTokenProviders()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 

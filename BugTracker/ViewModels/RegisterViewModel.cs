@@ -28,8 +28,5 @@ public class RegisterViewModel
     [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
     public string ConfirmPassword { get; set; } = string.Empty;
 
-    [Display(Name = "Upload Avatar Photo")]
-    public IFormFile AvatarPhoto { get; set; } = null!;
-
-    public List<string> Roles { get; set; } = null!;
+    public List<string> Roles { get; set; } = new List<string>();
 }

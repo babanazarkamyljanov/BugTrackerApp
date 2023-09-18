@@ -1,5 +1,5 @@
 ﻿@model CreateBugViewModel
-@inject RoleManager<IdentityRole> RoleManager
+@inject RoleManager<Role> RoleManager
 @inject UserManager<User> UserManager
 
 <!DOCTYPE html>
@@ -87,7 +87,7 @@
                                     var assigneeList = new List<SelectListItem>();
                                     foreach (var user in Model.AssigneeList)
                                     {
-                                        assigneeList.Add(new SelectListItem { Value = user.Id, Text = user.Email });
+                                        assigneeList.Add(new SelectListItem { Value = user.Id.ToString(), Text = user.Email });
                                     }
                                 }
                                 <label asp-for="@Model.Bug.AssignedUserId">Assignee</label>

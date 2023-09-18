@@ -1,73 +1,107 @@
-﻿
-using BugTracker.Authorization;
+﻿using BugTracker.Authorization;
+using BugTracker.Interfaces;
+using BugTracker.Models.DTOs;
 
 namespace BugTracker.Controllers;
 
 [Authorize]
 public class ProjectsController : Controller
 {
-    private readonly IProjectRepository projectRepository;
     private readonly IAuthorizationService authorizationService;
+    private readonly IProjectsService _projectsService;
+    private readonly ILogger<ProjectsController> _logger;
 
     public ProjectsController(
-        IProjectRepository projectRepository,
-        IAuthorizationService authorizationService)
+        IAuthorizationService authorizationService,
+        IProjectsService projectsService,
+        ILogger<ProjectsController> logger)
     {
-        this.projectRepository = projectRepository;
         this.authorizationService = authorizationService;
+        _projectsService = projectsService;
+        _logger = logger;
     }
 
-    // GET: Projects
-    public async Task<IActionResult> Index()
+    // GET: all projects
+    public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
     {
-        var projects = await projectRepository.GetAll();
-        return View(projects);
-    }
-
-    // this method is called by SignalR hubjs connection
-    [HttpGet]
-    public async Task<IActionResult> GetProjectsIndex()
-    {
-        var result = await projectRepository.GetAll();
-        return Ok(result);
+        try
+        {
+            var projects = await _projectsService.GetAll(cancellationToken);
+            return View(projects);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Index)}");
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Index)}");
+            ViewData["ErrorMessage"] = "Something went wrong";
+            return View();
+        }
     }
 
     // GET: Projects/Details/5
-    public async Task<IActionResult> Details(Guid id, string user, bool isRead)
+    public async Task<IActionResult> Details(Guid id, CancellationToken cancellationToken = default)
     {
-        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Read);
+        var isAuthorized = await authorizationService
+            .AuthorizeAsync(User, Permissions.ProjectOperations.Read);
         if (!isAuthorized.Succeeded)
         {
             return RedirectToAction("AccessDenied", "Account");
         }
 
-        var project = await projectRepository.GetProject(id);
-        if (project == null)
+        try
         {
+            var project = await _projectsService.Get(id, cancellationToken);
+            return View(project);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Details)}");
             return NotFound();
         }
-        return View(project);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Details)}");
+            ViewData["ErrorMessage"] = "Something went wrong";
+            return View();
+        }
     }
 
     // GET: Projects/Create
+    [HttpGet]
     public async Task<IActionResult> Create()
     {
-        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Create);
+        var isAuthorized = await authorizationService
+            .AuthorizeAsync(User, Permissions.ProjectOperations.Create);
         if (!isAuthorized.Succeeded)
         {
             return RedirectToAction("AccessDenied", "Account");
         }
 
-        var model = await projectRepository.AddGet();
-        return View(model);
+        try
+        {
+            var dto = _projectsService.CreateGet();
+            return View(dto);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Create)}");
+            ViewData["ErrorMessage"] = "Something went wrong";
+            return View();
+        }
     }
 
     // POST: Projects/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(CreateProjectViewModel model)
+    public async Task<IActionResult> Create(CreateProjectDTO dto,
+        CancellationToken cancellationToken = default)
     {
-        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Create);
+        var isAuthorized = await authorizationService
+            .AuthorizeAsync(User, Permissions.ProjectOperations.Create);
         if (!isAuthorized.Succeeded)
         {
             return RedirectToAction("AccessDenied", "Account");
@@ -75,64 +109,89 @@ public class ProjectsController : Controller
 
         if (ModelState.IsValid)
         {
-            var result = await projectRepository.AddPost(model);
-            if(result == "success")
-                return RedirectToAction(nameof(Index));
-            else
-                Console.WriteLine(result);
+            try
+            {
+                var result = await _projectsService.CreatePost(dto, cancellationToken);
+                _logger.LogInformation("project has been created successfully", nameof(result));
+                return RedirectToAction(nameof(Index), result);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Create)}");
+                ViewData["ErrorMessage"] = ex.Message;
+                return View();
+            }
         }
-        return View(model);
+        return View(dto);
     }
 
     // GET: Projects/Edit/5
-    public async Task<IActionResult> Edit(Guid id)
+    public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken = default)
     {
         var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Update);
+
         if (!isAuthorized.Succeeded)
         {
             return RedirectToAction("AccessDenied", "Account");
         }
 
-        var result = await projectRepository.UpdateGet(id);
-        if(result == null)
+        try
         {
-            return NotFound();
+            var dto = await _projectsService.EditGet(id, cancellationToken);
+            return View(dto);
         }
-        return View(result);
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Edit)}");
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Edit)}");
+            ViewData["ErrorMessage"] = "Something went wrong";
+            return View();
+        }
     }
 
     // POST: Projects/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Guid id, CreateProjectViewModel model)
+    public async Task<IActionResult> Edit(Guid id, EditProjectDTO dto, CancellationToken cancellationToken = default)
     {
-        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Update);
+        var isAuthorized = await authorizationService
+            .AuthorizeAsync(User, Permissions.ProjectOperations.Update);
         if (!isAuthorized.Succeeded)
         {
             return RedirectToAction("AccessDenied", "Account");
         }
 
-        if (id != model.Project.Id)
+        if (ModelState.IsValid)
         {
-            return NotFound();
-        }
-        if(ModelState.IsValid)
-        {
-            var result = await projectRepository.UpdatePost(id, model);
-            if (result == "success")
+            try
+            {
+                var result = await _projectsService.EditPost(id, dto, cancellationToken);
+                _logger.LogInformation("project has been created successfully", nameof(result));
                 return RedirectToAction(nameof(Index));
-            else if (result == "NotFound")
-                return NotFound();
-            else
-                Console.WriteLine(result);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Edit)}");
+                ViewData["ErrorMessage"] = ex.Message;
+                View(dto);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Edit)}");
+                ViewData["ErrorMessage"] = "Something went wrong";
+                return View(dto);
+            }
         }
-        return View(model);
+        return View(dto);
     }
-
 
     // POST: Projects/Delete/5
     [HttpPost]
-    public async Task<ActionResult> DeleteConfirmed(Guid id)
+    public async Task<ActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
     {
         var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Delete);
         if (!isAuthorized.Succeeded)
@@ -140,6 +199,26 @@ public class ProjectsController : Controller
             return RedirectToAction("AccessDenied", "Account");
         }
 
-        return Json(await projectRepository.Delete(id));
+        try
+        {
+            await _projectsService.Delete(id, cancellationToken);
+            _logger.LogInformation($"Project has been deleted successfully. {nameof(ProjectsController)}.{Delete}");
+            return Json(new { success = true, message = "Project deleted successfully" });
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{Delete}");
+            return Json(new { success = false, message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{Delete}");
+            return Json(new { success = false, message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{Delete}");
+            return Json(new { success = false, message = "An error occurred while deleting the project" });
+        }
     }
 }
