@@ -1,8 +1,8 @@
 ﻿@using BugTracker.Authorization;
 @using Microsoft.AspNetCore.Identity
 @using static BugTracker.Helpers.NavigationIndicatorHelper;
-@inject SignInManager<ApplicationUser> SignInManager
-@inject UserManager<ApplicationUser> UserManager
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
 @inject IAuthorizationService AuthorizationService
 
 @{
@@ -266,10 +266,8 @@
     <script src="~/js/adminlte.js"></script>
     <!-- AdminLTE for demo purposes -->
     <script src="~/js/demo.js"></script>
-
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
-    <script src="~/js/commonhubscript.js"></script>
-
+    @* <script src="~/js/commonhubscript.js"></script> *@
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

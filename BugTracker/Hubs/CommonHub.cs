@@ -1,6 +1,3 @@
 ﻿namespace BugTracker.Hubs;
 
-public class CommonHub : Hub
-{
-
-}
+public class CommonHub : Hub { }

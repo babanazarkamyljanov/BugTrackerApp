@@ -1,6 +1,6 @@
 ﻿@model BugDetailsViewModel
 @{
-    ViewData["id"] = @Model.Bug.BugId;
+    ViewData["id"] = @Model.Bug.Id;
 }
 <!DOCTYPE html>
 <html>
@@ -65,21 +65,21 @@
                             </ul>
                         </p>
                         <p class="text-lg">
-                            Submitter
+                            Created by
                             <ul class="list-inline">
                                 <li class="list-inline-item">
-                                    @if (@Model.Bug.Submitter.AvatarPhoto is null)
+                                    @if (@Model.Bug.CreatedBy.AvatarPhoto is null)
                                     {
                                         <img src="~/img/default-avatar.png" class="table-avatar" width="30" height="30" alt="User Image">
                                     }
                                     else
                                     {
-                                        string src = "data:image/png;base64," + Convert.ToBase64String(Model.Bug.Submitter.AvatarPhoto, 0, Model.Bug.Submitter.AvatarPhoto.Length);
+                                        string src = "data:image/png;base64," + Convert.ToBase64String(Model.Bug.CreatedBy.AvatarPhoto, 0, Model.Bug.CreatedBy.AvatarPhoto.Length);
                                         <img src="@src" class="table-avatar" width="30" height="30" alt="User Image">
                                     }
                                 </li>
                                 <li class="list-inline-item">
-                                    <b class="d-block text-blue">@Model.Bug.Submitter.UserName</b>
+                                    <b class="d-block text-blue">@Model.Bug.CreatedBy.UserName</b>
                                 </li>
                             </ul>
                         </p>
@@ -112,15 +112,15 @@
 
             <div class="card-body">
                 <form id="fileForm" 
-                    asp-route-id="@Model.Bug.BugId" 
+                    asp-route-id="@Model.Bug.Id" 
                     asp-action="UploadFile" 
                     method="post"
                     data-ajax="true"
                     enctype="multipart/form-data">
                     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
                     <div class="form-group">
-                        <input asp-for="@Model.BugFile.File" accept="file/*" />
-                        <span asp-validation-for="@Model.BugFile.File" class="text-danger"></span>
+                        <input asp-for="@Model.File.FileHolder" accept="file/*" />
+                        <span asp-validation-for="@Model.File.FileHolder" class="text-danger"></span>
                     </div>
                     <div class="form-group">
                         <input type="submit" value="Upload" class="btn btn-info btn-md" />
@@ -149,7 +149,7 @@
                     <!--- Bug comments -->
                     <div class="active tab-pane" id="comments">
                         <form id="commentForm"
-                              asp-route-id="@Model.Bug.BugId"
+                              asp-route-id="@Model.Bug.Id"
                               asp-action="AddComment"
                               method="post"
                               data-ajax="true"
@@ -191,7 +191,7 @@
                                 {
                                     <tr>
                                         <td>
-                                            @hist.ChangedBy.UserName
+                                            @hist.UpdatedBy.UserName
                                         </td>
                                         <td>
                                             @hist.Property
@@ -203,7 +203,7 @@
                                             @Html.Raw(hist.NewValue)
                                         </td>
                                         <td>
-                                            @hist.DateChanged
+                                            @hist.UpdatedDate
                                         </td>
                                     </tr>
                                 }
@@ -213,7 +213,7 @@
                 </div>
             </div>
         </div>
-        <input type="hidden" id="bugId" value="@Model.Bug.BugId" />
+        <input type="hidden" id="bugId" value="@Model.Bug.Id" />
         </section>
 
         <!-- jQuery -->

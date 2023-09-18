@@ -1,41 +1,38 @@
-﻿using Microsoft.AspNetCore.WebUtilities;
-using System.Text.Encodings.Web;
-using System.Text;
+﻿using BugTracker.Interfaces;
 
 namespace BugTracker.Controllers;
 
 public class AccountController : Controller
 {
-    private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly UserManager<ApplicationUser> _userManager;
-    private readonly IUserStore<ApplicationUser> _userStore;
-    private readonly IUserEmailStore<ApplicationUser> _emailStore;
+    private readonly SignInManager<User> _signInManager;
+    private readonly UserManager<User> _userManager;
+    private readonly IUserStore<User> _userStore;
+    private readonly IUserEmailStore<User> _emailStore;
     private readonly ILogger<RegisterViewModel> _logger;
-    private readonly BugTracker.Services.IEmailSender _emailSender;
-    private readonly ApplicationDbContext _context;
+    private readonly IOrganizationService _organizationService;
+    private readonly IRolesService _rolesService;
 
     public AccountController(
-        UserManager<ApplicationUser> userManager,
-        IUserStore<ApplicationUser> userStore,
-        SignInManager<ApplicationUser> signInManager,
+        UserManager<User> userManager,
+        IUserStore<User> userStore,
+        SignInManager<User> signInManager,
         ILogger<RegisterViewModel> logger,
-        BugTracker.Services.IEmailSender emailSender,
-        ApplicationDbContext context)
+        IOrganizationService organizationService,
+        IRolesService rolesService)
     {
         _userManager = userManager;
         _userStore = userStore;
         _emailStore = GetEmailStore();
         _signInManager = signInManager;
         _logger = logger;
-        _emailSender = emailSender;
-        _context = context;
-
+        _organizationService = organizationService;
+        _rolesService = rolesService;
     }
 
     // GET: Account/Login
     [HttpGet]
     [AllowAnonymous]
-    public async Task<IActionResult> Login(string returnUrl = null)
+    public async Task<IActionResult> Login(string? returnUrl = null)
     {
         //Clear the existing external cookie to ensure a clean login process
         await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
@@ -48,7 +45,7 @@ public class AccountController : Controller
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Login(LoginViewModel model, string returnUrl = null)
+    public async Task<IActionResult> Login(LoginViewModel model, string returnUrl)
     {
         ViewData["ReturnUrl"] = returnUrl;
 
@@ -81,7 +78,7 @@ public class AccountController : Controller
     // GET: Account/Register
     [HttpGet]
     [AllowAnonymous]
-    public IActionResult Register(string returnUrl = null)
+    public IActionResult Register(string? returnUrl = null)
     {
         ViewData["ReturnUrl"] = returnUrl;
         return View();
@@ -91,49 +88,36 @@ public class AccountController : Controller
     [HttpPost]
     [AllowAnonymous]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Register(RegisterViewModel model, string returnUrl = null)
+    public async Task<IActionResult> Register(RegisterViewModel model,
+        string? returnUrl = null,
+        CancellationToken cancellationToken = default)
     {
         ViewData["ReturnUrl"] = returnUrl;
         if (ModelState.IsValid)
         {
+            string orgName = model.Email;
+            var organization = await _organizationService.Create(orgName, cancellationToken);
+
             var user = CreateUser();
             user.FirstName = model.FirstName;
             user.LastName = model.LastName;
+            user.OrganizationId = organization.Id;
             await _userStore.SetUserNameAsync(user, model.Email, CancellationToken.None);
             await _emailStore.SetEmailAsync(user, model.Email, CancellationToken.None);
             var result = await _userManager.CreateAsync(user, model.Password);
 
             if (result.Succeeded)
             {
-                // create a new organization for admin user
-                var organization = new Organization()
+                try
                 {
-                    OrganizationName = model.FirstName + model.LastName,
-                    CreatedById = user.Id,
-                };
-                _context.Organizations.Add(organization);
-                await _context.SaveChangesAsync();
-
-                // update user organizationId Column
-                user.OrganizationId = organization.OrganizationId;
-                await _userManager.UpdateAsync(user);
-
-                // add user to admin role
-                await _userManager.AddToRoleAsync(user, "Administrator");
+                    await _rolesService.CreateDefaultRoles(user, organization.Id);
+                }
+                catch (InvalidOperationException ex)
+                {
+                    _logger.LogError(ex, $"{nameof(AccountController)}.{nameof(Register)}");
+                }
 
                 _logger.LogInformation("User created a new account with password.");
-
-                var userId = await _userManager.GetUserIdAsync(user);
-                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
-                var callbackUrl = Url.Page(
-                    "/Account/ConfirmEmail",
-                    pageHandler: null,
-                    values: new { area = "Identity", userId = userId, code = code, returnUrl = returnUrl },
-                    protocol: Request.Scheme);
-
-                await _emailSender.SendEmailAsync(model.Email, "Confirm your email",
-                    $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
                 if (_userManager.Options.SignIn.RequireConfirmedAccount)
                 {
@@ -145,6 +129,18 @@ public class AccountController : Controller
                     return LocalRedirect("/");
                 }
             }
+            else
+            {
+                try
+                {
+                    await _organizationService.Delete(organization.Id, cancellationToken);
+                }
+                catch (ArgumentException ex)
+                {
+                    _logger.LogError(ex, $"{nameof(AccountController)}.{nameof(Register)}");
+                }
+            }
+
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -171,26 +167,26 @@ public class AccountController : Controller
         return View();
     }
 
-    private ApplicationUser CreateUser()
+    private User CreateUser()
     {
         try
         {
-            return Activator.CreateInstance<ApplicationUser>();
+            return Activator.CreateInstance<User>();
         }
         catch
         {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor, or alternatively " +
+            throw new InvalidOperationException($"Can't create an instance of '{nameof(Models.User)}'. " +
+                $"Ensure that '{nameof(Models.User)}' is not an abstract class and has a parameterless constructor, or alternatively " +
                 $"override the register page in /Areas/Identity/Pages/Account/Register.cshtml");
         }
     }
 
-    private IUserEmailStore<ApplicationUser> GetEmailStore()
+    private IUserEmailStore<User> GetEmailStore()
     {
         if (!_userManager.SupportsUserEmail)
         {
             throw new NotSupportedException("The default UI requires a user store with email support.");
         }
-        return (IUserEmailStore<ApplicationUser>)_userStore;
+        return (IUserEmailStore<User>)_userStore;
     }
 }

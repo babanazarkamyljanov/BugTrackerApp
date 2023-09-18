@@ -3,18 +3,12 @@
 public class Organization
 {
     [Key]
-    public Guid OrganizationId { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
-    public string OrganizationName { get; set; }
-    public string CreatedById { get; set; }
-    //public ICollection<ApplicationUser> OrganizationUsers { get; set; }
-    //public ICollection<Project> Projects { get; set; }
+    public string Name { get; set; } = string.Empty;
 
-    public Organization()
-    {
-        //Projects = new List<Project>();
-        //OrganizationUsers = new List<ApplicationUser>();
-        OrganizationId = Guid.NewGuid();
-    }
+    public ICollection<User> OrganizationUsers { get; set; } = null!;
+
+    public ICollection<Project> Projects { get; set; } = null!;
 }

@@ -1,13 +1,26 @@
 using BugTracker.Authorization;
-using BugTracker.Services;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using BugTracker.Interfaces;
 using System.Text.Json.Serialization;
-
 
 var builder = WebApplication.CreateBuilder(args);
 
-// signalr
+// add services to DI container
+var connectionString = builder.Configuration.GetConnectionString("LocalConnection");
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlServer(connectionString));
+
 builder.Services.AddSignalR();
+builder.Services.AddScoped<IUsersService, UsersService>();
+builder.Services.AddScoped<IRolesService, RolesService>();
+builder.Services.AddScoped<IProjectsService, ProjectsService>();
+builder.Services.AddScoped<IOrganizationService, OrganizationService>();
+builder.Services.AddScoped<IBugRepository, BugRepository>();
+builder.Services.AddScoped<NotificationService>();
+builder.Services.AddTransient<IViewsService, ViewsService>();
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
+
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
@@ -15,28 +28,7 @@ builder.Services.AddControllers().AddJsonOptions(options =>
     options.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
 });
 
-// add Repositories to dependency injection container
-builder.Services.AddScoped<IProjectRepository, ProjectRepository>();
-builder.Services.AddScoped<IBugRepository, BugRepository>();
-
-// AuthorizationHandler
-builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
-builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
-
-// Add email and sms services.
-builder.Services.AddTransient<IEmailSender, AuthMessageSender>();
-builder.Services.AddTransient<ISmsSender, AuthMessageSender>();
-
-builder.Services.AddScoped<NotificationService>();
-builder.Services.AddHttpContextAccessor();
-
-// Add services to the container.
-var connectionString = builder.Configuration.GetConnectionString("LocalSqlServerConnection");
-builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(connectionString));
-
-// add identity
-builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
+builder.Services.AddDefaultIdentity<User>(options =>
     {
         options.Password.RequireDigit = false;
         options.Password.RequireLowercase = false;
@@ -45,7 +37,7 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options =>
         options.Password.RequireNonAlphanumeric = false;
         options.SignIn.RequireConfirmedAccount = false;
     })
-    .AddRoles<IdentityRole>()
+    .AddRoles<Role>()
     .AddDefaultTokenProviders()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
@@ -58,9 +50,6 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 builder.Services.AddControllersWithViews();
-
-// Seed database with default roles
-builder.Services.AddHostedService<ScopedBackgroundService>();
 
 var app = builder.Build();
 

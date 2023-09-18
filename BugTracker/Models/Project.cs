@@ -1,47 +1,39 @@
 ﻿namespace BugTracker.Models;
 
-[Index(nameof(ProjectKey), IsUnique = true)]
+[Index(nameof(Key), IsUnique = true)]
 public class Project
 {
     [Key]
-    public Guid Id { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     [Required]
-    [Display(Name ="Title")]
-    public string Title { get; set; }
+    public string Title { get; set; } = string.Empty;
 
     [Required]
-    [Display(Name = "Project Key")]
-    public string ProjectKey { get; set; }
+    public string Key { get; set; } = string.Empty;
 
     [Required]
-    [Display(Name ="Description")]
-    public string Description { get; set; }
+    public string Description { get; set; } = string.Empty;
 
     [Required]
-    [Display(Name ="Priority")]
-    public string Priority { get; set; }
+    public string Priority { get; set; } = string.Empty;
 
     [Required]
-    [Display(Name = "Status")]
-    public string Status { get; set; }
+    public string Status { get; set; } = string.Empty;
 
-    [Display(Name ="Submitted date")]
-    public DateTime CreatedDate { get; set; }
+    public DateTime CreatedDate { get; set; } = DateTime.Now;
 
-    [ForeignKey("ProjectManager")]
-    public string ManagerId { get; set; }
-    public ApplicationUser ProjectManager { get; set; }
+    [ForeignKey("Organization")]
+    public Guid OrganizationId { get; set; }
+    public Organization Organization { get; set; } = null!;
+
+    [ForeignKey("Manager")]
+    public string ManagerId { get; set; } = string.Empty;
+    public User Manager { get; set; } = null!;
 
     [ForeignKey("CreatedBy")]
-    public string CreatedById { get; set; }
-    public ApplicationUser CreatedBy { get; set; }
+    public string CreatedById { get; set; } = string.Empty;
+    public User CreatedBy { get; set; } = null!;
 
-    public ICollection<Bug> ProjectBugs { get; set; }
-
-    public Project()
-    {
-        Id = new Guid();
-        CreatedDate = DateTime.Now;
-    }
+    public ICollection<Bug> Bugs { get; set; } = null!;
 }

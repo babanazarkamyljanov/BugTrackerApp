@@ -1,73 +1,68 @@
-﻿namespace BugTracker.Repository;
+﻿using BugTracker.Interfaces;
+
+namespace BugTracker.Repository;
 
 public class BugRepository : IBugRepository
 {
     private readonly ApplicationDbContext context;
     private readonly IHubContext<CommonHub> bugDetailsHub;
-    private IHttpContextAccessor httpContextAccessor;
     private readonly IWebHostEnvironment hostEnvironment;
-    private readonly UserManager<ApplicationUser> userManager;
+    private readonly IUsersService _usersService;
 
-    public IHttpContextAccessor HttpContextAccessorProp
-    {
-        get
-        {
-            return this.httpContextAccessor;
-        }
-        set
-        {
-            this.httpContextAccessor = value;
-        }
-    }
     public BugRepository(ApplicationDbContext context,
         IHubContext<CommonHub> bugDetailsHub,
-        IHttpContextAccessor httpContextAccessor,
         IWebHostEnvironment hostEnvironment,
-        UserManager<ApplicationUser> userManager)
+        IUsersService usersService)
     {
         this.context = context;
         this.bugDetailsHub = bugDetailsHub;
-        HttpContextAccessorProp = httpContextAccessor;
         this.hostEnvironment = hostEnvironment;
-        this.userManager = userManager;
+        _usersService = usersService;
     }
 
     // get all bugs
     public IQueryable<Bug> GetAll()
     {
-        return context.Bugs.Include(b => b.Project).Include(b => b.AssignedUser);
+        return context.Bugs
+            .Include(b => b.Project)
+            .Include(b => b.AssignedUser);
     }
-    
+
     // get bug by id
     public async Task<Bug> Get(int id)
     {
-        return await context.Bugs.FirstOrDefaultAsync(b => b.BugId == id);
+        var bug = await context.Bugs.FirstOrDefaultAsync(b => b.Id == id);
+        if (bug == null)
+        {
+            throw new ArgumentException($"Bug by id: {id} wasn't found", nameof(id));
+        }
+        return bug;
     }
 
     // attach file to the bug
-    public async Task<string> UploadFile(BugFile model, int id)
+    public async Task<string> UploadFile(Models.BugFile model, int id)
     {
         try
         {
             //save to wwwroot / File folder
             string UploadsFolder = Path.Combine(hostEnvironment.WebRootPath, "files");
             //unique file name
-            string fileName = Path.GetFileNameWithoutExtension(model.File.FileName) +
+            string fileName = Path.GetFileNameWithoutExtension(model.FileHolder.FileName) +
                                 DateTime.Now.ToString("yymmssfff") +
-                                Path.GetExtension(model.File.FileName);
+                                Path.GetExtension(model.FileHolder.FileName);
 
             //storing fileName to database
-            model.FileName = fileName;
+            model.Name = fileName;
 
             //copying file to wwwroot/ Files location
             string filePath = Path.Combine(UploadsFolder, fileName);
-            await model.File.CopyToAsync(new FileStream(filePath, FileMode.Create));
+            await model.FileHolder.CopyToAsync(new FileStream(filePath, FileMode.Create));
 
             // sql server does inserting identity key value, so we assign id to 0
             model.BugId = id;
 
             //add to database and save
-            context.Files.Add(model);
+            context.BugFiles.Add(model);
             await context.SaveChangesAsync();
             await bugDetailsHub.Clients.All.SendAsync("GetBugDetails");
             return "success";
@@ -80,15 +75,13 @@ public class BugRepository : IBugRepository
     }
 
     // make a comment to the bug
-    public async Task<string> AddComment(Comment comment, int id)
+    public async Task<string> AddComment(BugComment comment, int id)
     {
         try
         {
             comment.BugId = id;
-            string userId = HttpContextAccessorProp.HttpContext.
-                User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            comment.AuthorId = userId;
-            context.Comments.Add(comment);
+            comment.AuthorId = _usersService.GetCurrentUserId();
+            context.BugComments.Add(comment);
             await context.SaveChangesAsync();
             await bugDetailsHub.Clients.All.SendAsync("GetBugDetails");
             return "success";
@@ -114,11 +107,11 @@ public class BugRepository : IBugRepository
     {
         try
         {
+            var user = await _usersService.GetCurrentUserAsync();
+
             model.Bug.Status = "Open";
             model.Bug.CreatedDate = DateTime.Now;
-            string userId = HttpContextAccessorProp.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-            model.Bug.SubmitterId = userId;
-
+            model.Bug.CreatedById = user.Id.ToString();
             context.Bugs.Add(model.Bug);
             await context.SaveChangesAsync();
             await bugDetailsHub.Clients.All.SendAsync("GetBugDetails");
@@ -139,17 +132,21 @@ public class BugRepository : IBugRepository
         var bug = await context.Bugs.FindAsync(id);
         if (bug == null)
         {
-            return null;
+            throw new ArgumentException($"Bug by id: {id} wasn't found", nameof(id));
         }
         model.Bug = bug;
         return model;
     }
-    
+
     // Edit bug
     // POST
     public async Task<string> UpdatePost(int id, CreateBugViewModel model)
     {
-        var bug = await context.Bugs.AsNoTracking().FirstOrDefaultAsync(b => b.BugId == id);
+        var bug = await context.Bugs.AsNoTracking().FirstOrDefaultAsync(b => b.Id == id);
+        if (bug == null)
+        {
+            throw new ArgumentException($"bug by id: {id} wasn't found", nameof(id));
+        }
         try
         {
             // Update edited Bug in the database
@@ -158,11 +155,11 @@ public class BugRepository : IBugRepository
             await bugDetailsHub.Clients.All.SendAsync("GetBugDetails");
 
             //Add changes to BugHistories table
-            var currentUser = await GetCurrentUser();
+            var currentUser = await _usersService.GetCurrentUserAsync();
             var bugHistory = new BugHistory
             {
                 BugId = id,
-                ChangedById = currentUser.Id
+                UpdatedById = currentUser.Id.ToString()
             };
 
             if (bug.Title != model.Bug.Title)
@@ -212,8 +209,8 @@ public class BugRepository : IBugRepository
             }
             if (bug.AssignedUserId != model.Bug.AssignedUserId)
             {
-                var oldAssignee = await userManager.Users.SingleOrDefaultAsync(u => u.Id == bug.AssignedUserId);
-                var newAssignee = await userManager.Users.SingleOrDefaultAsync(u => u.Id == model.Bug.AssignedUserId);
+                var oldAssignee = await _usersService.GetUserByIdAsync(bug.AssignedUserId);
+                var newAssignee = await _usersService.GetUserByIdAsync(model.Bug.AssignedUserId);
                 if (oldAssignee != null && newAssignee != null)
                 {
                     bugHistory.Id = 0;
@@ -224,13 +221,13 @@ public class BugRepository : IBugRepository
                     await context.SaveChangesAsync();
                 }
             }
-            
+
             await bugDetailsHub.Clients.All.SendAsync("GetBugDetails");
             return "success";
         }
         catch (DbUpdateConcurrencyException e)
         {
-            if (!context.Bugs.Any(b => b.BugId == id))
+            if (!context.Bugs.Any(b => b.Id == id))
             {
                 return "NotFound";
             }
@@ -246,9 +243,9 @@ public class BugRepository : IBugRepository
     public async Task<string> Delete(int id)
     {
         var bug = await Get(id);
-        if(bug == null)
+        if (bug == null)
         {
-            return null;
+            throw new ArgumentException($"bug by id: {id} wasn't found", nameof(id));
         }
 
         try
@@ -267,18 +264,16 @@ public class BugRepository : IBugRepository
     public async Task<CreateBugViewModel> CreateBugVM()
     {
         var model = new CreateBugViewModel();
-        string userId = httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier).Value;
-        ApplicationUser currentUser = await userManager.Users.FirstOrDefaultAsync(u => u.Id == userId);
+        var user = await _usersService.GetCurrentUserAsync();
 
-        // get users within same organization
-        var organizationUsers = userManager.Users.Where(u => u.OrganizationId == currentUser.OrganizationId);
-        if(organizationUsers.Any())
+        var organizationUsers = await _usersService.GetOrganizationUsersAsync(user.OrganizationId);
+        if (organizationUsers.Any())
         {
-            model.AssigneeList = organizationUsers.ToList();
+            model.AssigneeList = organizationUsers;
         }
         else
         {
-            model.AssigneeList.Add(currentUser);
+            model.AssigneeList.Add(user);
         }
         model.Projects = context.Projects.ToList();
         return model;
@@ -289,38 +284,27 @@ public class BugRepository : IBugRepository
     {
         var bug = await context.Bugs
             .Include(i => i.Project)
-            .Include(i => i.BugHistory)
-            .ThenInclude(h => h.ChangedBy)
+            .Include(i => i.History)
+            .ThenInclude(h => h.UpdatedBy)
             .Include(i => i.AssignedUser)
-            .Include(i => i.Submitter)
+            .Include(i => i.CreatedBy)
             .Include(i => i.Files)
             .Include(i => i.Comments)
             .ThenInclude(c => c.Author)
             .AsSplitQuery()
-            .FirstOrDefaultAsync(b => b.BugId == id);
+            .FirstOrDefaultAsync(b => b.Id == id);
         if (bug == null)
         {
-            return null;
+            throw new ArgumentException("Bug wasn't found", nameof(bug));
         }
 
         var vm = new BugDetailsViewModel
         {
             Bug = bug,
-            Comments = bug.Comments,
-            Files = bug.Files,
-            History = bug.BugHistory
+            Comments = bug.Comments.ToList(),
+            Files = bug.Files.ToList(),
+            History = bug.History.ToList()
         };
         return vm;
-    }
-
-    // get current user
-    private async Task<ApplicationUser> GetCurrentUser()
-    {
-        var id = httpContextAccessor
-                                .HttpContext
-                                .User
-                                .FindFirst(ClaimTypes.NameIdentifier)
-                                .Value;
-        return await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
     }
 }
