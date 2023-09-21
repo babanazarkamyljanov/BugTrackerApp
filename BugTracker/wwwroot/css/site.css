@@ -16,3 +16,44 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+.custom-btn-primary {
+    background-color: #322653;
+    color: white;
+}
+
+.custom-btn-primary:hover {
+    background-color: #512b81;
+    color: white;
+}
+
+.custom-btn-primary:disabled {
+    background-color: #d6f8ff;
+    color: #9c9c9c;
+}
+
+
+#deleteConfirmBox {
+    z-index: 9;
+    display: none;
+    width: 400px;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+
+button.btn.btn-secondary.buttons-csv.buttons-html5.btn-info.csvButton,
+button.btn.btn-secondary.buttons-excel.buttons-html5.excelButton {
+    border-radius: 5px;
+}
+
+button.btn.btn-secondary.buttons-csv.buttons-html5.btn-info.csvButton {
+    margin-right: 10px;
+}
+
+button.btn.btn-secondary.custom-btn-primary.addButton {
+    margin-right: 10px;
+    border-radius: 5px;
+}

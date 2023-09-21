@@ -20,5 +20,5 @@ public class GetProjectDTO
 
     public UserDTO CreatedBy { get; set; } = new UserDTO();
 
-    public List<ProjectDetailBugDTO> Bugs { get; set; } = new List<ProjectDetailBugDTO>();
+    public List<SharedBugDTO> Bugs { get; set; } = new List<SharedBugDTO>();
 }

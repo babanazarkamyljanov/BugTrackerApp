@@ -9,9 +9,6 @@ public class BugFile
 
     [ForeignKey("Bug")]
     public int BugId { get; set; }
-    public Bug Bug { get; set; } = null!;
 
-    [NotMapped]
-    [Display(Name = "Upload File")]
-    public IFormFile FileHolder { get; set; } = null!;
+    public Bug Bug { get; set; } = null!;
 }

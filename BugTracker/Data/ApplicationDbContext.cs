@@ -50,7 +50,7 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, string>
             .OnDelete(DeleteBehavior.NoAction);
 
         builder.Entity<Bug>()
-            .HasOne(b => b.AssignedUser)
+            .HasOne(b => b.Assignee)
             .WithMany()
             .OnDelete(DeleteBehavior.NoAction);
 

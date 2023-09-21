@@ -15,6 +15,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Bug Tracker</title>
 
+
+
     <!-- Google Font: Source Sans Pro -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
     <!-- Font Awesome -->
@@ -32,6 +34,7 @@
     <link rel="stylesheet" href="../../plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css">
     <!-- Theme style -->
     <link rel="stylesheet" href="~/css/adminlte.min.css">
+    <link href="~/css/site.css" rel="stylesheet" />
     <!-- overlayScrollbars -->
     <link rel="stylesheet" href="~/plugins/overlayScrollbars/css/OverlayScrollbars.min.css">
     <!-- Daterange picker -->
@@ -234,6 +237,7 @@
 
     <!-- jQuery -->
     <script src="~/plugins/jquery/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js"></script>
     <!-- jQuery UI 1.11.4 -->
     <script src="~/plugins/jquery-ui/jquery-ui.min.js"></script>
 
@@ -267,7 +271,7 @@
     <!-- AdminLTE for demo purposes -->
     <script src="~/js/demo.js"></script>
     <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
-    @* <script src="~/js/commonhubscript.js"></script> *@
+    <script src="~/js/commonhubscript.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>

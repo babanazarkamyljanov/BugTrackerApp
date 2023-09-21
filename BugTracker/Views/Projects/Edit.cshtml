@@ -12,24 +12,11 @@
 @{
     if (errorMessage != null)
     {
-    <h1 class="text-danger">Error</h1>
-    <h2 class="text-danger">An error occurred while processing your request</h2>
-    <p>@ViewData["ErrorMessage"]</p>
+        <h1 class="text-danger">Error</h1>
+        <h2 class="text-danger">An error occurred while processing your request</h2>
+        <p>@ViewData["ErrorMessage"]</p>
     }
 }
-
-
-<style>
-    #deleteConfirmBox {
-        z-index: 9;
-        display: none;
-        width: 400px;
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-    }
-</style>
 
 <section class="content-header">
     <div class="container-fluid">
@@ -125,7 +112,7 @@
                 </div>
             </div>
             <div class="col-8" style="margin-bottom: 10px;">
-                <button type="submit" class="btn btn-success btn-lg">Save</button>
+                <button type="submit" class="btn custom-btn-primary btn-lg">Save</button>
                 <a asp-controller="Projects" asp-action="Index" class="btn btn-secondary btn-lg">Cancel</a>
             </div>
             <div class="col-4">

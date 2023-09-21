@@ -113,7 +113,12 @@ public class ProjectsController : Controller
             {
                 var result = await _projectsService.CreatePost(dto, cancellationToken);
                 _logger.LogInformation("project has been created successfully", nameof(result));
-                return RedirectToAction(nameof(Index), result);
+                return RedirectToAction(nameof(Index));
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Create)}");
+                NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -128,7 +133,8 @@ public class ProjectsController : Controller
     // GET: Projects/Edit/5
     public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken = default)
     {
-        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Update);
+        var isAuthorized = await authorizationService
+            .AuthorizeAsync(User, Permissions.ProjectOperations.Update);
 
         if (!isAuthorized.Succeeded)
         {

@@ -1,52 +1,17 @@
 ﻿@model IEnumerable<GetAllProjectDTO>
 
-<style>
-    button.btn.btn-secondary.buttons-csv.buttons-html5.btn-info.csvButton, 
-    button.btn.btn-secondary.buttons-excel.buttons-html5.excelButton {
-        border-top-left-radius: 5px;
-        border-bottom-left-radius: 5px;
-        border-top-right-radius: 5px;
-        border-bottom-right-radius: 5px;
-    }
-    button.btn.btn-secondary.buttons-excel.buttons-html5.excelButton {
-        margin-left: 10px;
-    }
-
-    button.btn.btn-secondary.btn-success.addButton {
-        margin-left: 10px;
-        border-radius: 5px;
-        border-radius: 5px;
-    }
-</style>
-
 <section class="content-header">
     <div class="container-fluid">
         <div class="row mb-2">
-            <div class="col-sm-6">
+            <div class="col-sm-12">
                 <h1>All Projects</h1>
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a href="#">Projects</a></li>
-                    <li class="breadcrumb-item active">Index</li>
-                </ol>
             </div>
         </div>
     </div>
 </section>
 
-<!-- Main content -->
 <section class="content">
     <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Projects</h3>
-
-            <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                    <i class="fas fa-minus"></i>
-                </button>
-            </div>
-        </div>
         <div class="card-body">
             <table id="example1" class="table table-striped projects">
                 <thead>
@@ -70,7 +35,7 @@
                             Status
                         </th>
                         <th class="no-sort text-right" style="width: 20%">
-                            Actions
+                            
                         </th>
                     </tr>
                 </thead>
@@ -147,15 +112,16 @@
                     "orderable": false
                 }],
                 "buttons": [
-                    { extend: 'csv', className: 'btn-info csvButton' },
-                    { extend: 'excel', className: 'excelButton' },
                     {
                         text: 'Add',
-                        className: 'btn-success addButton',
+                        className: 'custom-btn-primary addButton',
                         action: function (e, dt, node, config) {
                             window.location.href = "/Projects/Create"
-                    }
-                }]
+                        }
+                    },
+                    { extend: 'csv', className: 'btn-info csvButton' },
+                    { extend: 'excel', className: 'excelButton' }
+                ]
             }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
         });
     </script>

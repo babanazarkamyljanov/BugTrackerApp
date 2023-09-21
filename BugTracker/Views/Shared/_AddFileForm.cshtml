@@ -1,0 +1,33 @@
+﻿@model BugTracker.Models.DTOs.AddFileDTO
+
+<form id="fileForm"
+      asp-action="UploadFile"
+      method="post"
+      data-ajax="true"
+      enctype="multipart/form-data">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="BugId" />
+    <div class="form-group">
+        <input asp-for="@Model.FileHolder" accept="file/*" />
+        <span asp-validation-for="@Model.FileHolder" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Upload" class="btn custom-btn-primary btn-md" />
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(function () {
+            var fileForm = document.getElementById('fileForm');
+            $('#fileForm').submit(function (e) {
+                $.ajax({
+                    success: function () {
+                        console.log('Add file was successful');
+                        fileForm.reset();
+                    }
+                })
+            })
+        }
+    </script>
+}

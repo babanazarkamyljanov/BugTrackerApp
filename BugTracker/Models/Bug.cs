@@ -6,18 +6,14 @@ public class Bug
     public int Id { get; set; }
 
     [Required]
-    [Display(Name = "Bug Title")]
     public string Title { get; set; } = string.Empty;
 
     [Required]
-    [Display(Name = "Bug Description")]
     public string Description { get; set; } = string.Empty;
 
     [Required]
-    [Display(Name = "Bug Priority")]
     public string Priority { get; set; } = string.Empty;
 
-    [Display(Name = "Bug Status")]
     public string Status { get; set; } = string.Empty;
 
     public DateTime CreatedDate { get; set; } = DateTime.Now;
@@ -34,9 +30,9 @@ public class Bug
     public string CreatedById { get; set; } = string.Empty;
     public User CreatedBy { get; set; } = null!;
 
-    [ForeignKey("AssignedUser")]
-    public string AssignedUserId { get; set; } = string.Empty;
-    public User AssignedUser { get; set; } = null!;
+    [ForeignKey("Assignee")]
+    public string AssigneeId { get; set; } = string.Empty;
+    public User Assignee { get; set; } = null!;
 
     public ICollection<BugHistory> History { get; set; } = null!;
 
