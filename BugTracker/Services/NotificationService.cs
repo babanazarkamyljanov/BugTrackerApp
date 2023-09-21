@@ -6,13 +6,13 @@ public class NotificationService
     private readonly SignInManager<User> signInManager;
     private readonly UserManager<User> userManager;
     private IHttpContextAccessor httpContextAccessor;
-    private readonly IHubContext<CommonHub> hubContext;
+    private readonly IHubContext<Hubs.BugDetailsHub> hubContext;
 
     public NotificationService(ApplicationDbContext context,
         SignInManager<User> signInManager,
         UserManager<User> userManager,
         IHttpContextAccessor httpContextAccessor,
-        IHubContext<CommonHub> hubContext)
+        IHubContext<Hubs.BugDetailsHub> hubContext)
     {
         this.context = context;
         this.signInManager = signInManager;

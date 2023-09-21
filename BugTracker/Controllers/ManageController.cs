@@ -329,7 +329,7 @@ public class ManageController : Controller
             }
         }
 
-        var userAssignedBugs = await context.Bugs.Where(b => b.AssignedUser.Id.ToString() == model.Id).ToListAsync();
+        var userAssignedBugs = await context.Bugs.Where(b => b.Assignee.Id.ToString() == model.Id).ToListAsync();
 
         bool isCurrentUser = false;
         if (user == await GetCurrentUserAsync())
@@ -342,7 +342,7 @@ public class ManageController : Controller
         {
             foreach (var bug in userAssignedBugs)
             {
-                bug.AssignedUserId = null;
+                bug.Assignee = null;
                 context.Update(bug);
             }
             await context.SaveChangesAsync();

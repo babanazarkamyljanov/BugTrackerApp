@@ -67,7 +67,7 @@ public class ProjectsService : IProjectsService
                     UserName = p.CreatedBy.UserName,
                     AvatarPhoto = p.CreatedBy.AvatarPhoto
                 },
-                Bugs = p.Bugs.Select(b => new ProjectDetailBugDTO()
+                Bugs = p.Bugs.Select(b => new SharedBugDTO()
                 {
                     Id = b.Id,
                     Title = b.Title,
@@ -105,6 +105,11 @@ public class ProjectsService : IProjectsService
             ManagerId = dto.ManagerId.Trim(),
         };
         var currentUser = await _usersService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            throw new ArgumentException("Current logged in user wasn't found");
+        }
+
         project.CreatedById = currentUser.Id;
         project.OrganizationId = currentUser.OrganizationId;
 

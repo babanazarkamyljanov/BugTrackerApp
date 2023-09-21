@@ -1,6 +1,6 @@
 ﻿namespace BugTracker.Models.DTOs;
 
-public class ProjectDetailBugDTO
+public class SharedBugDTO
 {
     public int Id { get; set; }
 

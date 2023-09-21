@@ -1,0 +1,32 @@
+﻿@model BugTracker.Models.DTOs.AddCommentDTO
+
+<form id="commentForm" asp-action="AddComment"
+      method="post"
+      data-ajax="true"
+      style="margin-bottom: 20px;">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <input type="hidden" asp-for="BugId" />
+    <div class="form-group">
+        <input asp-for="@Model.Message" class="form-control" />
+        <span asp-validation-for="@Model.Message" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="submit" value="Add Comment" class="btn custom-btn-primary btn-md" />
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        $(function () {
+            var commentForm = document.getElementById('commentForm');
+            $('#commentForm').submit(function (e) {
+                $.ajax({
+                    success: function () {
+                        console.log('Add comment was successful');
+                        commentForm.reset();
+                    }
+                })
+            })
+        }
+    </script>
+}
