@@ -175,9 +175,10 @@
         </div>
     </div>
     <input type="hidden" id="bugId" value="@Model.Id" />
-    </section>
+</section>
 
 @section Scripts {
+    <script src="~/js/commonhubscript.js"></script>
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
