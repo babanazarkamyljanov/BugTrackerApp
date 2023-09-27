@@ -27,6 +27,7 @@ connection.on("refreshBugs", function (bugs) {
 function loadBugs(bugs) {
     var tbody = '';
     var src = '';
+    var projectSrc = 'Projects/Details/';
     var detailsSrc = '/Bugs/Details/';
     var editSrc = '/Bugs/Edit/';
 
@@ -41,6 +42,7 @@ function loadBugs(bugs) {
         }
         detailsSrc += item.id;
         editSrc += item.id;
+        projectSrc += item.projectId;
 
         tbody += `
         <tr>
@@ -50,7 +52,7 @@ function loadBugs(bugs) {
                 <small>Created ${item.createdDate}</small>
             </td>
             <td>
-                ${item.projectKey}
+                <a href="${projectSrc}">${item.projectKey}</a>
             </td>
             <td>
                 <ul class="list-inline">
