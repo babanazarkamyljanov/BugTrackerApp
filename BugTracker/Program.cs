@@ -82,5 +82,7 @@ app.MapControllerRoute(
 
 app.MapRazorPages();
 app.MapHub<BugDetailsHub>("/bugDetailsHub");
+app.MapHub<LoadProjectsHub>("/loadProjectsHub");
+app.MapHub<LoadBugsHub>("/loadBugsHub");
 
 app.Run();

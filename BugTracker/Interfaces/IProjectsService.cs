@@ -4,17 +4,19 @@ namespace BugTracker.Interfaces;
 
 public interface IProjectsService
 {
-    Task<List<GetAllProjectDTO>> GetAll(CancellationToken cancellationToken);
+    Task<List<GetAllProjectDTO>> GetAll(CancellationToken ct);
 
-    Task<GetProjectDTO> Get(Guid id, CancellationToken cancellationToken);
+    Task<GetProjectDTO> Get(Guid id, CancellationToken ct);
+
+    Task Search(string searchTerm, CancellationToken ct);
 
     CreateProjectDTO CreateGet();
 
-    Task<CreateProjectDTO> CreatePost(CreateProjectDTO dto, CancellationToken cancellationToken);
+    Task<CreateProjectDTO> CreatePost(CreateProjectDTO dto, CancellationToken ct);
 
-    Task<EditProjectDTO> EditGet(Guid id, CancellationToken cancellationToken);
+    Task<EditProjectDTO> EditGet(Guid id, CancellationToken ct);
 
-    Task<EditProjectDTO> EditPost(Guid id, EditProjectDTO dto, CancellationToken cancellationToken);
+    Task<EditProjectDTO> EditPost(Guid id, EditProjectDTO dto, CancellationToken ct);
 
-    Task Delete(Guid id, CancellationToken cancellationToken);
+    Task Delete(Guid id, CancellationToken ct);
 }

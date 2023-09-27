@@ -7,6 +7,8 @@ public interface IBugsService
 {
     Task<List<GetAllBugDTO>> GetAll(CancellationToken cancellationToken);
 
+    Task Search(string searchTerm, CancellationToken ct);
+
     CreateBugDTO CreateGet();
 
     Task<CreateBugDTO> CreatePost(CreateBugDTO dto, CancellationToken cancellationToken);

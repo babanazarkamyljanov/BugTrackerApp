@@ -22,15 +22,15 @@ public class BugsController : Controller
     }
 
     // GET: BugsController
-    public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Index(CancellationToken ct = default)
     {
-        var bugs = await _bugsService.GetAll(cancellationToken);
+        var bugs = await _bugsService.GetAll(ct);
         return View(bugs);
     }
 
     // GET: BugsController/Details/5
     [HttpGet]
-    public async Task<IActionResult> Details(int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Details(int id, CancellationToken ct = default)
     {
         var isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Read);
@@ -41,7 +41,7 @@ public class BugsController : Controller
 
         try
         {
-            var bug = await _bugsService.GetDetails(id, cancellationToken);
+            var bug = await _bugsService.GetDetails(id, ct);
             return View(bug);
         }
         catch (ArgumentException ex)
@@ -57,9 +57,30 @@ public class BugsController : Controller
         }
     }
 
+    // GET: Search for projects
+    [HttpGet]
+    public async Task<ActionResult> Search(string searchTerm, CancellationToken ct = default)
+    {
+        try
+        {
+            await _bugsService.Search(searchTerm, ct);
+            return Ok();
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Search)}");
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Search)}");
+            return StatusCode(500, "Something went wrong");
+        }
+    }
+
     // this method is called by SignalR hubjs connection
     [HttpGet]
-    public async Task<IActionResult> GetBugDetails(int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> GetBugDetails(int id, CancellationToken ct = default)
     {
         var isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Read);
@@ -70,7 +91,7 @@ public class BugsController : Controller
 
         try
         {
-            var bug = await _bugsService.GetDetails(id, cancellationToken);
+            var bug = await _bugsService.GetDetails(id, ct);
             return Ok(bug);
         }
         catch (ArgumentException ex)
@@ -87,7 +108,7 @@ public class BugsController : Controller
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<BugCommentDTO>>> GetBugComments(int id, CancellationToken cancellationToken = default)
+    public async Task<ActionResult<List<BugCommentDTO>>> GetBugComments(int id, CancellationToken ct = default)
     {
         var isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Read);
@@ -98,7 +119,7 @@ public class BugsController : Controller
 
         try
         {
-            var comments = await _bugsService.GetBugComments(id, cancellationToken);
+            var comments = await _bugsService.GetBugComments(id, ct);
             return Ok(comments);
         }
         catch (ArgumentException ex)
@@ -115,7 +136,7 @@ public class BugsController : Controller
     }
 
     [HttpGet]
-    public async Task<ActionResult<List<BugFileDTO>>> GetBugFiles(int id, CancellationToken cancellationToken = default)
+    public async Task<ActionResult<List<BugFileDTO>>> GetBugFiles(int id, CancellationToken ct = default)
     {
         var isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Read);
@@ -126,7 +147,7 @@ public class BugsController : Controller
 
         try
         {
-            var files = await _bugsService.GetBugFiles(id, cancellationToken);
+            var files = await _bugsService.GetBugFiles(id, ct);
             return Ok(files);
         }
         catch (ArgumentException ex)
@@ -146,13 +167,13 @@ public class BugsController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize]
-    public async Task<IActionResult> UploadFile(AddFileDTO dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> UploadFile(AddFileDTO dto, CancellationToken ct = default)
     {
         if (ModelState.IsValid)
         {
             try
             {
-                await _bugsService.UploadFile(dto, cancellationToken);
+                await _bugsService.UploadFile(dto, ct);
                 _logger.LogInformation("File has been uploaded successfully");
                 return RedirectToAction("Details", new { @id = dto.BugId });
             }
@@ -175,13 +196,13 @@ public class BugsController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize]
-    public async Task<IActionResult> AddComment(AddCommentDTO dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> AddComment(AddCommentDTO dto, CancellationToken ct = default)
     {
         if (ModelState.IsValid)
         {
             try
             {
-                await _bugsService.AddComment(dto, cancellationToken);
+                await _bugsService.AddComment(dto, ct);
                 _logger.LogInformation("Comment has been added successfully");
                 return RedirectToAction("Details", new { @id = dto.BugId });
             }
@@ -218,7 +239,7 @@ public class BugsController : Controller
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(CreateBugDTO dto, CancellationToken cancellationToken)
+    public async Task<IActionResult> Create(CreateBugDTO dto, CancellationToken ct)
     {
         var isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Create);
@@ -231,7 +252,7 @@ public class BugsController : Controller
         {
             try
             {
-                var result = await _bugsService.CreatePost(dto, cancellationToken);
+                var result = await _bugsService.CreatePost(dto, ct);
                 _logger.LogInformation("project has been created successfully", nameof(result));
                 return RedirectToAction(nameof(Index));
             }
@@ -251,7 +272,7 @@ public class BugsController : Controller
     }
 
     // GET: BugsController/Edit/5
-    public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Edit(int id, CancellationToken ct = default)
     {
         var isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Update);
@@ -262,7 +283,7 @@ public class BugsController : Controller
 
         try
         {
-            var dto = await _bugsService.EditGet(id, cancellationToken);
+            var dto = await _bugsService.EditGet(id, ct);
             return View(dto);
         }
         catch (ArgumentException ex)
@@ -281,9 +302,10 @@ public class BugsController : Controller
     // POST: BugsController/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, EditBugDTO dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Edit(int id, EditBugDTO dto, CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.BugOperations.Update);
+        var isAuthorized = await authorizationService
+            .AuthorizeAsync(User, Permissions.BugOperations.Update);
         if (!isAuthorized.Succeeded)
         {
             return RedirectToAction("AccessDenied", "Account");
@@ -293,7 +315,7 @@ public class BugsController : Controller
         {
             try
             {
-                var result = await _bugsService.EditPost(id, dto, cancellationToken);
+                var result = await _bugsService.EditPost(id, dto, ct);
                 _logger.LogInformation("project has been created successfully", nameof(result));
                 return RedirectToAction(nameof(Index));
             }
@@ -315,7 +337,7 @@ public class BugsController : Controller
 
     // Delete: BugsController/Delete/5
     [HttpPost]
-    public async Task<ActionResult> Delete(int id, CancellationToken cancellationToken = default)
+    public async Task<ActionResult> Delete(int id, CancellationToken ct = default)
     {
         var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.BugOperations.Delete);
         if (!isAuthorized.Succeeded)
@@ -325,7 +347,7 @@ public class BugsController : Controller
 
         try
         {
-            await _bugsService.Delete(id, cancellationToken);
+            await _bugsService.Delete(id, ct);
             return Json(new { success = true, message = "Bug deleted successfully" });
         }
         catch (ArgumentException ex)

@@ -8,14 +8,18 @@ public class ProjectsService : IProjectsService
 {
     private readonly IUsersService _usersService;
     private readonly ApplicationDbContext _context;
+    private readonly IHubContext<LoadProjectsHub> _hubContext;
 
-    public ProjectsService(IUsersService usersService, ApplicationDbContext context)
+    public ProjectsService(IUsersService usersService,
+        ApplicationDbContext context,
+        IHubContext<LoadProjectsHub> hubContext)
     {
         _usersService = usersService;
         _context = context;
+        _hubContext = hubContext;
     }
 
-    public async Task<List<GetAllProjectDTO>> GetAll(CancellationToken cancellationToken)
+    public async Task<List<GetAllProjectDTO>> GetAll(CancellationToken ct)
     {
         var currentUser = await _usersService.GetCurrentUserAsync();
 
@@ -33,18 +37,18 @@ public class ProjectsService : IProjectsService
                 Key = p.Key,
                 Priority = p.Priority,
                 Status = p.Status,
-                CreatedDate = p.CreatedDate,
+                CreatedDate = p.CreatedDate.ToShortDateString(),
                 Manager = new UserDTO()
                 {
                     UserName = p.Manager.UserName,
                     AvatarPhoto = p.Manager.AvatarPhoto
                 }
-            }).ToListAsync(cancellationToken);
+            }).ToListAsync(ct);
 
         return projects;
     }
 
-    public async Task<GetProjectDTO> Get(Guid id, CancellationToken cancellationToken)
+    public async Task<GetProjectDTO> Get(Guid id, CancellationToken ct)
     {
         var project = await _context.Projects
             .Where(p => p.Id == id)
@@ -74,7 +78,7 @@ public class ProjectsService : IProjectsService
                     Description = b.Description,
                 }).ToList()
             })
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(ct);
 
         if (project == null)
         {
@@ -84,6 +88,61 @@ public class ProjectsService : IProjectsService
         return project;
     }
 
+    public async Task Search(string searchTerm, CancellationToken ct)
+    {
+        var currentUser = await _usersService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            throw new ArgumentException("current logged in user wasn't found");
+        }
+
+        List<GetAllProjectDTO> projects;
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            projects = await _context.Projects
+                .Where(p => p.OrganizationId == currentUser.OrganizationId)
+                .Select(p => new GetAllProjectDTO()
+                {
+                    Id = p.Id,
+                    Title = p.Title,
+                    Key = p.Key,
+                    Priority = p.Priority,
+                    Status = p.Status,
+                    CreatedDate = p.CreatedDate.ToShortDateString(),
+                    Manager = new UserDTO()
+                    {
+                        UserName = p.Manager.UserName,
+                        AvatarPhoto = p.Manager.AvatarPhoto
+                    }
+                }).ToListAsync(ct);
+            await _hubContext.Clients.All.SendAsync("refreshProjects", projects, ct);
+            return;
+        }
+
+        searchTerm = searchTerm.Trim().ToLower();
+        projects = await _context.Projects
+            .Where(p => p.OrganizationId == currentUser.OrganizationId && (
+                        p.Title.ToLower().Contains(searchTerm) ||
+                        p.Priority.ToLower().Contains(searchTerm) ||
+                        p.Status.ToLower().Contains(searchTerm)))
+            .Select(p => new GetAllProjectDTO()
+            {
+                Id = p.Id,
+                Title = p.Title,
+                Key = p.Key,
+                Priority = p.Priority,
+                Status = p.Status,
+                CreatedDate = p.CreatedDate.ToShortDateString(),
+                Manager = new UserDTO()
+                {
+                    UserName = p.Manager.UserName,
+                    AvatarPhoto = p.Manager.AvatarPhoto
+                }
+            }).ToListAsync(ct);
+        await _hubContext.Clients.All.SendAsync("refreshProjects", projects, ct);
+        return;
+    }
+
     public CreateProjectDTO CreateGet()
     {
         var dto = new CreateProjectDTO();
@@ -91,7 +150,7 @@ public class ProjectsService : IProjectsService
     }
 
     public async Task<CreateProjectDTO> CreatePost(CreateProjectDTO dto,
-        CancellationToken cancellationToken)
+        CancellationToken ct)
     {
         // TODO validate dto
 
@@ -114,7 +173,7 @@ public class ProjectsService : IProjectsService
         project.OrganizationId = currentUser.OrganizationId;
 
         _context.Projects.Add(project);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(ct);
         return dto;
 
         // TODO implement notification
@@ -141,7 +200,7 @@ public class ProjectsService : IProjectsService
         //return "success";
     }
 
-    public async Task<EditProjectDTO> EditGet(Guid id, CancellationToken cancellationToken)
+    public async Task<EditProjectDTO> EditGet(Guid id, CancellationToken ct)
     {
         var project = await _context.Projects
             .Where(p => p.Id == id)
@@ -154,7 +213,7 @@ public class ProjectsService : IProjectsService
                 Status = p.Status,
                 ManagerId = p.ManagerId
             })
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(ct);
 
         if (project == null)
         {
@@ -164,7 +223,7 @@ public class ProjectsService : IProjectsService
         return project;
     }
 
-    public async Task<EditProjectDTO> EditPost(Guid id, EditProjectDTO dto, CancellationToken cancellationToken)
+    public async Task<EditProjectDTO> EditPost(Guid id, EditProjectDTO dto, CancellationToken ct)
     {
         if (id != dto.Id)
         {
@@ -183,11 +242,11 @@ public class ProjectsService : IProjectsService
         project.Status = dto.Status;
         project.ManagerId = dto.ManagerId;
 
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(ct);
         return dto;
     }
 
-    public async Task Delete(Guid id, CancellationToken cancellationToken)
+    public async Task Delete(Guid id, CancellationToken ct)
     {
         var project = await _context.Projects
             .Where(p => p.Id == id)
@@ -196,7 +255,7 @@ public class ProjectsService : IProjectsService
                 Id = p.Id,
                 Bugs = p.Bugs,
             })
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(ct);
 
         if (project == null)
         {
@@ -215,6 +274,6 @@ public class ProjectsService : IProjectsService
         }
 
         _context.Projects.Remove(project);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(ct);
     }
 }
