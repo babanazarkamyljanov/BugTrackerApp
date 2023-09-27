@@ -22,28 +22,29 @@ public class ProjectsController : Controller
     }
 
     // GET: all projects
-    public async Task<IActionResult> Index(CancellationToken cancellationToken = default)
+    [HttpGet]
+    public async Task<IActionResult> Index(CancellationToken ct = default)
     {
         try
         {
-            var projects = await _projectsService.GetAll(cancellationToken);
+            var projects = await _projectsService.GetAll(ct);
             return View(projects);
         }
         catch (ArgumentException ex)
         {
             _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Index)}");
-            return NotFound(ex.Message);
+            return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Index)}");
-            ViewData["ErrorMessage"] = "Something went wrong";
-            return View();
+            return StatusCode(500, "Something went wrong");
         }
     }
 
     // GET: Projects/Details/5
-    public async Task<IActionResult> Details(Guid id, CancellationToken cancellationToken = default)
+    [HttpGet]
+    public async Task<IActionResult> Details(Guid id, CancellationToken ct = default)
     {
         var isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Read);
@@ -54,19 +55,39 @@ public class ProjectsController : Controller
 
         try
         {
-            var project = await _projectsService.Get(id, cancellationToken);
+            var project = await _projectsService.Get(id, ct);
             return View(project);
         }
         catch (ArgumentException ex)
         {
             _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Details)}");
-            return NotFound();
+            return BadRequest(ex.Message);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Details)}");
-            ViewData["ErrorMessage"] = "Something went wrong";
-            return View();
+            return StatusCode(500, "Something went wrong");
+        }
+    }
+
+    // GET: Search for projects
+    [HttpGet]
+    public async Task<ActionResult> Search(string searchTerm, CancellationToken ct = default)
+    {
+        try
+        {
+            await _projectsService.Search(searchTerm, ct);
+            return Ok();
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Search)}");
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Search)}");
+            return StatusCode(500, "Something went wrong");
         }
     }
 
@@ -98,7 +119,7 @@ public class ProjectsController : Controller
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateProjectDTO dto,
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
         var isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Create);
@@ -111,7 +132,7 @@ public class ProjectsController : Controller
         {
             try
             {
-                var result = await _projectsService.CreatePost(dto, cancellationToken);
+                var result = await _projectsService.CreatePost(dto, ct);
                 _logger.LogInformation("project has been created successfully", nameof(result));
                 return RedirectToAction(nameof(Index));
             }
@@ -131,7 +152,7 @@ public class ProjectsController : Controller
     }
 
     // GET: Projects/Edit/5
-    public async Task<IActionResult> Edit(Guid id, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Edit(Guid id, CancellationToken ct = default)
     {
         var isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Update);
@@ -143,7 +164,7 @@ public class ProjectsController : Controller
 
         try
         {
-            var dto = await _projectsService.EditGet(id, cancellationToken);
+            var dto = await _projectsService.EditGet(id, ct);
             return View(dto);
         }
         catch (ArgumentException ex)
@@ -162,7 +183,7 @@ public class ProjectsController : Controller
     // POST: Projects/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Guid id, EditProjectDTO dto, CancellationToken cancellationToken = default)
+    public async Task<IActionResult> Edit(Guid id, EditProjectDTO dto, CancellationToken ct = default)
     {
         var isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Update);
@@ -175,7 +196,7 @@ public class ProjectsController : Controller
         {
             try
             {
-                var result = await _projectsService.EditPost(id, dto, cancellationToken);
+                var result = await _projectsService.EditPost(id, dto, ct);
                 _logger.LogInformation("project has been created successfully", nameof(result));
                 return RedirectToAction(nameof(Index));
             }
@@ -197,7 +218,7 @@ public class ProjectsController : Controller
 
     // POST: Projects/Delete/5
     [HttpPost]
-    public async Task<ActionResult> Delete(Guid id, CancellationToken cancellationToken = default)
+    public async Task<ActionResult> Delete(Guid id, CancellationToken ct = default)
     {
         var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Delete);
         if (!isAuthorized.Succeeded)
@@ -207,7 +228,7 @@ public class ProjectsController : Controller
 
         try
         {
-            await _projectsService.Delete(id, cancellationToken);
+            await _projectsService.Delete(id, ct);
             _logger.LogInformation($"Project has been deleted successfully. {nameof(ProjectsController)}.{Delete}");
             return Json(new { success = true, message = "Project deleted successfully" });
         }

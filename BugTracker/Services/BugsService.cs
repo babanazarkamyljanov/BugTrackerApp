@@ -9,16 +9,19 @@ public class BugsService : IBugsService
     private readonly IUsersService _usersService;
     private readonly ApplicationDbContext _context;
     private readonly IHubContext<BugDetailsHub> _hubContext;
+    private readonly IHubContext<LoadBugsHub> _loadBugsHubContext;
     private readonly IWebHostEnvironment _hostEnvironment;
 
     public BugsService(IUsersService usersService,
         ApplicationDbContext context,
         IHubContext<BugDetailsHub> hubContext,
+        IHubContext<LoadBugsHub> loadBugsHubContext,
         IWebHostEnvironment hostEnvironment)
     {
         _usersService = usersService;
         _context = context;
         _hubContext = hubContext;
+        _loadBugsHubContext = loadBugsHubContext;
         _hostEnvironment = hostEnvironment;
     }
 
@@ -37,7 +40,7 @@ public class BugsService : IBugsService
             {
                 Id = b.Id,
                 Title = b.Title,
-                CreatedDate = b.CreatedDate,
+                CreatedDate = b.CreatedDate.ToShortDateString(),
                 Priority = b.Priority,
                 Status = b.Status,
                 ProjectKey = b.Project.Key,
@@ -50,6 +53,64 @@ public class BugsService : IBugsService
             }).ToListAsync(cancellationToken);
 
         return bugs;
+    }
+
+    public async Task Search(string searchTerm, CancellationToken ct)
+    {
+        var currentUser = await _usersService.GetCurrentUserAsync();
+        if (currentUser == null)
+        {
+            throw new ArgumentException("current logged in user wasn't found");
+        }
+
+        List<GetAllBugDTO> bugs;
+        if (string.IsNullOrWhiteSpace(searchTerm))
+        {
+            bugs = await _context.Bugs
+                .Where(b => b.OrganizationId == currentUser.OrganizationId)
+                .Select(b => new GetAllBugDTO()
+                {
+                    Id = b.Id,
+                    Title = b.Title,
+                    CreatedDate = b.CreatedDate.ToShortDateString(),
+                    Priority = b.Priority,
+                    Status = b.Status,
+                    ProjectKey = b.Project.Key,
+                    ProjectId = b.Project.Id,
+                    Assignee = new UserDTO()
+                    {
+                        UserName = b.Assignee.UserName,
+                        AvatarPhoto = b.Assignee.AvatarPhoto
+                    }
+                }).ToListAsync(ct);
+            await _loadBugsHubContext.Clients.All.SendAsync("refreshBugs", bugs, ct);
+            return;
+        }
+
+        searchTerm = searchTerm.Trim().ToLower();
+        bugs = await _context.Bugs
+            .Where(b => b.OrganizationId == currentUser.OrganizationId && (
+                        b.Title.ToLower().Contains(searchTerm) ||
+                        b.Priority.ToLower().Contains(searchTerm) ||
+                        b.Status.ToLower().Contains(searchTerm)))
+            .Select(b => new GetAllBugDTO()
+            {
+                Id = b.Id,
+                Title = b.Title,
+                CreatedDate = b.CreatedDate.ToShortDateString(),
+                Priority = b.Priority,
+                Status = b.Status,
+                ProjectKey = b.Project.Key,
+                ProjectId = b.Project.Id,
+                Assignee = new UserDTO()
+                {
+                    UserName = b.Assignee.UserName,
+                    AvatarPhoto = b.Assignee.AvatarPhoto
+                }
+            }).ToListAsync(ct);
+
+        await _loadBugsHubContext.Clients.All.SendAsync("refreshBugs", bugs, ct);
+        return;
     }
 
     public CreateBugDTO CreateGet()

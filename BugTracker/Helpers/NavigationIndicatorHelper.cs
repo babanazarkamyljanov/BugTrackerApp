@@ -7,23 +7,23 @@ public static class NavigationIndicatorHelper
         try
         {
             string result = "active";
-            var controllerName = urlHelper.ActionContext.RouteData.Values["controller"].ToString();
-            var methodName = urlHelper.ActionContext.RouteData.Values["action"].ToString();
+            var controllerName = urlHelper?.ActionContext?.RouteData?.Values["controller"]?.ToString();
+            var methodName = urlHelper?.ActionContext?.RouteData?.Values["action"]?.ToString();
 
             if (string.IsNullOrEmpty(controllerName))
-                return null;
+                return "";
             if (controllerName.Equals(controller, StringComparison.OrdinalIgnoreCase))
             {
-                if (methodName.Equals(action, StringComparison.OrdinalIgnoreCase))
+                if (methodName != null && methodName.Equals(action, StringComparison.OrdinalIgnoreCase))
                 {
                     return result;
                 }
             }
-            return null;
+            return "";
         }
         catch (Exception)
         {
-            return null;
+            return "";
         }
     }
 }

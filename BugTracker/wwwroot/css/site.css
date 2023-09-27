@@ -32,7 +32,6 @@ body {
     color: #9c9c9c;
 }
 
-
 #deleteConfirmBox {
     z-index: 9;
     display: none;
@@ -42,7 +41,6 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
 }
-
 
 button.btn.btn-secondary.buttons-csv.buttons-html5.btn-info.csvButton,
 button.btn.btn-secondary.buttons-excel.buttons-html5.excelButton {

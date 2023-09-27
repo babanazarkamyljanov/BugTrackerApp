@@ -1,128 +1,120 @@
 ﻿@model IEnumerable<GetAllProjectDTO>
 
-<section class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-12">
-                <h1>All Projects</h1>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1>All Projects</h1>
+        </div>
+    </div>
+
+    <div class="row g-3 align-items-center">
+        <div class="col-6">
+            <input class="form-control form-control-lg" id="searchInput" placeholder="search" />
+        </div>
+        <div class="col-6">
+            <button class="btn btn-primary btn-lg" id="searchBtn" type="button">Search</button>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped projects">
+                    <thead>
+                        <tr>
+                            <th style="width: 1%">Key</th>
+                            <th style="width: 20%">Title</th>
+                            <th style="width: 30%">Project Manager</th>
+                            <th>Priority</th>
+                            <th>Progress</th>
+                            <th style="width: 8%">Status</th>
+                            <th style="width: 20%"></th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody">
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    <h6>@item.Key</h6>
+                                </td>
+                                <td>
+                                    @item.Title
+                                    <br />
+                                    <small>Created @item.CreatedDate</small>
+                                </td>
+                                <td>
+                                    <ul class="list-inline">
+                                        <li class="list-inline-item">
+                                            @if (item.Manager.AvatarPhoto is null)
+                                            {
+                                                <img src="~/img/default-avatar.png" class="table-avatar" alt="User Image">
+                                            }
+                                            else
+                                            {
+                                                string src = "data:image/png;base64,"
+                                                + Convert.ToBase64String(item.Manager.AvatarPhoto, 0, item.Manager.AvatarPhoto.Length);
+                                                <img src="@src" class="table-avatar" alt="User Image">
+                                            }
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <h6>@item.Manager.UserName</h6>
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <h6>@item.Priority</h6>
+                                </td>
+                                <td class="project_progress">
+                                    <div class="progress progress-sm">
+                                        <div class="progress-bar bg-green" role="progressbar" aria-valuenow="57" aria-valuemin="0" aria-valuemax="100" style="width: 57%">
+                                        </div>
+                                    </div>
+                                    <small>
+                                        57% Complete
+                                    </small>
+                                </td>
+                                <td class="project-state">
+                                    <span class="badge badge-success">@item.Status</span>
+                                </td>
+                                <td class="project-actions text-right">
+                                    <a class="btn btn-primary btn-sm" asp-controller="Projects" asp-action="Details" asp-route-id="@item.Id">
+                                        <i class="fa-solid fa-eye">
+                                        </i>
+                                    </a>
+                                    <a class="btn btn-info btn-sm" asp-controller="Projects" asp-action="Edit" asp-route-id="@item.Id">
+                                        <i class="fas fa-pencil-alt">
+                                        </i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
-</section>
+</div>
 
-<section class="content">
-    <div class="card">
-        <div class="card-body">
-            <table id="example1" class="table table-striped projects">
-                <thead>
-                    <tr>
-                        <th style="width: 1%">
-                            Key
-                        </th>
-                        <th style="width: 20%">
-                            Title
-                        </th>
-                        <th style="width: 30%">
-                            Project Manager
-                        </th>
-                        <th>
-                            Priority
-                        </th>
-                        <th class="no-sort">
-                            Progress
-                        </th>
-                        <th style="width: 8%" class="text-center">
-                            Status
-                        </th>
-                        <th class="no-sort text-right" style="width: 20%">
-                            
-                        </th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model)
-                    {
-                        <tr>
-                            <td>
-                                <h6>@item.Key</h6>
-                            </td>
-                            <td>
-                                <a asp-controller="Projects" asp-action="Details" asp-route-id="@item.Id">@item.Title</a>
-                                <br />
-                                <small>Created @item.CreatedDate</small>
-                            </td>
-                            <td>
-                                <ul class="list-inline">
-                                    <li class="list-inline-item">
-                                        @if (item.Manager.AvatarPhoto is null)
-                                        {
-                                            <img src="~/img/default-avatar.png" class="table-avatar" alt="User Image">
-                                        }
-                                        else
-                                        {
-                                            string src = "data:image/png;base64," 
-                                            + Convert.ToBase64String(item.Manager.AvatarPhoto, 0, item.Manager.AvatarPhoto.Length);
-                                            <img src="@src" class="table-avatar" alt="User Image">
-                                        }
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <h6>@item.Manager.UserName</h6>
-                                    </li>
-                                </ul>
-                            </td>
-                            <td>
-                                <h6>@item.Priority</h6>
-                            </td>
-                            <td class="project_progress">
-                                <div class="progress progress-sm">
-                                    <div class="progress-bar bg-green" role="progressbar" aria-valuenow="57" aria-valuemin="0" aria-valuemax="100" style="width: 57%">
-                                    </div>
-                                </div>
-                                <small>
-                                    57% Complete
-                                </small>
-                            </td>
-                            <td class="project-state">
-                                <span class="badge badge-success">@item.Status</span>
-                            </td>
-                            <td class="project-actions text-right">
-                                <a class="btn btn-primary btn-sm" asp-controller="Projects" asp-action="Details" asp-route-id="@item.Id">
-                                    <i class="fa-solid fa-eye">
-                                    </i>
-                                </a>
-                                <a class="btn btn-info btn-sm" asp-controller="Projects" asp-action="Edit" asp-route-id="@item.Id">
-                                    <i class="fas fa-pencil-alt">
-                                    </i>
-                                </a>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-</section>
 @section Scripts {
+    <script src="~/js/loadprojects.js"></script>
     <script>
         $(function () {
-            $("#example1").DataTable({
-                "responsive": true, "lengthChange": false, "autoWidth": false,
-                "columnDefs": [{
-                    "targets": "no-sort",
-                    "orderable": false
-                }],
-                "buttons": [
-                    {
-                        text: 'Add',
-                        className: 'custom-btn-primary addButton',
-                        action: function (e, dt, node, config) {
-                            window.location.href = "/Projects/Create"
-                        }
+            $('#searchBtn').click(function () {
+                var searchTerm = $('#searchInput').val()
+
+                $.ajax({
+                    url: '/Projects/Search/',
+                    method: 'GET',
+                    data: { searchTerm: searchTerm },
+                    success: () => {
+                        $('#searchInput').val('');
                     },
-                    { extend: 'csv', className: 'btn-info csvButton' },
-                    { extend: 'excel', className: 'excelButton' }
-                ]
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+                    error: (error) => {
+                        console.log(JSON.stringify(error))
+                    }
+                });
+            });
         });
     </script>
 }

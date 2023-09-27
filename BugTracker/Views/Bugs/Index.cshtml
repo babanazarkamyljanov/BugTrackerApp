@@ -1,50 +1,42 @@
 ﻿@model IEnumerable<GetAllBugDTO>
 
-<section class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-12">
-                <h1>All Bugs</h1>
-            </div>
+<div class="container">
+    <div class="row">
+        <div class="col-12">
+            <h1>All Bugs</h1>
         </div>
     </div>
-</section>
 
-<section class="content">
-    <div class="card">
+    <div class="row g-3 align-items-center">
+        <div class="col-6">
+            <input class="form-control form-control-lg" id="searchInput" placeholder="search" />
+        </div>
+        <div class="col-6">
+            <button class="btn btn-primary btn-lg" id="searchBtn" type="button">Search</button>
+        </div>
+    </div>
+
+    <div class="card mt-4">
         <div class="card-body">
-            <table id="example1" class="table table-striped projects">
+            <div class="table-responsive">
+                <table class="table table-striped projects">
                 <thead>
                     <tr>
-                        <th style="width: 20%">
-                            Title
-                        </th>
-                        <th style="width: 5%">
-                            Project Key
-                        </th>
-                        <th style="width: 30%">
-                            Assignee
-                        </th>
-                        <th>
-                            Priority
-                        </th>
-                        <th class="no-sort">
-                            Progress
-                        </th>
-                        <th style="width: 8%" class="text-center">
-                            Status
-                        </th>
-                        <th class="no-sort text-right" style="width: 20%">
-                            
-                        </th>
+                        <th style="width: 20%">Title</th>
+                        <th style="width: 5%">Project Key</th>
+                        <th style="width: 30%">Assignee</th>
+                        <th>Priority</th>
+                        <th>Progress</th>
+                        <th style="width: 8%">Status</th>
+                        <th style="width: 20%"></th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="tbody">
                     @foreach (var item in Model)
                     {
                         <tr>
                             <td>
-                                <a asp-controller="Bugs" asp-action="Details" asp-route-id="@item.Id">@item.Title</a>
+                                @item.Title
                                 <br />
                                 <small>Created @item.CreatedDate</small>
                             </td>
@@ -100,31 +92,29 @@
                     }
                 </tbody>
             </table>
+            </div>
         </div>
     </div>
-</section>
-
+</div>
 @section Scripts {
+    <script src="~/js/loadbugs.js"></script>
     <script>
         $(function () {
-            $("#example1").DataTable({
-                "responsive": true, "lengthChange": false, "autoWidth": false,
-                "columnDefs": [ {
-                    "targets": "no-sort",
-                    "orderable": false
-                }],
-                "buttons": [
-                    {
-                        text: 'Add',
-                        className: 'custom-btn-primary addButton',
-                        action: function (e, dt, node, config) {
-                            window.location.href = "/Bugs/Create"
-                        }
+            $('#searchBtn').click(function () {
+                var searchTerm = $('#searchInput').val()
+
+                $.ajax({
+                    url: '/Bugs/Search/',
+                    method: 'GET',
+                    data: { searchTerm: searchTerm },
+                    success: () => {
+                        $('#searchInput').val('');
                     },
-                    { extend: 'csv', className: 'btn btn-info csvButton' },
-                    { extend: 'excel', className: 'btn excelButton' }
-                ]
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+                    error: (error) => {
+                        console.log(JSON.stringify(error))
+                    }
+                });
+            });
         });
     </script>
 }
