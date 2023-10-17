@@ -75,7 +75,6 @@ public class ProjectsService : IProjectsService
                 {
                     Id = b.Id,
                     Title = b.Title,
-                    Description = b.Description,
                 }).ToList()
             })
             .FirstOrDefaultAsync(ct);

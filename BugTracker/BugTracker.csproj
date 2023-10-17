@@ -7,9 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="ViewModels\Account\**" />
     <Compile Remove="wwwroot\files\**" />
+    <Content Remove="ViewModels\Account\**" />
     <Content Remove="wwwroot\files\**" />
+    <EmbeddedResource Remove="ViewModels\Account\**" />
     <EmbeddedResource Remove="wwwroot\files\**" />
+    <None Remove="ViewModels\Account\**" />
     <None Remove="wwwroot\files\**" />
   </ItemGroup>
 
@@ -30,7 +34,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="ViewModels\Account\" />
     <Folder Include="wwwroot\bugfiles\" />
     <Folder Include="wwwroot\user-avatars\" />
   </ItemGroup>

@@ -65,15 +65,6 @@ function loadProjects(projects) {
             <td>
                 <h6>${item.priority}</h6>
             </td>
-            <td class="project_progress">
-                <div class="progress progress-sm">
-                    <div class="progress-bar bg-green" role="progressbar" aria-valuenow="57" aria-valuemin="0" aria-valuemax="100" style="width: 57%">
-                    </div>
-                </div>
-                <small>
-                    57% Complete
-                </small>
-            </td>
             <td class="project-state">
                 <span class="badge badge-success">${item.status}</span>
             </td>

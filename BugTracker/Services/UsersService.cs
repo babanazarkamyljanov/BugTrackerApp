@@ -79,7 +79,7 @@ public class UsersService : IUsersService
 
         if (users == null)
         {
-            throw new ArgumentException($"users weren't found {nameof(UsersService)}.{nameof(GetOrganizationUsersAsync)}");
+            throw new ArgumentException("Organization users weren't found");
         }
         return users;
     }
