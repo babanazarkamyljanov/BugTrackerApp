@@ -89,10 +89,10 @@ public class ProjectsService : IProjectsService
 
     public async Task Search(string searchTerm, CancellationToken ct)
     {
-        var currentUser = await _usersService.GetCurrentUserAsync();
+        User? currentUser = await _usersService.GetCurrentUserAsync();
         if (currentUser == null)
         {
-            throw new ArgumentException("current logged in user wasn't found");
+            throw new InvalidOperationException("current logged in user wasn't found");
         }
 
         List<GetAllProjectDTO> projects;
@@ -144,7 +144,7 @@ public class ProjectsService : IProjectsService
 
     public CreateProjectDTO CreateGet()
     {
-        var dto = new CreateProjectDTO();
+        CreateProjectDTO dto = new CreateProjectDTO();
         return dto;
     }
 

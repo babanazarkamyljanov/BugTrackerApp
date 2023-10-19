@@ -55,3 +55,18 @@ button.btn.btn-secondary.custom-btn-primary.addButton {
     margin-right: 10px;
     border-radius: 5px;
 }
+
+.custom-btn-primary {
+    background-color: #322653;
+    color: white;
+}
+
+.custom-btn-primary:hover {
+    background-color: #512b81;
+    color: white;
+}
+
+.custom-btn-primary:disabled {
+    background-color: #d6f8ff;
+    color: #9c9c9c;
+}

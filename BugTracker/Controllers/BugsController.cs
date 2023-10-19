@@ -21,18 +21,24 @@ public class BugsController : Controller
         _logger = logger;
     }
 
-    // GET: BugsController
-    public async Task<IActionResult> Index(CancellationToken ct = default)
+    public async Task<ActionResult<GetAllBugDTO>> Index(CancellationToken ct = default)
     {
-        var bugs = await _bugsService.GetAll(ct);
-        return View(bugs);
+        try
+        {
+            List<GetAllBugDTO> bugs = await _bugsService.GetAll(ct);
+            return View(bugs);
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Index)}");
+            return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
+        }
     }
 
-    // GET: BugsController/Details/5
     [HttpGet]
     public async Task<IActionResult> Details(int id, CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Read);
         if (!isAuthorized.Succeeded)
         {
@@ -41,7 +47,7 @@ public class BugsController : Controller
 
         try
         {
-            var bug = await _bugsService.GetDetails(id, ct);
+            BugDetailsDTO bug = await _bugsService.GetDetails(id, ct);
             return View(bug);
         }
         catch (ArgumentException ex)
@@ -52,12 +58,10 @@ public class BugsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Details)}");
-            ViewData["ErrorMessage"] = "Something went wrong";
-            return View();
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
         }
     }
 
-    // GET: Search for projects
     [HttpGet]
     public async Task<ActionResult> Search(string searchTerm, CancellationToken ct = default)
     {
@@ -66,23 +70,22 @@ public class BugsController : Controller
             await _bugsService.Search(searchTerm, ct);
             return Ok();
         }
-        catch (ArgumentException ex)
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Search)}");
-            return BadRequest(ex.Message);
+            return NotFound(ex.Message);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Search)}");
-            return StatusCode(500, "Something went wrong");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
         }
     }
 
-    // this method is called by SignalR hubjs connection
     [HttpGet]
     public async Task<IActionResult> GetBugDetails(int id, CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Read);
         if (!isAuthorized.Succeeded)
         {
@@ -91,7 +94,7 @@ public class BugsController : Controller
 
         try
         {
-            var bug = await _bugsService.GetDetails(id, ct);
+            BugDetailsDTO bug = await _bugsService.GetDetails(id, ct);
             return Ok(bug);
         }
         catch (ArgumentException ex)
@@ -102,15 +105,14 @@ public class BugsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Details)}");
-            ViewData["ErrorMessage"] = "Something went wrong";
-            return View();
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
         }
     }
 
     [HttpGet]
     public async Task<ActionResult<List<BugCommentDTO>>> GetBugComments(int id, CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Read);
         if (!isAuthorized.Succeeded)
         {
@@ -119,7 +121,7 @@ public class BugsController : Controller
 
         try
         {
-            var comments = await _bugsService.GetBugComments(id, ct);
+            List<BugCommentDTO> comments = await _bugsService.GetBugComments(id, ct);
             return Ok(comments);
         }
         catch (ArgumentException ex)
@@ -130,15 +132,14 @@ public class BugsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(GetBugComments)}");
-            ViewData["ErrorMessage"] = "Something went wrong";
-            return View();
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
         }
     }
 
     [HttpGet]
     public async Task<ActionResult<List<BugFileDTO>>> GetBugFiles(int id, CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Read);
         if (!isAuthorized.Succeeded)
         {
@@ -147,7 +148,7 @@ public class BugsController : Controller
 
         try
         {
-            var files = await _bugsService.GetBugFiles(id, ct);
+            List<BugFileDTO> files = await _bugsService.GetBugFiles(id, ct);
             return Ok(files);
         }
         catch (ArgumentException ex)
@@ -158,12 +159,10 @@ public class BugsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(GetBugFiles)}");
-            ViewData["ErrorMessage"] = "Something went wrong";
-            return View();
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
         }
     }
 
-    // attach file to bug
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize]
@@ -174,7 +173,6 @@ public class BugsController : Controller
             try
             {
                 await _bugsService.UploadFile(dto, ct);
-                _logger.LogInformation("File has been uploaded successfully");
                 return RedirectToAction("Details", new { @id = dto.BugId });
             }
             catch (ArgumentException ex)
@@ -185,14 +183,12 @@ public class BugsController : Controller
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(UploadFile)}");
-                ViewData["ErrorMessage"] = ex.Message;
-                return View();
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
             }
         }
         return RedirectToAction("Details", new { @id = dto.BugId });
     }
 
-    // add a comment to bug
     [HttpPost]
     [ValidateAntiForgeryToken]
     [Authorize]
@@ -203,7 +199,6 @@ public class BugsController : Controller
             try
             {
                 await _bugsService.AddComment(dto, ct);
-                _logger.LogInformation("Comment has been added successfully");
                 return RedirectToAction("Details", new { @id = dto.BugId });
             }
             catch (ArgumentException ex)
@@ -214,34 +209,32 @@ public class BugsController : Controller
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(AddComment)}");
-                ViewData["ErrorMessage"] = ex.Message;
-                return View();
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
             }
         }
         return RedirectToAction("Details", new { @id = dto.BugId });
     }
 
-    // GET: BugsController/Create
+    [HttpGet]
     public async Task<IActionResult> Create()
     {
-        var isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Create);
         if (!isAuthorized.Succeeded)
         {
             return RedirectToAction("AccessDenied", "Account");
         }
 
-        var dto = _bugsService.CreateGet();
+        CreateBugDTO dto = _bugsService.CreateGet();
         return View(dto);
     }
 
-    // POST: BugsController/Create
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(CreateBugDTO dto, CancellationToken ct)
+    public async Task<ActionResult<EditBugDTO>> Create(CreateBugDTO dto, CancellationToken ct)
     {
-        var isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Create);
         if (!isAuthorized.Succeeded)
         {
@@ -252,29 +245,27 @@ public class BugsController : Controller
         {
             try
             {
-                var result = await _bugsService.CreatePost(dto, ct);
-                _logger.LogInformation("project has been created successfully", nameof(result));
+                CreateBugDTO result = await _bugsService.CreatePost(dto, ct);
                 return RedirectToAction(nameof(Index));
             }
-            catch (ArgumentException ex)
+            catch (InvalidOperationException ex)
             {
                 _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Create)}");
-                return NotFound(ex.Message);
+                return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Create)}");
-                ViewData["ErrorMessage"] = ex.Message;
-                return View();
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
             }
         }
         return View(dto);
     }
 
-    // GET: BugsController/Edit/5
+    [HttpGet]
     public async Task<IActionResult> Edit(int id, CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Update);
         if (!isAuthorized.Succeeded)
         {
@@ -283,7 +274,7 @@ public class BugsController : Controller
 
         try
         {
-            var dto = await _bugsService.EditGet(id, ct);
+            EditBugDTO dto = await _bugsService.EditGet(id, ct);
             return View(dto);
         }
         catch (ArgumentException ex)
@@ -294,17 +285,15 @@ public class BugsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Edit)}");
-            ViewData["ErrorMessage"] = "Something went wrong";
-            return View();
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
         }
     }
 
-    // POST: BugsController/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(int id, EditBugDTO dto, CancellationToken ct = default)
+    public async Task<ActionResult<EditBugDTO>> Edit(int id, EditBugDTO dto, CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Update);
         if (!isAuthorized.Succeeded)
         {
@@ -315,31 +304,33 @@ public class BugsController : Controller
         {
             try
             {
-                var result = await _bugsService.EditPost(id, dto, ct);
-                _logger.LogInformation("project has been created successfully", nameof(result));
+                EditBugDTO result = await _bugsService.EditPost(id, dto, ct);
                 return RedirectToAction(nameof(Index));
             }
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Edit)}");
-                ViewData["ErrorMessage"] = ex.Message;
-                View(dto);
+                return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Edit)}");
+                return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Edit)}");
-                ViewData["ErrorMessage"] = "Something went wrong";
-                return View(dto);
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
             }
         }
         return View(dto);
     }
 
-    // Delete: BugsController/Delete/5
     [HttpPost]
     public async Task<ActionResult> Delete(int id, CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.BugOperations.Delete);
+        AuthorizationResult isAuthorized = await authorizationService
+            .AuthorizeAsync(User, Permissions.BugOperations.Delete);
         if (!isAuthorized.Succeeded)
         {
             return RedirectToAction("AccessDenied", "Account");

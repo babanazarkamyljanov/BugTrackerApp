@@ -27,11 +27,13 @@ connection.on("refreshBugs", function (bugs) {
 function loadBugs(bugs) {
     var tbody = '';
     var src = '';
-    var projectSrc = 'Projects/Details/';
-    var detailsSrc = '/Bugs/Details/';
-    var editSrc = '/Bugs/Edit/';
+    
+
 
     bugs.map(item => {
+        var detailsSrc = '/Bugs/Details/' + item.id;
+        var editSrc = '/Bugs/Edit/' + item.id;
+        var projectSrc = 'Projects/Details/' + item.projectId;
         if (item.assignee.avatarPhoto === null) {
             src = '/img/default-avatar.png';
         } else {
@@ -40,9 +42,6 @@ function loadBugs(bugs) {
             const base64String = btoa(binaryString);
             src = 'data:image/png;base64,' + base64String;
         }
-        detailsSrc += item.id;
-        editSrc += item.id;
-        projectSrc += item.projectId;
 
         tbody += `
         <tr>
@@ -71,12 +70,12 @@ function loadBugs(bugs) {
                 <span class="badge badge-success">${item.status}</span>
             </td>
             <td class="project-actions text-right">
-                <a title="View" class="btn btn-primary btn-sm" src="${detailsSrc}">
+                <a title="View" class="btn btn-info btn-sm" href="${detailsSrc}">
                     <i class="fa-solid fa-eye">
                     </i>
                                         
                 </a>
-                <a title="edit" class="btn btn-info btn-sm" src="${editSrc}">
+                <a title="edit" class="btn btn-secondary btn-sm" href="${editSrc}">
                     <i class="fas fa-pencil-alt">
                     </i> 
                 </a>

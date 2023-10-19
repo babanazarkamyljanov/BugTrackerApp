@@ -6,7 +6,7 @@
 @inject IAuthorizationService AuthorizationService
 
 @{
-    var currentUser = await UserManager.GetUserAsync(User);
+    User? currentUser = await UserManager.GetUserAsync(User);
 }
 <!DOCTYPE html>
 <html lang="en">

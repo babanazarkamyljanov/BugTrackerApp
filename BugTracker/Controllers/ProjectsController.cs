@@ -21,13 +21,12 @@ public class ProjectsController : Controller
         _logger = logger;
     }
 
-    // GET: all projects
     [HttpGet]
-    public async Task<IActionResult> Index(CancellationToken ct = default)
+    public async Task<ActionResult<GetAllProjectDTO>> Index(CancellationToken ct = default)
     {
         try
         {
-            var projects = await _projectsService.GetAll(ct);
+            List<GetAllProjectDTO> projects = await _projectsService.GetAll(ct);
             return View(projects);
         }
         catch (ArgumentException ex)
@@ -38,15 +37,14 @@ public class ProjectsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Index)}");
-            return StatusCode(500, "Something went wrong");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
         }
     }
 
-    // GET: Projects/Details/5
     [HttpGet]
-    public async Task<IActionResult> Details(Guid id, CancellationToken ct = default)
+    public async Task<ActionResult<GetProjectDTO>> Details(Guid id, CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Read);
         if (!isAuthorized.Succeeded)
         {
@@ -55,7 +53,7 @@ public class ProjectsController : Controller
 
         try
         {
-            var project = await _projectsService.Get(id, ct);
+            GetProjectDTO project = await _projectsService.Get(id, ct);
             return View(project);
         }
         catch (ArgumentException ex)
@@ -66,11 +64,10 @@ public class ProjectsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Details)}");
-            return StatusCode(500, "Something went wrong");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
         }
     }
 
-    // GET: Search for projects
     [HttpGet]
     public async Task<ActionResult> Search(string searchTerm, CancellationToken ct = default)
     {
@@ -78,6 +75,11 @@ public class ProjectsController : Controller
         {
             await _projectsService.Search(searchTerm, ct);
             return Ok();
+        }
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Search)}");
+            return BadRequest(ex.Message);
         }
         catch (ArgumentException ex)
         {
@@ -87,15 +89,14 @@ public class ProjectsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Search)}");
-            return StatusCode(500, "Something went wrong");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
         }
     }
 
-    // GET: Projects/Create
     [HttpGet]
-    public async Task<IActionResult> Create()
+    public async Task<ActionResult<CreateProjectDTO>> Create()
     {
-        var isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Create);
         if (!isAuthorized.Succeeded)
         {
@@ -104,24 +105,22 @@ public class ProjectsController : Controller
 
         try
         {
-            var dto = _projectsService.CreateGet();
+            CreateProjectDTO dto = _projectsService.CreateGet();
             return View(dto);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Create)}");
-            ViewData["ErrorMessage"] = "Something went wrong";
-            return View();
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
         }
     }
 
-    // POST: Projects/Create
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Create(CreateProjectDTO dto,
+    public async Task<ActionResult<CreateProjectDTO>> Create(CreateProjectDTO dto,
         CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Create);
         if (!isAuthorized.Succeeded)
         {
@@ -132,8 +131,7 @@ public class ProjectsController : Controller
         {
             try
             {
-                var result = await _projectsService.CreatePost(dto, ct);
-                _logger.LogInformation("project has been created successfully", nameof(result));
+                CreateProjectDTO result = await _projectsService.CreatePost(dto, ct);
                 return RedirectToAction(nameof(Index));
             }
             catch (ArgumentException ex)
@@ -144,17 +142,16 @@ public class ProjectsController : Controller
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Create)}");
-                ViewData["ErrorMessage"] = ex.Message;
-                return View();
+                return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
             }
         }
         return View(dto);
     }
 
-    // GET: Projects/Edit/5
-    public async Task<IActionResult> Edit(Guid id, CancellationToken ct = default)
+    [HttpGet]
+    public async Task<ActionResult<EditProjectDTO>> Edit(Guid id, CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Update);
 
         if (!isAuthorized.Succeeded)
@@ -164,7 +161,7 @@ public class ProjectsController : Controller
 
         try
         {
-            var dto = await _projectsService.EditGet(id, ct);
+            EditProjectDTO dto = await _projectsService.EditGet(id, ct);
             return View(dto);
         }
         catch (ArgumentException ex)
@@ -175,17 +172,15 @@ public class ProjectsController : Controller
         catch (Exception ex)
         {
             _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Edit)}");
-            ViewData["ErrorMessage"] = "Something went wrong";
-            return View();
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
         }
     }
 
-    // POST: Projects/Edit/5
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Edit(Guid id, EditProjectDTO dto, CancellationToken ct = default)
+    public async Task<ActionResult<EditProjectDTO>> Edit(Guid id, EditProjectDTO dto, CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Update);
         if (!isAuthorized.Succeeded)
         {
@@ -196,8 +191,7 @@ public class ProjectsController : Controller
         {
             try
             {
-                var result = await _projectsService.EditPost(id, dto, ct);
-                _logger.LogInformation("project has been created successfully", nameof(result));
+                EditProjectDTO result = await _projectsService.EditPost(id, dto, ct);
                 return RedirectToAction(nameof(Index));
             }
             catch (ArgumentException ex)
@@ -216,11 +210,10 @@ public class ProjectsController : Controller
         return View(dto);
     }
 
-    // POST: Projects/Delete/5
     [HttpPost]
     public async Task<ActionResult> Delete(Guid id, CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Delete);
+        AuthorizationResult isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Delete);
         if (!isAuthorized.Succeeded)
         {
             return RedirectToAction("AccessDenied", "Account");
@@ -229,22 +222,21 @@ public class ProjectsController : Controller
         try
         {
             await _projectsService.Delete(id, ct);
-            _logger.LogInformation($"Project has been deleted successfully. {nameof(ProjectsController)}.{Delete}");
             return Json(new { success = true, message = "Project deleted successfully" });
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, $"{nameof(ProjectsController)}.{Delete}");
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Delete)}");
             return Json(new { success = false, message = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, $"{nameof(ProjectsController)}.{Delete}");
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Delete)}");
             return Json(new { success = false, message = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"{nameof(ProjectsController)}.{Delete}");
+            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Delete)}");
             return Json(new { success = false, message = "An error occurred while deleting the project" });
         }
     }

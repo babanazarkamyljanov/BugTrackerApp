@@ -27,10 +27,10 @@ connection.on("refreshProjects", function (projects) {
 function loadProjects(projects) {
     var tbody = '';
     var src = '';
-    var detailsSrc = '/Projects/Details/';
-    var editSrc = '/Projects/Edit/';
 
     projects.map(item => {
+        var detailsSrc = '/Projects/Details/' + item.id;
+        var editSrc = '/Projects/Edit/' + item.id;
         if (item.manager.avatarPhoto === null) {
             src = '/img/default-avatar.png';
         } else {
@@ -39,8 +39,6 @@ function loadProjects(projects) {
             const base64String = btoa(binaryString);
             src = 'data:image/png;base64,' + base64String;
         }
-        detailsSrc += item.id;
-        editSrc += item.id;
 
         tbody += `
         <tr>
@@ -69,11 +67,11 @@ function loadProjects(projects) {
                 <span class="badge badge-success">${item.status}</span>
             </td>
             <td class="project-actions text-right">
-                <a class="btn btn-primary btn-sm" href="${detailsSrc}">
+                <a class="btn btn-info btn-sm" href="${detailsSrc}">
                     <i class="fa-solid fa-eye">
                     </i>
                 </a>
-                <a class="btn btn-info btn-sm" href="${editSrc}">
+                <a class="btn btn-secondary btn-sm" href="${editSrc}">
                     <i class="fas fa-pencil-alt">
                     </i>
                 </a>
