@@ -73,7 +73,7 @@
         </div>
 
         <div class="row">
-            <section class="col-lg-7 connectedSortable">
+            <section class="col-lg-7">
                 <!-- PROJECTS STATUS CHART -->
                 <div class="card card-danger">
                     <div class="card-header">
@@ -94,7 +94,7 @@
                 </div>
             </section>
 
-            <section class="col-lg-5 connectedSortable">
+            <section class="col-lg-5">
                 <!-- PROJECTS PRIORITY CHART -->
                 <div class="card card-danger">
                     <div class="card-header">
@@ -126,16 +126,6 @@
 @section Scripts {
     <script>
         $(function () {
-            // Make the dashboard widgets sortable Using jquery UI
-            $('.connectedSortable').sortable({
-                placeholder: 'sort-highlight',
-                connectWith: '.connectedSortable',
-                handle: '.card-header, .nav-tabs',
-                forcePlaceholderSize: true,
-                zIndex: 999999
-            })
-            $('.connectedSortable .card-header').css('cursor', 'move')
-
             //- PROJECTS STATUS CHART -
             var projectsStatusChartCanvas = $('#projectsStatusChart').get(0).getContext('2d')
             var projectsStatusData = {
