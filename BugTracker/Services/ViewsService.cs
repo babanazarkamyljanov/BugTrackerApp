@@ -21,17 +21,18 @@ public class ViewsService : IViewsService
 
     public async Task<List<UserDTO>> GetOrganizationManagers()
     {
-        var currentUser = await _usersService.GetCurrentUserAsync();
-
+        string claim = _usersService.GetCurrentUserId();
+        User? currentUser = await GetCurrentUser(claim);
         if (currentUser == null)
         {
-            throw new ArgumentException("current logged in user wasn't found");
+            throw new InvalidOperationException("Current logged in user wasn't found");
         }
 
-        var organizationUsers = await _usersService
-            .GetOrganizationUsersAsync(currentUser.OrganizationId);
+        List<User> organizationUsers = await _userManager.Users
+            .Where(u => u.OrganizationId == currentUser.OrganizationId)
+            .ToListAsync();
 
-        var managers = new List<UserDTO>();
+        List<UserDTO> managers = new List<UserDTO>();
         foreach (var user in organizationUsers)
         {
             if (await _userManager.IsInRoleAsync(user, DefaultRoles.ProjectManager))
@@ -57,11 +58,11 @@ public class ViewsService : IViewsService
 
     public async Task<List<UserDTO>> GetOrganizationUsers()
     {
-        var currentUser = await _usersService.GetCurrentUserAsync();
-
+        string claim = _usersService.GetCurrentUserId();
+        User? currentUser = await GetCurrentUser(claim);
         if (currentUser == null)
         {
-            throw new ArgumentException("current logged in user wasn't found");
+            throw new InvalidOperationException("Current logged in user wasn't found");
         }
 
         var users = await _userManager.Users
@@ -78,11 +79,11 @@ public class ViewsService : IViewsService
 
     public async Task<List<SharedProjectDTO>> GetOrganizationProjects()
     {
-        var currentUser = await _usersService.GetCurrentUserAsync();
-
+        string claim = _usersService.GetCurrentUserId();
+        User? currentUser = await GetCurrentUser(claim);
         if (currentUser == null)
         {
-            throw new ArgumentException("current logged in user wasn't found");
+            throw new InvalidOperationException("Current logged in user wasn't found");
         }
 
         var projects = await _context.Projects
@@ -96,4 +97,14 @@ public class ViewsService : IViewsService
 
         return projects;
     }
+
+    #region Helpers
+    private async Task<User> GetCurrentUser(string claim)
+    {
+        User? currentUser = await _userManager.Users
+            .Where(u => u.Id == claim)
+            .FirstOrDefaultAsync();
+        return currentUser!;
+    }
+    #endregion
 }

@@ -10,8 +10,6 @@ public interface IProjectsService
 
     Task Search(string searchTerm, CancellationToken ct);
 
-    CreateProjectDTO CreateGet();
-
     Task<CreateProjectDTO> CreatePost(CreateProjectDTO dto, CancellationToken ct);
 
     Task<EditProjectDTO> EditGet(Guid id, CancellationToken ct);

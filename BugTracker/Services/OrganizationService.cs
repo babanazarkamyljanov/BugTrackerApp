@@ -1,14 +1,24 @@
 ﻿using BugTracker.Interfaces;
+using BugTracker.Models.DTOs;
 
 namespace BugTracker.Services;
 
 public class OrganizationService : IOrganizationService
 {
     private readonly ApplicationDbContext _context;
+    private readonly IUsersService _usersService;
+    private readonly RoleManager<Role> _roleManager;
+    private readonly UserManager<User> _userManager;
 
-    public OrganizationService(ApplicationDbContext context)
+    public OrganizationService(ApplicationDbContext context,
+        IUsersService usersService,
+        RoleManager<Role> roleManager,
+        UserManager<User> userManager)
     {
         _context = context;
+        _usersService = usersService;
+        _roleManager = roleManager;
+        _userManager = userManager;
     }
 
     public async Task<Organization> Create(string name, CancellationToken cancellationToken)
@@ -25,6 +35,44 @@ public class OrganizationService : IOrganizationService
         _context.Organizations.Add(model);
         await _context.SaveChangesAsync(cancellationToken);
         return model;
+    }
+
+    public async Task<GetOrganizationDTO> GetOrganization(CancellationToken ct)
+    {
+        string claim = _usersService.GetCurrentUserId();
+        User? currentUser = await _userManager.Users
+            .Where(u => u.Id == claim)
+            .FirstOrDefaultAsync(ct);
+        if (currentUser == null)
+        {
+            throw new InvalidOperationException("Current logged in user wasn't found");
+        }
+
+        GetOrganizationDTO? organization = await _context.Organizations
+            .Where(o => o.Id == currentUser.OrganizationId)
+            .Select(o => new GetOrganizationDTO()
+            {
+                Id = o.Id,
+                Name = o.Name,
+                Users = o.OrganizationUsers
+                .Select(u => new UserDTO()
+                {
+                    Id = u.Id,
+                    Email = u.Email,
+                    UserName = u.UserName,
+                    AvatarPhoto = u.AvatarPhoto,
+                    Roles = _userManager.GetRolesAsync(u).Result.ToList()
+                })
+                .ToList()
+            })
+            .FirstOrDefaultAsync(ct);
+
+        if (organization == null)
+        {
+            throw new ArgumentException("organization wasn't found");
+        }
+
+        return organization;
     }
 
     public async Task Delete(Guid id, CancellationToken cancellationToken)

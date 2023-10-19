@@ -6,29 +6,32 @@ namespace BugTracker.Services;
 
 public class ProjectsService : IProjectsService
 {
-    private readonly IUsersService _usersService;
     private readonly ApplicationDbContext _context;
+    private readonly IUsersService _usersService;
+    private readonly UserManager<User> _userManager;
     private readonly IHubContext<LoadProjectsHub> _hubContext;
 
-    public ProjectsService(IUsersService usersService,
-        ApplicationDbContext context,
+    public ProjectsService(ApplicationDbContext context,
+        IUsersService usersService,
+        UserManager<User> userManager,
         IHubContext<LoadProjectsHub> hubContext)
     {
-        _usersService = usersService;
         _context = context;
+        _usersService = usersService;
+        _userManager = userManager;
         _hubContext = hubContext;
     }
 
     public async Task<List<GetAllProjectDTO>> GetAll(CancellationToken ct)
     {
-        var currentUser = await _usersService.GetCurrentUserAsync();
-
+        string claim = _usersService.GetCurrentUserId();
+        User? currentUser = await GetCurrentUser(claim);
         if (currentUser == null)
         {
-            throw new ArgumentException("current logged in user wasn't found");
+            throw new InvalidOperationException("Current logged in user wasn't found");
         }
 
-        var projects = await _context.Projects
+        List<GetAllProjectDTO> projects = await _context.Projects
             .Where(p => p.OrganizationId == currentUser.OrganizationId)
             .Select(p => new GetAllProjectDTO()
             {
@@ -50,7 +53,7 @@ public class ProjectsService : IProjectsService
 
     public async Task<GetProjectDTO> Get(Guid id, CancellationToken ct)
     {
-        var project = await _context.Projects
+        GetProjectDTO? project = await _context.Projects
             .Where(p => p.Id == id)
             .Select(p => new GetProjectDTO()
             {
@@ -75,7 +78,6 @@ public class ProjectsService : IProjectsService
                 {
                     Id = b.Id,
                     Title = b.Title,
-                    Description = b.Description,
                 }).ToList()
             })
             .FirstOrDefaultAsync(ct);
@@ -90,10 +92,11 @@ public class ProjectsService : IProjectsService
 
     public async Task Search(string searchTerm, CancellationToken ct)
     {
-        var currentUser = await _usersService.GetCurrentUserAsync();
+        string claim = _usersService.GetCurrentUserId();
+        User? currentUser = await GetCurrentUser(claim);
         if (currentUser == null)
         {
-            throw new ArgumentException("current logged in user wasn't found");
+            throw new InvalidOperationException("Current logged in user wasn't found");
         }
 
         List<GetAllProjectDTO> projects;
@@ -118,35 +121,31 @@ public class ProjectsService : IProjectsService
             await _hubContext.Clients.All.SendAsync("refreshProjects", projects, ct);
             return;
         }
-
-        searchTerm = searchTerm.Trim().ToLower();
-        projects = await _context.Projects
-            .Where(p => p.OrganizationId == currentUser.OrganizationId && (
-                        p.Title.ToLower().Contains(searchTerm) ||
-                        p.Priority.ToLower().Contains(searchTerm) ||
-                        p.Status.ToLower().Contains(searchTerm)))
-            .Select(p => new GetAllProjectDTO()
-            {
-                Id = p.Id,
-                Title = p.Title,
-                Key = p.Key,
-                Priority = p.Priority,
-                Status = p.Status,
-                CreatedDate = p.CreatedDate.ToShortDateString(),
-                Manager = new UserDTO()
+        else
+        {
+            searchTerm = searchTerm.Trim().ToLower();
+            projects = await _context.Projects
+                .Where(p => p.OrganizationId == currentUser.OrganizationId && (
+                            p.Title.ToLower().Contains(searchTerm) ||
+                            p.Priority.ToLower().Contains(searchTerm) ||
+                            p.Status.ToLower().Contains(searchTerm)))
+                .Select(p => new GetAllProjectDTO()
                 {
-                    UserName = p.Manager.UserName,
-                    AvatarPhoto = p.Manager.AvatarPhoto
-                }
-            }).ToListAsync(ct);
-        await _hubContext.Clients.All.SendAsync("refreshProjects", projects, ct);
-        return;
-    }
-
-    public CreateProjectDTO CreateGet()
-    {
-        var dto = new CreateProjectDTO();
-        return dto;
+                    Id = p.Id,
+                    Title = p.Title,
+                    Key = p.Key,
+                    Priority = p.Priority,
+                    Status = p.Status,
+                    CreatedDate = p.CreatedDate.ToShortDateString(),
+                    Manager = new UserDTO()
+                    {
+                        UserName = p.Manager.UserName,
+                        AvatarPhoto = p.Manager.AvatarPhoto
+                    }
+                }).ToListAsync(ct);
+            await _hubContext.Clients.All.SendAsync("refreshProjects", projects, ct);
+            return;
+        }
     }
 
     public async Task<CreateProjectDTO> CreatePost(CreateProjectDTO dto,
@@ -154,7 +153,7 @@ public class ProjectsService : IProjectsService
     {
         // TODO validate dto
 
-        var project = new Project()
+        Project project = new Project()
         {
             Title = dto.Title.Trim(),
             Key = dto.Key.Trim(),
@@ -163,10 +162,12 @@ public class ProjectsService : IProjectsService
             Status = dto.Status.Trim(),
             ManagerId = dto.ManagerId.Trim(),
         };
-        var currentUser = await _usersService.GetCurrentUserAsync();
+
+        string claim = _usersService.GetCurrentUserId();
+        User? currentUser = await GetCurrentUser(claim);
         if (currentUser == null)
         {
-            throw new ArgumentException("Current logged in user wasn't found");
+            throw new InvalidOperationException("Current logged in user wasn't found");
         }
 
         project.CreatedById = currentUser.Id;
@@ -202,7 +203,7 @@ public class ProjectsService : IProjectsService
 
     public async Task<EditProjectDTO> EditGet(Guid id, CancellationToken ct)
     {
-        var project = await _context.Projects
+        EditProjectDTO? project = await _context.Projects
             .Where(p => p.Id == id)
             .Select(p => new EditProjectDTO()
             {
@@ -217,7 +218,7 @@ public class ProjectsService : IProjectsService
 
         if (project == null)
         {
-            throw new ArgumentException("Project wasn't found");
+            throw new ArgumentException("Project by id wasn't found", nameof(id));
         }
 
         return project;
@@ -227,13 +228,13 @@ public class ProjectsService : IProjectsService
     {
         if (id != dto.Id)
         {
-            throw new ArgumentException("Id with project id doesn't match");
+            throw new ArgumentException("Id with project id doesn't match", nameof(id));
         }
 
-        var project = await _context.Projects.FindAsync(id);
+        Project? project = await _context.Projects.FindAsync(id);
         if (project == null)
         {
-            throw new ArgumentException("Project wasn't found");
+            throw new ArgumentException("Project by id wasn't found", nameof(id));
         }
 
         project.Title = dto.Title;
@@ -248,7 +249,7 @@ public class ProjectsService : IProjectsService
 
     public async Task Delete(Guid id, CancellationToken ct)
     {
-        var project = await _context.Projects
+        Project? project = await _context.Projects
             .Where(p => p.Id == id)
             .Select(p => new Project()
             {
@@ -259,7 +260,7 @@ public class ProjectsService : IProjectsService
 
         if (project == null)
         {
-            throw new ArgumentException("Project wasn't found");
+            throw new ArgumentException("Project by id wasn't found", nameof(id));
         }
 
         if (project.Bugs != null && project.Bugs.Any())
@@ -268,7 +269,7 @@ public class ProjectsService : IProjectsService
             {
 
             }
-            var message = "Deletion failed, project is being used by these bugs: ";
+            string message = "Deletion failed, project is being used by these bugs: ";
             message = string.Join(", ", project.Bugs.Select(b => b.Title));
             throw new InvalidOperationException($"{message}");
         }
@@ -276,4 +277,14 @@ public class ProjectsService : IProjectsService
         _context.Projects.Remove(project);
         await _context.SaveChangesAsync(ct);
     }
+
+    #region Helpers
+    private async Task<User> GetCurrentUser(string claim)
+    {
+        User? currentUser = await _userManager.Users
+            .Where(u => u.Id == claim)
+            .FirstOrDefaultAsync();
+        return currentUser!;
+    }
+    #endregion
 }

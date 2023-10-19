@@ -1,5 +1,6 @@
 ﻿using BugTracker.Authorization;
-using System.Data;
+using BugTracker.Interfaces;
+using BugTracker.Models.DTOs;
 
 namespace BugTracker.Controllers;
 
@@ -9,9 +10,10 @@ public class OrganizationController : Controller
     private readonly UserManager<User> userManager;
     private readonly IUserStore<User> userStore;
     private readonly IUserEmailStore<User> emailStore;
-    private readonly ILogger<RegisterViewModel> logger;
+    private readonly ILogger<RegisterViewModel> _logger;
     private readonly ApplicationDbContext context;
     private readonly IAuthorizationService authorizationService;
+    private readonly IOrganizationService _organizationService;
 
     public OrganizationController(
         ApplicationDbContext context,
@@ -19,67 +21,39 @@ public class OrganizationController : Controller
         UserManager<User> userManager,
         IUserStore<User> userStore,
         ILogger<RegisterViewModel> logger,
-        IAuthorizationService authorizationService)
+        IAuthorizationService authorizationService,
+        IOrganizationService organizationService)
     {
         this.context = context;
         this.httpContextAccessor = httpContextAccessor;
         this.userManager = userManager;
         this.userStore = userStore;
         this.emailStore = GetEmailStore();
-        this.logger = logger;
+        _logger = logger;
         this.authorizationService = authorizationService;
+        _organizationService = organizationService;
     }
 
-    // GET
-    // Organization
-    public async Task<IActionResult> Index()
+    public async Task<ActionResult<GetOrganizationDTO>> Index(CancellationToken ct = default)
     {
-        // get current user
-        var currentUserId = httpContextAccessor
-                            .HttpContext
-                            .User
-                            .FindFirst(ClaimTypes.NameIdentifier)
-                            .Value;
-        var currentUser = await userManager.FindByIdAsync(currentUserId);
-
-        // find organization where current user is in this organization
-        var model = await context.Organizations
-            .SingleOrDefaultAsync(o => o.Id == currentUser.OrganizationId);
-
-        if (model == null)
+        try
         {
-            throw new ArgumentException("organization wans't found", nameof(currentUser.OrganizationId));
+            var result = await _organizationService.GetOrganization(ct);
+            return result;
         }
-        // find all organization users
-        var orgUsers = await userManager.Users
-            .Where(u => u.OrganizationId == model.Id && u != currentUser)
-            .ToListAsync();
-
-        // fill user roles property
-        foreach (var user in orgUsers)
+        catch (ArgumentException ex)
         {
-            var userRoles = await userManager.GetRolesAsync(user);
-            string roles = "";
-            for (int i = 0; i < userRoles.Count - 1; i++)
-            {
-                roles += userRoles[i] + ' ' + '/' + ' ';
-            }
-            roles += userRoles[userRoles.Count - 1];
-            user.UserRoles = roles;
+            _logger.LogError(ex, $"{nameof(OrganizationController)}.{nameof(Index)}");
+            return NotFound(ex.Message);
         }
-
-        // create view model
-        var organizationVM = new OrganizationViewModel
+        catch (Exception ex)
         {
-            Organization = model,
-            Users = orgUsers
-        };
-
-        return View(organizationVM);
+            _logger.LogError(ex, $"{nameof(OrganizationController)}.{nameof(Index)}");
+            ViewData["ErrorMessage"] = "Something went wrong";
+            return View();
+        }
     }
 
-    // POST
-    // Change the name of organization
     [HttpPost]
     public async Task<ActionResult> ChangeName(Guid id, string newName)
     {
@@ -114,8 +88,6 @@ public class OrganizationController : Controller
         }
     }
 
-    // GET
-    // Create a user for organization
     [HttpGet]
     public async Task<IActionResult> CreateUser(Guid id)
     {
@@ -135,8 +107,6 @@ public class OrganizationController : Controller
         return View(model);
     }
 
-    // POST
-    // Create a user for organization
     [HttpPost]
     public async Task<IActionResult> CreateUser(Guid id, RegisterViewModel model)
     {
@@ -161,12 +131,11 @@ public class OrganizationController : Controller
 
             if (result.Succeeded)
             {
-                // add user to given roles
                 foreach (var role in model.Roles)
                 {
                     await userManager.AddToRoleAsync(user, role);
                 }
-                logger.LogInformation("User created a new account with password.");
+                _logger.LogInformation("User created a new account with password.");
                 return LocalRedirect("/Organization/Index");
             }
             foreach (var error in result.Errors)
@@ -175,7 +144,6 @@ public class OrganizationController : Controller
             }
         }
 
-        // If we got this far, something failed, redisplay form
         return View(model);
     }
 

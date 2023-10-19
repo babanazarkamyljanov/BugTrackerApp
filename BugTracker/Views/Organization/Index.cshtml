@@ -1,4 +1,4 @@
-﻿@model OrganizationViewModel
+﻿@model GetOrganizationDTO
 @using BugTracker.Authorization;
 @inject IAuthorizationService AuthorizationService
 
@@ -20,7 +20,6 @@
     </style>
 </head>
 <body>
-    <!-- Main content -->
     <section style="margin-top: 10px;" class="content">
 
         <!-- About Organization -->
@@ -33,8 +32,8 @@
                 <div class="row">
                     <!-- name box -->
                     <div class="col-lg-12" style="display: flex; flex-direction: row; gap: 15px; padding-bottom: 15px;">
-                        <h2 class="text-primary" id="organizationName">@Model.Organization.Name</h2>
-                        <a style="width: 40px; height: 30px; margin-top: 5px;" class="btn btn-success btn-sm" onclick="showChangeForm('@Model.Organization.Id')" title="Change Name">
+                        <h2 class="text-primary" id="organizationName">@Model.Name</h2>
+                        <a style="width: 40px; height: 30px; margin-top: 5px;" class="btn btn-success btn-sm" onclick="showChangeForm('@Model.Id')" title="Change Name">
                             <i style="margin-top: 3px;" class="fa-solid fa-pen-to-square"></i>
                         </a>
                     </div>
@@ -51,7 +50,7 @@
                             </div>
                             @if((AuthorizationService.AuthorizeAsync(User, Permissions.OrganizationManageOperations.CreateUser)).Result.Succeeded)
                             {
-                                <a asp-action="CreateUser" asp-route-id="@Model.Organization.Id" class="small-box-footer">Create User <i class="fas fa-arrow-circle-right"></i></a>
+                                <a asp-action="CreateUser" asp-route-id="@Model.Id" class="small-box-footer">Create User <i class="fas fa-arrow-circle-right"></i></a>
                             }
                         </div>
                     </div>
@@ -76,7 +75,7 @@
                                             <div class="col-8">
                                                 <h2 class="lead"><b>@user.UserName</b></h2>
                                                 <p class="text-muted text-sm">
-                                                    <b>Roles: </b>@user.UserRoles
+                                                    <b>Roles: </b>@user.Roles
                                                 </p>
                                             </div>
                                             <div class="col-4 text-center">
@@ -115,7 +114,6 @@
                     }
                 </div>
             </div>
-            <!-- /.card-body -->
 
             <div class="card-footer">
                 <nav aria-label="Contacts Page Navigation">
@@ -131,7 +129,6 @@
                     </ul>
                 </nav>
             </div>
-            <!-- /.card-footer -->
         </div>
 
     </section>
@@ -143,7 +140,7 @@
         </div>
         <div class="card-body">
             <div class="form-group">
-                <input class="form-control" id="organizationNameInput" type="text" value="@Model.Organization.Name" />
+                <input class="form-control" id="organizationNameInput" type="text" value="@Model.Name" />
                 <span id="validationForOrgName" class="text-danger"></span>
             </div>
             <div class="form-group">
@@ -154,53 +151,53 @@
     </div>
     <input type="hidden" id="organizationId" />
 
-    <!-- jQuery -->
-    <script src="~/plugins/jquery/jquery.min.js"></script>
-    <script>
-        $(function () {
-            $("#example1").DataTable({
-                "responsive": true, "lengthChange": false, "autoWidth": false,
-                "buttons": [
-                    { extend: 'csv', className: 'btn-info csvButton' },
-                    { extend: 'excel', className: 'excelButton' },
-                    {
-                        text: 'Add new project',
-                        className: 'btn-success addButton',
-                        action: function (e, dt, node, config) {
-                            window.location.href = "/Projects/Create"
-                        }
-                    }]
-            }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-        });
+    @section Scripts {
+        <script>
+            $(function () {
+                $("#example1").DataTable({
+                    "responsive": true, "lengthChange": false, "autoWidth": false,
+                    "buttons": [
+                        { extend: 'csv', className: 'btn-info csvButton' },
+                        { extend: 'excel', className: 'excelButton' },
+                        {
+                            text: 'Add new project',
+                            className: 'btn-success addButton',
+                            action: function (e, dt, node, config) {
+                                window.location.href = "/Projects/Create"
+                            }
+                        }]
+                }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
+            });
 
-        function showChangeForm(id) {
-            document.getElementById("organizationId").value = id
-            $('#changeNameForm').show()
-        }
-        function hideChangeForm() {
-            $('#changeNameForm').hide()
-        }
-        function submitChange() {
-            var id = document.getElementById("organizationId").value
-            var newName = document.getElementById("organizationNameInput").value
-            console.log("newName", newName)
-            $.ajax({
-                type: 'POST',
-                url: '/Organization/ChangeName',
-                data: { "id": id , "newName": newName },
-                success: function (response) {
-                    if (response == 'ValidationInvalid') {
-                        document.getElementById("validationForOrgName").textContent = "Name cannot be empty"
-                    } else {
-                        hideChangeForm()
-                        document.getElementById("organizationName").textContent = newName 
+            function showChangeForm(id) {
+                document.getElementById("organizationId").value = id
+                $('#changeNameForm').show()
+            }
+            function hideChangeForm() {
+                $('#changeNameForm').hide()
+            }
+            function submitChange() {
+                var id = document.getElementById("organizationId").value
+                var newName = document.getElementById("organizationNameInput").value
+                console.log("newName", newName)
+                $.ajax({
+                    type: 'POST',
+                    url: '/Organization/ChangeName',
+                    data: { "id": id, "newName": newName },
+                    success: function (response) {
+                        if (response == 'ValidationInvalid') {
+                            document.getElementById("validationForOrgName").textContent = "Name cannot be empty"
+                        } else {
+                            hideChangeForm()
+                            document.getElementById("organizationName").textContent = newName
+                        }
+                    },
+                    error: function (response) {
+                        console.log(response)
                     }
-                },
-                error: function (response) {
-                    console.log(response)
-                }
-            })
-        }
-    </script>
+                })
+            }
+        </script>
+    } 
 </body>
 </html>

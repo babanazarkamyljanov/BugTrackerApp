@@ -1,22 +1,32 @@
 ﻿@model IEnumerable<GetAllBugDTO>
 
-<div class="container">
+<div class="container p-4">
     <div class="row">
         <div class="col-12">
             <h1>All Bugs</h1>
         </div>
     </div>
 
-    <div class="row g-3 align-items-center">
+    <div class="row mt-2 align-items-center">
         <div class="col-6">
-            <input class="form-control form-control-lg" id="searchInput" placeholder="search" />
+            <input class="form-control form-control-lg" id="searchInput" placeholder="search by title, priority, status" />
         </div>
         <div class="col-6">
-            <button class="btn btn-primary btn-lg" id="searchBtn" type="button">Search</button>
+            <button class="btn btn-primary btn-lg" id="searchBtn" type="button">
+                <i class="fa fa-search"></i> Search
+            </button>
         </div>
     </div>
 
-    <div class="card mt-4">
+    <div class="card mt-2">
+        <div class="card-header">
+            <a 
+               class="btn custom-btn-primary btn-lg"
+               asp-controller="Bugs"
+               asp-action="Create">
+               <i class="fa fa-plus"></i> Add
+            </a>
+        </div>
         <div class="card-body">
             <div class="table-responsive">
                 <table class="table table-striped projects">
@@ -26,7 +36,6 @@
                         <th style="width: 5%">Project Key</th>
                         <th style="width: 30%">Assignee</th>
                         <th>Priority</th>
-                        <th>Progress</th>
                         <th style="width: 8%">Status</th>
                         <th style="width: 20%"></th>
                     </tr>
@@ -65,27 +74,25 @@
                             <td>
                                 <h6>@item.Priority</h6>
                             </td>
-                            <td class="project_progress">
-                                <div class="progress progress-sm">
-                                    <div class="progress-bar bg-green" role="progressbar" aria-valuenow="57" aria-valuemin="0" aria-valuemax="100" style="width: 57%">
-                                    </div>
-                                </div>
-                                <small>
-                                    57% Complete
-                                </small>
-                            </td>
-                            <td class="project-state">
+                            <td>
                                 <span class="badge badge-success">@item.Status</span>
                             </td>
-                            <td class="project-actions text-right">
-                                <a title="View" class="btn btn-primary btn-sm" asp-controller="Bugs" asp-action="Details" asp-route-id="@item.Id">
-                                    <i class="fa-solid fa-eye">
-                                    </i>
-                                        
+                            <td class="text-right">
+                                <a
+                                    title="View" 
+                                    class="btn btn-info btn-sm" 
+                                    asp-controller="Bugs"
+                                    asp-action="Details"
+                                    asp-route-id="@item.Id"
+                                    ><i class="fa-solid fa-eye"></i>    
                                 </a>
-                                <a title="edit" class="btn btn-info btn-sm" asp-controller="Bugs" asp-action="Edit" asp-route-id="@item.Id">
-                                    <i class="fas fa-pencil-alt">
-                                    </i> 
+                                <a
+                                    title="edit"
+                                    class="btn btn-secondary btn-sm"
+                                    asp-controller="Bugs"
+                                    asp-action="Edit"
+                                    asp-route-id="@item.Id"
+                                    ><i class="fas fa-pencil-alt"></i> 
                                 </a>
                             </td>
                         </tr>
@@ -97,7 +104,7 @@
     </div>
 </div>
 @section Scripts {
-    <script src="~/js/loadbugs.js"></script>
+    <script src="~/js/loadBugs.js"></script>
     <script>
         $(function () {
             $('#searchBtn').click(function () {
