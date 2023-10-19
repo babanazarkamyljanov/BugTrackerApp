@@ -117,35 +117,31 @@ public class ProjectsService : IProjectsService
             await _hubContext.Clients.All.SendAsync("refreshProjects", projects, ct);
             return;
         }
-
-        searchTerm = searchTerm.Trim().ToLower();
-        projects = await _context.Projects
-            .Where(p => p.OrganizationId == currentUser.OrganizationId && (
-                        p.Title.ToLower().Contains(searchTerm) ||
-                        p.Priority.ToLower().Contains(searchTerm) ||
-                        p.Status.ToLower().Contains(searchTerm)))
-            .Select(p => new GetAllProjectDTO()
-            {
-                Id = p.Id,
-                Title = p.Title,
-                Key = p.Key,
-                Priority = p.Priority,
-                Status = p.Status,
-                CreatedDate = p.CreatedDate.ToShortDateString(),
-                Manager = new UserDTO()
+        else
+        {
+            searchTerm = searchTerm.Trim().ToLower();
+            projects = await _context.Projects
+                .Where(p => p.OrganizationId == currentUser.OrganizationId && (
+                            p.Title.ToLower().Contains(searchTerm) ||
+                            p.Priority.ToLower().Contains(searchTerm) ||
+                            p.Status.ToLower().Contains(searchTerm)))
+                .Select(p => new GetAllProjectDTO()
                 {
-                    UserName = p.Manager.UserName,
-                    AvatarPhoto = p.Manager.AvatarPhoto
-                }
-            }).ToListAsync(ct);
-        await _hubContext.Clients.All.SendAsync("refreshProjects", projects, ct);
-        return;
-    }
-
-    public CreateProjectDTO CreateGet()
-    {
-        CreateProjectDTO dto = new CreateProjectDTO();
-        return dto;
+                    Id = p.Id,
+                    Title = p.Title,
+                    Key = p.Key,
+                    Priority = p.Priority,
+                    Status = p.Status,
+                    CreatedDate = p.CreatedDate.ToShortDateString(),
+                    Manager = new UserDTO()
+                    {
+                        UserName = p.Manager.UserName,
+                        AvatarPhoto = p.Manager.AvatarPhoto
+                    }
+                }).ToListAsync(ct);
+            await _hubContext.Clients.All.SendAsync("refreshProjects", projects, ct);
+            return;
+        }
     }
 
     public async Task<CreateProjectDTO> CreatePost(CreateProjectDTO dto,
@@ -201,7 +197,7 @@ public class ProjectsService : IProjectsService
 
     public async Task<EditProjectDTO> EditGet(Guid id, CancellationToken ct)
     {
-        var project = await _context.Projects
+        EditProjectDTO? project = await _context.Projects
             .Where(p => p.Id == id)
             .Select(p => new EditProjectDTO()
             {
@@ -216,7 +212,7 @@ public class ProjectsService : IProjectsService
 
         if (project == null)
         {
-            throw new ArgumentException("Project wasn't found");
+            throw new ArgumentException("Project by id wasn't found", nameof(id));
         }
 
         return project;
@@ -226,13 +222,13 @@ public class ProjectsService : IProjectsService
     {
         if (id != dto.Id)
         {
-            throw new ArgumentException("Id with project id doesn't match");
+            throw new ArgumentException("Id with project id doesn't match", nameof(id));
         }
 
-        var project = await _context.Projects.FindAsync(id);
+        Project? project = await _context.Projects.FindAsync(id);
         if (project == null)
         {
-            throw new ArgumentException("Project wasn't found");
+            throw new ArgumentException("Project by id wasn't found", nameof(id));
         }
 
         project.Title = dto.Title;

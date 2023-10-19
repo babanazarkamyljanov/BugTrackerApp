@@ -12,16 +12,19 @@
             <input class="form-control form-control-lg" id="searchInput" placeholder="search by title, priority, status" />
         </div>
         <div class="col-6">
-            <button class="btn btn-primary btn-lg" id="searchBtn" type="button">Search</button>
+            <button class="btn btn-primary btn-lg" id="searchBtn" type="button">
+                <i class="fa fa-search"></i> Search
+            </button>
         </div>
     </div>
 
     <div class="card mt-2">
         <div class="card-header">
-            <a class="btn custom-btn-primary btn-lg"
+            <a 
+               class="btn custom-btn-primary btn-lg"
                asp-controller="Bugs"
                asp-action="Create">
-                Add
+               <i class="fa fa-plus"></i> Add
             </a>
         </div>
         <div class="card-body">

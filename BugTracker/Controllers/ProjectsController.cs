@@ -103,16 +103,8 @@ public class ProjectsController : Controller
             return RedirectToAction("AccessDenied", "Account");
         }
 
-        try
-        {
-            CreateProjectDTO dto = _projectsService.CreateGet();
-            return View(dto);
-        }
-        catch (Exception ex)
-        {
-            _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Create)}");
-            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
-        }
+        CreateProjectDTO dto = new CreateProjectDTO();
+        return View(dto);
     }
 
     [HttpPost]

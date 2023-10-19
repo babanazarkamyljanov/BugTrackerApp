@@ -86,31 +86,33 @@ public class BugsService : IBugsService
             await _loadBugsHubContext.Clients.All.SendAsync("refreshBugs", bugs, ct);
             return;
         }
-
-        searchTerm = searchTerm.Trim().ToLower();
-        bugs = await _context.Bugs
-            .Where(b => b.OrganizationId == currentUser.OrganizationId && (
-                        b.Title.ToLower().Contains(searchTerm) ||
-                        b.Priority.ToLower().Contains(searchTerm) ||
-                        b.Status.ToLower().Contains(searchTerm)))
-            .Select(b => new GetAllBugDTO()
-            {
-                Id = b.Id,
-                Title = b.Title,
-                CreatedDate = b.CreatedDate.ToShortDateString(),
-                Priority = b.Priority,
-                Status = b.Status,
-                ProjectKey = b.Project.Key,
-                ProjectId = b.Project.Id,
-                Assignee = new UserDTO()
+        else
+        {
+            searchTerm = searchTerm.Trim().ToLower();
+            bugs = await _context.Bugs
+                .Where(b => b.OrganizationId == currentUser.OrganizationId && (
+                            b.Title.ToLower().Contains(searchTerm) ||
+                            b.Priority.ToLower().Contains(searchTerm) ||
+                            b.Status.ToLower().Contains(searchTerm)))
+                .Select(b => new GetAllBugDTO()
                 {
-                    UserName = b.Assignee.UserName,
-                    AvatarPhoto = b.Assignee.AvatarPhoto
-                }
-            }).ToListAsync(ct);
+                    Id = b.Id,
+                    Title = b.Title,
+                    CreatedDate = b.CreatedDate.ToShortDateString(),
+                    Priority = b.Priority,
+                    Status = b.Status,
+                    ProjectKey = b.Project.Key,
+                    ProjectId = b.Project.Id,
+                    Assignee = new UserDTO()
+                    {
+                        UserName = b.Assignee.UserName,
+                        AvatarPhoto = b.Assignee.AvatarPhoto
+                    }
+                }).ToListAsync(ct);
 
-        await _loadBugsHubContext.Clients.All.SendAsync("refreshBugs", bugs, ct);
-        return;
+            await _loadBugsHubContext.Clients.All.SendAsync("refreshBugs", bugs, ct);
+            return;
+        }
     }
 
     public CreateBugDTO CreateGet()
