@@ -29,7 +29,7 @@ public class ProjectsController : Controller
             List<GetAllProjectDTO> projects = await _projectsService.GetAll(ct);
             return View(projects);
         }
-        catch (ArgumentException ex)
+        catch (InvalidOperationException ex)
         {
             _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Index)}");
             return BadRequest(ex.Message);

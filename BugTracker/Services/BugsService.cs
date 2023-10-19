@@ -6,20 +6,23 @@ namespace BugTracker.Services;
 
 public class BugsService : IBugsService
 {
-    private readonly IUsersService _usersService;
     private readonly ApplicationDbContext _context;
+    private readonly IUsersService _usersService;
+    private readonly UserManager<User> _userManager;
     private readonly IHubContext<BugDetailsHub> _hubContext;
     private readonly IHubContext<LoadBugsHub> _loadBugsHubContext;
     private readonly IWebHostEnvironment _hostEnvironment;
 
-    public BugsService(IUsersService usersService,
-        ApplicationDbContext context,
+    public BugsService(ApplicationDbContext context,
+        IUsersService usersService,
+        UserManager<User> userManager,
         IHubContext<BugDetailsHub> hubContext,
         IHubContext<LoadBugsHub> loadBugsHubContext,
         IWebHostEnvironment hostEnvironment)
     {
-        _usersService = usersService;
         _context = context;
+        _usersService = usersService;
+        _userManager = userManager;
         _hubContext = hubContext;
         _loadBugsHubContext = loadBugsHubContext;
         _hostEnvironment = hostEnvironment;
@@ -27,11 +30,11 @@ public class BugsService : IBugsService
 
     public async Task<List<GetAllBugDTO>> GetAll(CancellationToken ct)
     {
-        User? currentUser = await _usersService.GetCurrentUserAsync();
-
+        string claim = _usersService.GetCurrentUserId();
+        User? currentUser = await GetCurrentUser(claim);
         if (currentUser == null)
         {
-            throw new InvalidOperationException("current logged in user wasn't found");
+            throw new InvalidOperationException("Current logged in user wasn't found");
         }
 
         List<GetAllBugDTO> bugs = await _context.Bugs
@@ -57,10 +60,11 @@ public class BugsService : IBugsService
 
     public async Task Search(string searchTerm, CancellationToken ct)
     {
-        User? currentUser = await _usersService.GetCurrentUserAsync();
+        string claim = _usersService.GetCurrentUserId();
+        User? currentUser = await GetCurrentUser(claim);
         if (currentUser == null)
         {
-            throw new InvalidOperationException("current logged in user wasn't found");
+            throw new InvalidOperationException("Current logged in user wasn't found");
         }
 
         List<GetAllBugDTO> bugs;
@@ -133,7 +137,8 @@ public class BugsService : IBugsService
             AssigneeId = dto.AssigneeId
         };
 
-        User currentUser = await _usersService.GetCurrentUserAsync();
+        string claim = _usersService.GetCurrentUserId();
+        User? currentUser = await GetCurrentUser(claim);
         if (currentUser == null)
         {
             throw new InvalidOperationException("Current logged in user wasn't found");
@@ -184,7 +189,8 @@ public class BugsService : IBugsService
             throw new ArgumentException("Bug by id wasn't found", nameof(id));
         }
 
-        User? currentUser = await _usersService.GetCurrentUserAsync();
+        string claim = _usersService.GetCurrentUserId();
+        User? currentUser = await GetCurrentUser(claim);
         if (currentUser == null)
         {
             throw new InvalidOperationException("Current logged in user wasn't found");
@@ -456,4 +462,14 @@ public class BugsService : IBugsService
         _context.Bugs.Remove(bug);
         await _context.SaveChangesAsync(ct);
     }
+
+    #region Helpers
+    private async Task<User> GetCurrentUser(string claim)
+    {
+        User? currentUser = await _userManager.Users
+            .Where(u => u.Id == claim)
+            .FirstOrDefaultAsync();
+        return currentUser!;
+    }
+    #endregion
 }

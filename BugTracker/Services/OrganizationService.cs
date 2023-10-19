@@ -39,14 +39,16 @@ public class OrganizationService : IOrganizationService
 
     public async Task<GetOrganizationDTO> GetOrganization(CancellationToken ct)
     {
-        var currentUser = await _usersService.GetCurrentUserAsync();
-
+        string claim = _usersService.GetCurrentUserId();
+        User? currentUser = await _userManager.Users
+            .Where(u => u.Id == claim)
+            .FirstOrDefaultAsync(ct);
         if (currentUser == null)
         {
-            throw new ArgumentException("current logged in user wasn't found");
+            throw new InvalidOperationException("Current logged in user wasn't found");
         }
 
-        var organization = await _context.Organizations
+        GetOrganizationDTO? organization = await _context.Organizations
             .Where(o => o.Id == currentUser.OrganizationId)
             .Select(o => new GetOrganizationDTO()
             {

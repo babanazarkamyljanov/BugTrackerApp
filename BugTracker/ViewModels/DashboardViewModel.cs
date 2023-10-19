@@ -13,7 +13,7 @@ public class DashboardViewModel
     // Project statuses
     public int Project_Active { get; set; }
     public int Project_InProgress { get; set; }
-    public int ProjectCompleted { get; set; }
+    public int Project_Completed { get; set; }
     public int Project_NotActive { get; set; }
     public int Project_Closed { get; set; }
 }

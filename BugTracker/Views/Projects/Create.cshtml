@@ -80,15 +80,15 @@
                             <label asp-for="@Model.Status">Status</label>
                             <select asp-for="@Model.Status" class="form-control custom-select">
                                 <option selected disabled>Select Status</option>
-                                <option>Active</option>
+                                <option>Open</option>
                                 <option>In Progress</option>
+                                <option>Completed</option>
+                                <option>Closed</option>
                             </select>
                             <span asp-validation-for="@Model.Status" class="text-danger"></span>
                         </div>
                     </div>
-                    <!-- /.card-body -->
                 </div>
-                <!-- /.card -->
             </div>
             <div class="col-md-5">
                 <div class="card card-secondary">

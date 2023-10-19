@@ -1,161 +1,241 @@
-﻿@model DashboardViewModel
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8" />
-    <title>Dashboard</title>
-  </head>
-  <body>
-    <!-- Content Header (Page header) -->
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">Dashboard</h1>
-                </div><!-- /.col -->
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
-                        <li class="breadcrumb-item active">Dashboard</li>
-                    </ol>
-                </div><!-- /.col -->
-            </div><!-- /.row -->
-        </div><!-- /.container-fluid -->
+﻿@model DashboardDTO
+
+<div class="content-header">
+    <div class="container-fluid">
+        <div class="row mb-2">
+            <div class="col-sm-6">
+                <h1 class="m-0">Dashboard</h1>
+            </div>
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+                    <li class="breadcrumb-item active">Dashboard</li>
+                </ol>
+            </div>
+        </div>
     </div>
-    <!-- /.content-header -->
-    <!-- Main content -->
-    <section class="content">
-        <div class="container-fluid">
-            <!-- Small boxes (Stat box) -->
-            <div class="row">
-                <div class="col-lg-3 col-6">
-                    <!-- small box -->
-                    <div class="small-box bg-info">
-                        <div class="inner">
-                            <h3>150</h3>
+</div>
 
-                            <p>Projects</p>
-                        </div>
-                        <div class="icon">
-                            <i class="ion ion-briefcase"></i>
-                        </div>
-                        <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+<section class="content">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>@Model.ProjectsCount</h3>
+                        <p>Projects</p>
                     </div>
-                </div>
-                <!-- ./col -->
-                <div class="col-lg-3 col-6">
-                    <!-- small box -->
-                    <div class="small-box bg-success">
-                        <div class="inner">
-                            <h3>53</h3>
-
-                            <p>Bugs</p>
-                        </div>
-                        <div class="icon">
-                            <i class="ion ion-bug"></i>
-                        </div>
-                        <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                    <div class="icon">
+                        <i class="ion ion-briefcase"></i>
                     </div>
+                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
                 </div>
-                <!-- ./col -->
-                <div class="col-lg-3 col-6">
-                    <!-- small box -->
-                    <div class="small-box bg-warning">
-                        <div class="inner">
-                            <h3>44</h3>
-
-                            <p>User Registrations</p>
-                        </div>
-                        <div class="icon">
-                            <i class="ion ion-person-add"></i>
-                        </div>
-                        <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-                    </div>
-                </div>
-                <!-- ./col -->
-                <div class="col-lg-3 col-6">
-                    <!-- small box -->
-                    <div class="small-box bg-danger">
-                        <div class="inner">
-                            <h3>65</h3>
-
-                            <p>Unique Visitors</p>
-                        </div>
-                        <div class="icon">
-                            <i class="ion ion-pie-graph"></i>
-                        </div>
-                        <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-                    </div>
-                </div>
-                <!-- ./col -->
             </div>
-            <!-- /.row -->
-            <!-- Main row -->
-            <div class="row">
-                <!-- Left col -->
-                <section class="col-lg-7 connectedSortable">
-                    <!-- PROJECTS STATUS CHART -->
-                    <div class="card card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Projects by status</h3>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="projectsStatusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                        </div>
-                        <!-- /.card-body -->
-                    </div>
-                    <!-- /.card -->
-                    <!-- BUGS STATUS CHART -->
-                    <div class="card card-primary">
-                        <div class="card-header">
-                            <h3 class="card-title">Bugs by status</h3>
-                        </div>
-                        <div class="card-body">
-                            <canvas id="bugsStatusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                        </div>
-                        <!-- /.card-body -->
-                    </div>
-                    <!-- /.card -->
-                </section>
-                <!-- /.Left col -->
 
-                <!-- right col (We are only adding the ID to make the widgets sortable)-->
-                <section class="col-lg-5 connectedSortable">
-                    <!-- PROJECTS PRIORITY CHART -->
-                    <div class="card card-warning">
-                        <div class="card-header">
-                            <h3 class="card-title">Projects by priority</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart">
-                                <canvas id="projectsPriorityChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                            </div>
-                        </div>
-                        <!-- /.card-body -->
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>@Model.BugsCount</h3>
+                        <p>Bugs</p>
                     </div>
-                    <!-- /.card -->
-                    <!-- BUGS PRIORITY CHART -->
-                    <div class="card card-warning">
-                        <div class="card-header">
-                            <h3 class="card-title">Bugs by priority</h3>
-                        </div>
-                        <div class="card-body">
-                            <div class="chart">
-                                <canvas id="bugsPriorityChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                            </div>
-                        </div>
-                        <!-- /.card-body -->
+                    <div class="icon">
+                        <i class="ion ion-bug"></i>
                     </div>
-                    <!-- /.card -->
-                </section>
-                <!-- right col -->
+                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
             </div>
-            <!-- /.row (main row) -->
-        </div><!-- /.container-fluid -->
-    </section>
-    <!-- /.content -->
-    <!-- jQuery -->
-    <script src="~/plugins/jquery/jquery.min.js"></script>
-    <script src="~/js/dashboard.js"></script>
-  </body>
-</html>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>@Model.UsersCount</h3>
+                        <p>Users</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-person-add"></i>
+                    </div>
+                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>65</h3>
+                        <p>Unique Visitors</p>
+                    </div>
+                    <div class="icon">
+                        <i class="ion ion-pie-graph"></i>
+                    </div>
+                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <section class="col-lg-7 connectedSortable">
+                <!-- PROJECTS STATUS CHART -->
+                <div class="card card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">Projects by status</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="projectsStatusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
+                </div>
+                <!-- BUGS STATUS CHART -->
+                <div class="card card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">Bugs by status</h3>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="bugsStatusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <section class="col-lg-5 connectedSortable">
+                <!-- PROJECTS PRIORITY CHART -->
+                <div class="card card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">Projects by priority</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart">
+                            <canvas id="projectsPriorityChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- BUGS PRIORITY CHART -->
+                <div class="card card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">Bugs by priority</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart">
+                            <canvas id="bugsPriorityChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script>
+        $(function () {
+            // Make the dashboard widgets sortable Using jquery UI
+            $('.connectedSortable').sortable({
+                placeholder: 'sort-highlight',
+                connectWith: '.connectedSortable',
+                handle: '.card-header, .nav-tabs',
+                forcePlaceholderSize: true,
+                zIndex: 999999
+            })
+            $('.connectedSortable .card-header').css('cursor', 'move')
+
+            //- PROJECTS STATUS CHART -
+            var projectsStatusChartCanvas = $('#projectsStatusChart').get(0).getContext('2d')
+            var projectsStatusData = {
+                labels: [
+                    'Open',
+                    'In Progress',
+                    'Completed',
+                    'Closed'
+                ],
+                datasets: [
+                    {
+                        data: [@Model.Project_Open, @Model.Project_InProgress, @Model.Project_Completed, @Model.Project_Closed],
+                        backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#111688'],
+                    }
+                ]
+            }
+            var chartOptions = {
+                maintainAspectRatio: false,
+                responsive: true,
+            }
+            new Chart(projectsStatusChartCanvas, {
+                type: 'doughnut',
+                data: projectsStatusData,
+                options: chartOptions
+            })
+
+            //- BUGS STATUS CHART -
+            var bugsStatusChartCanvas = $('#bugsStatusChart').get(0).getContext('2d')
+            var bugsStatusData = {
+                labels: [
+                    'Open',
+                    'Build In Progress',
+                    'Code Review',
+                    'Functional Testing',
+                    'Fixed',
+                    'Closed'
+                ],
+                datasets: [
+                    {
+                        data: [@Model.Bug_Open, @Model.Bug_BuildInProgress, @Model.Bug_CodeReview, @Model.Bug_FunctionalTesting, @Model.Bug_Fixed, @Model.Bug_Closed],
+                        backgroundColor: ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc', '#111688'],
+                    }
+                ]
+            };
+            new Chart(bugsStatusChartCanvas, {
+                type: 'pie',
+                data: bugsStatusData,
+                options: chartOptions
+            })
+
+            //- PROJECTS PRIORITY BAR CHART -
+            var barChartData = {
+                labels: ['Low', 'Medium', 'High'],
+                datasets: [
+                    {
+                        label: 'Projects',
+                        data: [@Model.Project_Low, @Model.Project_Medium, @Model.Project_High],
+                        backgroundColor: ['rgba(0,255,0,1)', 'rgba(0, 0, 255, 1)', 'rgba(255, 0, 0, 1)'],
+                        borderColor: ['rgba(0,255,0)', 'rgba(0, 0, 255)', 'rgba(255, 0, 0)']
+                    }
+                ]
+            }
+            var barChartCanvas = $('#projectsPriorityChart').get(0).getContext('2d')
+            var barChartOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{
+                        stacked: true,
+                    }],
+                    yAxes: [{
+                        stacked: true
+                    }]
+                }
+            }
+            new Chart(barChartCanvas, {
+                type: 'bar',
+                data: barChartData,
+                options: barChartOptions
+            })
+
+            //- BUGS PRIORITY BAR CHART -
+            var bugsBarChartCanvas = $('#bugsPriorityChart').get(0).getContext('2d')
+            var bugsBarChartData = {
+                labels: ['Low', 'Medium', 'High'],
+                datasets: [
+                    {
+                        label: 'Bugs',
+                        data: [@Model.Bug_Low, @Model.Bug_Medium, @Model.Bug_High],
+                        backgroundColor: ['rgba(0,255,0,1)', 'rgba(0, 0, 255, 1)', 'rgba(255, 0, 0, 1)'],
+                        borderColor: ['rgba(0,255,0)', 'rgba(0, 0, 255)', 'rgba(255, 0, 0)']
+
+                    }
+                ]
+            }
+            new Chart(bugsBarChartCanvas, {
+                type: 'bar',
+                data: bugsBarChartData,
+                options: barChartOptions
+            })
+        })
+    </script>
+}
