@@ -68,7 +68,7 @@ function loadProjects(projects) {
                     <i class="fa-solid fa-eye">
                     </i>
                 </a>
-                <a class="btn btn-secondary btn-sm" href="${editSrc}">
+                <a class="btn btn-warning btn-sm" href="${editSrc}">
                     <i class="fas fa-pencil-alt">
                     </i>
                 </a>

@@ -73,7 +73,7 @@ function loadBugs(bugs) {
                     </i>
                                         
                 </a>
-                <a title="edit" class="btn btn-secondary btn-sm" href="${editSrc}">
+                <a title="edit" class="btn btn-warning btn-sm" href="${editSrc}">
                     <i class="fas fa-pencil-alt">
                     </i> 
                 </a>
