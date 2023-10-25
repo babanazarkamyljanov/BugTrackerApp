@@ -1,33 +1,44 @@
 ﻿@model IEnumerable<GetAllProjectDTO>
 
-<div class="container p-4">
+<div class="container px-4 py-2">
     <div class="row">
         <div class="col-12">
             <h1>All Projects</h1>
         </div>
     </div>
 
-    <div class="row mt-2 align-items-center">
+    <div class="row mt-2">
         <div class="col-6">
-            <input class="form-control form-control-lg" id="searchInput" placeholder="search by title, priority, status" />
+            <a
+               class="btn custom-btn-primary btn-lg"
+               asp-controller="Projects"
+               asp-action="Create"
+            >
+                <i class="fa fa-plus"></i> New
+            </a>
         </div>
-        <div class="col-6">
-            <button class="btn btn-primary btn-lg" id="searchBtn" type="button">
+
+        <div class="col-4">
+            <input
+                class="form-control form-control-lg"
+                id="searchInput"
+                placeholder="search by title, priority, status"
+            />
+        </div>
+
+        <div class="col-2">
+            <button
+                class="btn btn-secondary btn-lg float-right"
+                id="searchBtn"
+                type="button"
+            >
                 <i class="fa fa-search"></i> Search
             </button>
         </div>
     </div>
 
-    <div class="card mt-2">
-        <div class="card-header">
-            <a 
-                class="btn custom-btn-primary btn-lg" 
-                asp-controller="Projects"
-                asp-action="Create">
-                <i class="fa fa-plus"></i> Add
-            </a>
-        </div>
-        <div class="card-body">
+    <div class="row mt-4">
+        <div class="col">
             <div class="table-responsive">
                 <table class="table table-striped projects">
                     <thead>
@@ -74,19 +85,19 @@
                                     <span class="badge badge-success">@item.Status</span>
                                 </td>
                                 <td class="text-right">
-                                    <a
-                                        class="btn btn-info btn-sm"
-                                        asp-controller="Projects"
-                                        asp-action="Details"
-                                        asp-route-id="@item.Id"
-                                        ><i class="fa-solid fa-eye"></i>
+                                    <a class="btn btn-info btn-sm"
+                                       asp-controller="Projects"
+                                       asp-action="Details"
+                                       asp-route-id="@item.Id"
+                                    >
+                                        <i class="fa-solid fa-eye"></i>
                                     </a>
-                                    <a
-                                        class="btn btn-secondary btn-sm"
-                                        asp-controller="Projects"
-                                        asp-action="Edit"
-                                        asp-route-id="@item.Id"
-                                        ><i class="fas fa-pencil-alt"></i>
+                                    <a class="btn btn-warning btn-sm"
+                                       asp-controller="Projects"
+                                       asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                    >
+                                        <i class="fas fa-pencil-alt"></i>
                                     </a>
                                 </td>
                             </tr>
@@ -95,11 +106,12 @@
                 </table>
             </div>
         </div>
-    </div>
+    </div>     
 </div>
 
 @section Scripts {
     <script src="~/js/loadProjects.js"></script>
+
     <script>
         $(function () {
             $('#searchBtn').click(function () {

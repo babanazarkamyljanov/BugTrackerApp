@@ -1,104 +1,115 @@
 ﻿@model IEnumerable<GetAllBugDTO>
 
-<div class="container p-4">
+<div class="container px-4 py-2">
     <div class="row">
         <div class="col-12">
             <h1>All Bugs</h1>
         </div>
     </div>
 
-    <div class="row mt-2 align-items-center">
+    <div class="row mt-2">
         <div class="col-6">
-            <input class="form-control form-control-lg" id="searchInput" placeholder="search by title, priority, status" />
+            <a
+               class="btn custom-btn-primary btn-lg"
+               asp-controller="Bugs"
+               asp-action="Create"
+            >
+                <i class="fa fa-plus"></i> New
+            </a>
         </div>
-        <div class="col-6">
-            <button class="btn btn-primary btn-lg" id="searchBtn" type="button">
+
+        <div class="col-4">
+            <input 
+                class="form-control form-control-lg" 
+                id="searchInput" 
+                placeholder="search by title, priority, status" 
+            />
+        </div>
+
+        <div class="col-2">
+            <button 
+                class="btn btn-secondary btn-lg float-right" 
+                id="searchBtn" 
+                type="button"
+            >
                 <i class="fa fa-search"></i> Search
             </button>
         </div>
     </div>
 
-    <div class="card mt-2">
-        <div class="card-header">
-            <a 
-               class="btn custom-btn-primary btn-lg"
-               asp-controller="Bugs"
-               asp-action="Create">
-               <i class="fa fa-plus"></i> Add
-            </a>
-        </div>
-        <div class="card-body">
+    <div class="row mt-4">
+        <div class="col">
             <div class="table-responsive">
                 <table class="table table-striped projects">
-                <thead>
-                    <tr>
-                        <th style="width: 20%">Title</th>
-                        <th style="width: 5%">Project</th>
-                        <th style="width: 30%">Assignee</th>
-                        <th>Priority</th>
-                        <th style="width: 8%">Status</th>
-                        <th style="width: 20%"></th>
-                    </tr>
-                </thead>
-                <tbody id="tbody">
-                    @foreach (var item in Model)
-                    {
+                    <thead>
                         <tr>
-                            <td>
-                                @item.Title
-                                <br />
-                                <small>Created @item.CreatedDate</small>
-                            </td>
-                            <td>
-                                <a asp-controller="Projects" asp-action="Details" asp-route-id="@item.Project.Id">@item.Project.Title</a>
-                            </td>
-                            <td>
-                                <ul class="list-inline">
-                                    <li class="list-inline-item">
-                                        @if (item.Assignee.AvatarPhoto is null)
-                                        {
-                                            <img src="~/img/default-avatar.png" class="table-avatar" alt="User Image">
-                                        }
-                                        else
-                                        {
-                                            string src = "data:image/png;base64,"
-                                            + Convert.ToBase64String(item.Assignee.AvatarPhoto, 0, item.Assignee.AvatarPhoto.Length);
-                                            <img src="@src" class="table-avatar" alt="User Image">
-                                        }
-                                    </li>
-                                    <li class="list-inline-item">
-                                        <h6>@item.Assignee.UserName</h6>
-                                    </li>
-                                </ul>
-                            </td>
-                            <td>
-                                <h6>@item.Priority</h6>
-                            </td>
-                            <td>
-                                <span class="badge badge-success">@item.Status</span>
-                            </td>
-                            <td class="text-right">
-                                <a
-                                    title="View" 
-                                    class="btn btn-info btn-sm" 
-                                    asp-controller="Bugs"
-                                    asp-action="Details"
-                                    asp-route-id="@item.Id"
-                                    ><i class="fa-solid fa-eye"></i>    
-                                </a>
-                                <a
-                                    title="edit"
-                                    class="btn btn-secondary btn-sm"
-                                    asp-controller="Bugs"
-                                    asp-action="Edit"
-                                    asp-route-id="@item.Id"
-                                    ><i class="fas fa-pencil-alt"></i> 
-                                </a>
-                            </td>
+                            <th style="width: 20%">Title</th>
+                            <th style="width: 5%">Project</th>
+                            <th style="width: 30%">Assignee</th>
+                            <th>Priority</th>
+                            <th style="width: 8%">Status</th>
+                            <th style="width: 20%"></th>
                         </tr>
-                    }
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody id="tbody">
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>
+                                    @item.Title
+                                    <br />
+                                    <small>Created @item.CreatedDate</small>
+                                </td>
+                                <td>
+                                    <a asp-controller="Projects" asp-action="Details" asp-route-id="@item.Project.Id">@item.Project.Title</a>
+                                </td>
+                                <td>
+                                    <ul class="list-inline">
+                                        <li class="list-inline-item">
+                                            @if (item.Assignee.AvatarPhoto is null)
+                                            {
+                                                <img src="~/img/default-avatar.png" class="table-avatar" alt="User Image">
+                                            }
+                                            else
+                                            {
+                                                string src = "data:image/png;base64,"
+                                                + Convert.ToBase64String(item.Assignee.AvatarPhoto, 0, item.Assignee.AvatarPhoto.Length);
+                                                <img src="@src" class="table-avatar" alt="User Image">
+                                            }
+                                        </li>
+                                        <li class="list-inline-item">
+                                            <h6>@item.Assignee.UserName</h6>
+                                        </li>
+                                    </ul>
+                                </td>
+                                <td>
+                                    <h6>@item.Priority</h6>
+                                </td>
+                                <td>
+                                    <span class="badge badge-success">@item.Status</span>
+                                </td>
+                                <td class="text-right">
+                                    <a title="View"
+                                       class="btn btn-info btn-sm"
+                                       asp-controller="Bugs"
+                                       asp-action="Details"
+                                       asp-route-id="@item.Id"
+                                    >
+                                        <i class="fa-solid fa-eye"></i>
+                                    </a>
+                                    <a title="edit"
+                                       class="btn btn-warning btn-sm"
+                                       asp-controller="Bugs"
+                                       asp-action="Edit"
+                                       asp-route-id="@item.Id"
+                                    >
+                                        <i class="fas fa-pencil-alt"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
