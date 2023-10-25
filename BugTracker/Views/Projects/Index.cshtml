@@ -32,7 +32,6 @@
                 <table class="table table-striped projects">
                     <thead>
                         <tr>
-                            <th style="width: 1%">Key</th>
                             <th style="width: 20%">Title</th>
                             <th style="width: 30%">Project Manager</th>
                             <th>Priority</th>
@@ -44,9 +43,6 @@
                         @foreach (var item in Model)
                         {
                             <tr>
-                                <td>
-                                    <h6>@item.Key</h6>
-                                </td>
                                 <td>
                                     @item.Title
                                     <br />

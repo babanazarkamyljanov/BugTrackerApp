@@ -5,7 +5,7 @@
         <div class="col">
             <div class="card card-secondary m-1">
                 <div class="card-header">
-                    <h3 class="card-title">Project: @Model.Title</h3>
+                    <h2 class="card-title">@Model.Title</h2>
 
                     <div class="card-tools">
                         <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
@@ -17,23 +17,16 @@
                     <div class="row">
                         <div class="col-sm-6 col-lg-4">
                             <label class="text-lg">
-                                Key
-                            </label>
-                            <h4 class="text-secondary fw-bold">@Model.Key</h4>
-                        </div>
-
-                        <div class="col-sm-6 col-lg-4">
-                            <label class="text-lg">
                                 Status
                             </label>
-                            <h4 class="text-secondary fw-bold">@Model.Status</h4>
+                            <h5>@Model.Status</h5>
                         </div>
 
                         <div class="col-sm-6 col-lg-4">
                             <label class="text-lg">
                                 Priority
                             </label>
-                            <h4 class="text-secondary fw-bold">@Model.Priority</h4>
+                            <h5>@Model.Priority</h5>
                         </div>
 
                         <div class="col-sm-6 col-lg-4">
@@ -53,7 +46,7 @@
                                     }
                                 </li>
                                 <li class="list-inline-item">
-                                    <h4 class="text-secondary fw-bold">@Model.Manager.UserName</h4>
+                                    <h5>@Model.Manager.UserName</h5>
                                 </li>
                             </ul>
                         </div>
@@ -75,7 +68,7 @@
                                     }
                                 </li>
                                 <li class="list-inline-item">
-                                    <h4 class="text-secondary fw-bold">@Model.CreatedBy.UserName</h4>
+                                    <h5>@Model.CreatedBy.UserName</h5>
                                 </li>
                             </ul>
                         </div>
@@ -84,14 +77,14 @@
                             <label class="text-lg">
                                 Created Date
                             </label>
-                            <h4 class="text-secondary fw-bold">@Model.CreatedDate</h4>
+                            <h5>@Model.CreatedDate</h5>
                         </div>
 
                         <div class="col-12">
                             <label class="text-lg">
                                 Description
                             </label>
-                            <h4 class="text-secondary fw-bold">@Html.Raw(Model.Description)</h4>
+                            <h5>@Html.Raw(Model.Description)</h5>
                         </div>
                     </div>
                 </div>

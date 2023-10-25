@@ -33,7 +33,7 @@
                 <thead>
                     <tr>
                         <th style="width: 20%">Title</th>
-                        <th style="width: 5%">Project Key</th>
+                        <th style="width: 5%">Project</th>
                         <th style="width: 30%">Assignee</th>
                         <th>Priority</th>
                         <th style="width: 8%">Status</th>
@@ -50,7 +50,7 @@
                                 <small>Created @item.CreatedDate</small>
                             </td>
                             <td>
-                                <a asp-controller="Projects" asp-action="Details" asp-route-id="@item.ProjectId">@item.ProjectKey</a>
+                                <a asp-controller="Projects" asp-action="Details" asp-route-id="@item.Project.Id">@item.Project.Title</a>
                             </td>
                             <td>
                                 <ul class="list-inline">

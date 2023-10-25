@@ -46,8 +46,11 @@ public class BugsService : IBugsService
                 CreatedDate = b.CreatedDate.ToShortDateString(),
                 Priority = b.Priority,
                 Status = b.Status,
-                ProjectKey = b.Project.Key,
-                ProjectId = b.Project.Id,
+                Project = new SharedProjectDTO()
+                {
+                    Id = b.ProjectId,
+                    Title = b.Project.Title
+                },
                 Assignee = new UserDTO()
                 {
                     UserName = b.Assignee.UserName,
@@ -79,8 +82,11 @@ public class BugsService : IBugsService
                     CreatedDate = b.CreatedDate.ToShortDateString(),
                     Priority = b.Priority,
                     Status = b.Status,
-                    ProjectKey = b.Project.Key,
-                    ProjectId = b.Project.Id,
+                    Project = new SharedProjectDTO()
+                    {
+                        Id = b.ProjectId,
+                        Title = b.Project.Title
+                    },
                     Assignee = new UserDTO()
                     {
                         UserName = b.Assignee.UserName,
@@ -105,8 +111,11 @@ public class BugsService : IBugsService
                     CreatedDate = b.CreatedDate.ToShortDateString(),
                     Priority = b.Priority,
                     Status = b.Status,
-                    ProjectKey = b.Project.Key,
-                    ProjectId = b.Project.Id,
+                    Project = new SharedProjectDTO()
+                    {
+                        Id = b.ProjectId,
+                        Title = b.Project.Title
+                    },
                     Assignee = new UserDTO()
                     {
                         UserName = b.Assignee.UserName,

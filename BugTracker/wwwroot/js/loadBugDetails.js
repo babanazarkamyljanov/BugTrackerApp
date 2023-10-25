@@ -1,4 +1,5 @@
-﻿"use strict";
+﻿/// <reference path="loadorganization.js" />
+"use strict";
 
 LoadBugComments();
 LoadBugFiles();

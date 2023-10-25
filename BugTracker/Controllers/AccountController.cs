@@ -11,6 +11,7 @@ public class AccountController : Controller
     private readonly ILogger<RegisterViewModel> _logger;
     private readonly IOrganizationService _organizationService;
     private readonly IRolesService _rolesService;
+    private readonly IAccountsService _accountsService;
 
     public AccountController(
         UserManager<User> userManager,
@@ -18,7 +19,8 @@ public class AccountController : Controller
         SignInManager<User> signInManager,
         ILogger<RegisterViewModel> logger,
         IOrganizationService organizationService,
-        IRolesService rolesService)
+        IRolesService rolesService,
+        IAccountsService accountsService)
     {
         _userManager = userManager;
         _userStore = userStore;
@@ -27,6 +29,7 @@ public class AccountController : Controller
         _logger = logger;
         _organizationService = organizationService;
         _rolesService = rolesService;
+        _accountsService = accountsService;
     }
 
     // GET: Account/Login
@@ -90,34 +93,47 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Register(RegisterViewModel model,
         string? returnUrl = null,
-        CancellationToken cancellationToken = default)
+        CancellationToken ct = default)
     {
         ViewData["ReturnUrl"] = returnUrl;
+
         if (ModelState.IsValid)
         {
-            string orgName = model.Email;
-            var organization = await _organizationService.Create(orgName, cancellationToken);
-
-            var user = CreateUser();
-            user.FirstName = model.FirstName;
-            user.LastName = model.LastName;
-            user.OrganizationId = organization.Id;
-            await _userStore.SetUserNameAsync(user, model.Email, CancellationToken.None);
-            await _emailStore.SetEmailAsync(user, model.Email, CancellationToken.None);
-            var result = await _userManager.CreateAsync(user, model.Password);
-
-            if (result.Succeeded)
+            Organization organization = new Organization()
             {
+                Id = Guid.Empty
+            };
+
+            User user = new User()
+            {
+                Id = ""
+            };
+
+            try
+            {
+                organization = await _organizationService.Create(model.OrganizationName, ct);
+            }
+            catch (ArgumentException ex)
+            {
+                _logger.LogError(ex, $"{nameof(AccountController)}.{nameof(Register)}");
+                ModelState.AddModelError("OrganizationName", ex.Message);
+                return View(model);
+            }
+
+            try
+            {
+                user = await _accountsService.CreateUser(organization.Id, model, ct);
+
                 try
                 {
-                    await _rolesService.CreateDefaultRoles(user, organization.Id);
+                    await _rolesService.CreateDefaultRoles(user, organization);
                 }
-                catch (InvalidOperationException ex)
+                catch (ArgumentException ex)
                 {
                     _logger.LogError(ex, $"{nameof(AccountController)}.{nameof(Register)}");
+                    ModelState.AddModelError(string.Empty, ex.Message);
+                    return View(model);
                 }
-
-                _logger.LogInformation("User created a new account with password.");
 
                 if (_userManager.Options.SignIn.RequireConfirmedAccount)
                 {
@@ -129,25 +145,25 @@ public class AccountController : Controller
                     return LocalRedirect("/");
                 }
             }
-            else
+            catch (ArgumentException ex)
             {
-                try
-                {
-                    await _organizationService.Delete(organization.Id, cancellationToken);
-                }
-                catch (ArgumentException ex)
-                {
-                    _logger.LogError(ex, $"{nameof(AccountController)}.{nameof(Register)}");
-                }
+                _logger.LogError(ex, $"{nameof(AccountController)}.{nameof(Register)}");
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
             }
-
-            foreach (var error in result.Errors)
+            catch (InvalidOperationException ex)
             {
-                ModelState.AddModelError(string.Empty, error.Description);
+                _logger.LogError(ex, $"{nameof(AccountController)}.{nameof(Register)}");
+                ModelState.AddModelError(string.Empty, ex.Message);
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"{nameof(AccountController)}.{nameof(Register)}");
+                ModelState.AddModelError(string.Empty, "Something went wrong");
+                return View(model);
             }
         }
-
-        // If we got this far, something failed, redisplay form
         return View(model);
     }
 

@@ -1,136 +1,80 @@
 ﻿using BugTracker.Authorization;
+using BugTracker.Interfaces;
 
 namespace BugTracker.Controllers;
 
 public class PermissionsController : Controller
 {
-    private readonly RoleManager<Role> roleManager;
-    private readonly IAuthorizationService authorizationService;
+    private readonly ILogger<PermissionsController> _logger;
+    private readonly IAuthorizationService _authorizationService;
+    private readonly IPermissionsService _permissionsService;
 
-    public PermissionsController(
-        RoleManager<Role> roleManager,
-        IAuthorizationService authorizationService)
+    public PermissionsController(ILogger<PermissionsController> logger,
+        IAuthorizationService authorizationService,
+        IPermissionsService permissionsService)
     {
-        this.roleManager = roleManager;
-        this.authorizationService = authorizationService;
-
+        _logger = logger;
+        _authorizationService = authorizationService;
+        _permissionsService = permissionsService;
     }
 
     [HttpGet]
     [Authorize]
-    public async Task<IActionResult> Index(string roleId)
+    public async Task<ActionResult<PermissionViewModel>> Index(string roleId, CancellationToken ct = default)
     {
-        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.PermissionManageOperations.Read);
+        AuthorizationResult isAuthorized = await _authorizationService
+            .AuthorizeAsync(User, Permissions.PermissionManageOperations.Read);
         if (!isAuthorized.Succeeded)
         {
             return RedirectToAction("AccessDenied", "Account");
         }
-
-        var model = new PermissionViewModel();
-        var allPermissions = PermissionHelper();
-
-        var role = await roleManager.FindByIdAsync(roleId);
-        model.RoleId = roleId;
-        model.RoleName = role.Name;
-
-        var claims = await roleManager.GetClaimsAsync(role);
-        var allClaimValues = allPermissions.Select(a => a.Value).ToList();
-        var roleClaimValues = claims.Select(a => a.Value).ToList();
-        var authorizedClaims = allClaimValues.Intersect(roleClaimValues).ToList();
-
-        foreach (var permission in allPermissions)
+        try
         {
-            if (authorizedClaims.Any(a => a == permission.Value))
-            {
-                permission.Selected = true;
-            }
+            PermissionViewModel model = await _permissionsService.Get(roleId, ct);
+            return View(model);
         }
-        model.RoleClaims = allPermissions;
-
-        return View(model);
+        catch (InvalidOperationException ex)
+        {
+            _logger.LogError(ex, $"{nameof(PermissionsController)}.{nameof(Index)}");
+            return NotFound(ex.Message);
+        }
+        catch (ArgumentException ex)
+        {
+            _logger.LogError(ex, $"{nameof(PermissionsController)}.{nameof(Index)}");
+            return NotFound(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"{nameof(PermissionsController)}.{nameof(Index)}");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
+        }
     }
 
     [HttpPost]
     [Authorize]
     public async Task<IActionResult> Update(PermissionViewModel model)
     {
-        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.PermissionManageOperations.Update);
+        AuthorizationResult isAuthorized = await _authorizationService
+            .AuthorizeAsync(User, Permissions.PermissionManageOperations.Update);
         if (!isAuthorized.Succeeded)
         {
             return RedirectToAction("AccessDenied", "Account");
         }
 
-        var role = await roleManager.FindByIdAsync(model.RoleId);
-        var claims = await roleManager.GetClaimsAsync(role);
-        foreach (var claim in claims)
+        try
         {
-            await roleManager.RemoveClaimAsync(role, claim);
+            await _permissionsService.Update(model);
+            return RedirectToAction(nameof(Index), new { roleId = model.RoleId });
         }
-        var selectedClaims = model.RoleClaims.Where(a => a.Selected).ToList();
-        foreach (var claim in selectedClaims)
+        catch (ArgumentException ex)
         {
-            await roleManager.AddClaimAsync(role, new Claim("Permission", claim.Value));
+            _logger.LogError(ex, $"{nameof(PermissionsController)}.{nameof(Update)}");
+            return NotFound(ex.Message);
         }
-
-        return RedirectToAction("Index", new { roleId = model.RoleId });
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"{nameof(PermissionsController)}.{nameof(Update)}");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
+        }
     }
-
-    #region helpers
-    public List<RoleClaimsViewModel> PermissionHelper()
-    {
-        var allPermissions = new List<RoleClaimsViewModel>();
-
-        var options = Permissions.ProjectOperations.GenerateProjectOperations();
-        foreach (var permission in options)
-        {
-            allPermissions.Add(new RoleClaimsViewModel
-            {
-                Value = permission,
-                Type = "Permission"
-            });
-        }
-
-        options = Permissions.BugOperations.GenerateBugOperations();
-        foreach (var permission in options)
-        {
-            allPermissions.Add(new RoleClaimsViewModel
-            {
-                Value = permission,
-                Type = "Permission"
-            });
-        }
-
-        options = Permissions.AccountManageOperations.GenerateAccountManageOperations();
-        foreach (var permission in options)
-        {
-            allPermissions.Add(new RoleClaimsViewModel
-            {
-                Value = permission,
-                Type = "Permission"
-            });
-        }
-
-        options = Permissions.RoleManageOperations.GenerateRoleManageOperations();
-        foreach (var permission in options)
-        {
-            allPermissions.Add(new RoleClaimsViewModel
-            {
-                Value = permission,
-                Type = "Permission"
-            });
-        }
-
-        options = Permissions.PermissionManageOperations.GeneratePermissionManageOperations();
-        foreach (var permission in options)
-        {
-            allPermissions.Add(new RoleClaimsViewModel
-            {
-                Value = permission,
-                Type = "Permission"
-            });
-        }
-
-        return allPermissions;
-    }
-    #endregion
 }

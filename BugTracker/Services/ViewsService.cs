@@ -8,14 +8,17 @@ public class ViewsService : IViewsService
 {
     private readonly IUsersService _usersService;
     private readonly UserManager<User> _userManager;
+    private readonly RoleManager<Role> _roleManager;
     private readonly ApplicationDbContext _context;
 
     public ViewsService(IUsersService usersService,
         UserManager<User> userManager,
+        RoleManager<Role> roleManager,
         ApplicationDbContext context)
     {
         _usersService = usersService;
         _userManager = userManager;
+        _roleManager = roleManager;
         _context = context;
     }
 
@@ -75,6 +78,22 @@ public class ViewsService : IViewsService
             .ToListAsync();
 
         return users;
+    }
+
+    public async Task<List<string>> GetOrganizationRoles()
+    {
+        string claim = _usersService.GetCurrentUserId();
+        User? currentUser = await GetCurrentUser(claim);
+        if (currentUser == null)
+        {
+            throw new InvalidOperationException("Current logged in user wasn't found");
+        }
+        List<string> roles = await _roleManager.Roles
+            .Where(r => r.OrganizationId == currentUser.OrganizationId)
+            .Select(r => r.Name)
+            .ToListAsync();
+
+        return roles;
     }
 
     public async Task<List<SharedProjectDTO>> GetOrganizationProjects()

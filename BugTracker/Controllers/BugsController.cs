@@ -232,7 +232,7 @@ public class BugsController : Controller
     [HttpPost]
     [Authorize]
     [ValidateAntiForgeryToken]
-    public async Task<ActionResult<EditBugDTO>> Create(CreateBugDTO dto, CancellationToken ct)
+    public async Task<ActionResult<EditBugDTO>> Create(CreateBugDTO dto, CancellationToken ct = default)
     {
         AuthorizationResult isAuthorized = await authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Create);
@@ -343,17 +343,17 @@ public class BugsController : Controller
         }
         catch (ArgumentException ex)
         {
-            _logger.LogError(ex, $"{nameof(BugsController)}.{Delete}");
+            _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Delete)}");
             return Json(new { success = false, message = ex.Message });
         }
         catch (InvalidOperationException ex)
         {
-            _logger.LogError(ex, $"{nameof(BugsController)}.{Delete}");
+            _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Delete)}");
             return Json(new { success = false, message = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, $"{nameof(BugsController)}.{Delete}");
+            _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Delete)}");
             return Json(new { success = false, message = "An error occurred while deleting the bug" });
         }
     }

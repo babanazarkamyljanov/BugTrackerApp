@@ -22,7 +22,6 @@
             $('#commentForm').submit(function (e) {
                 $.ajax({
                     success: function () {
-                        console.log('Add comment was successful');
                         commentForm.reset();
                     }
                 })

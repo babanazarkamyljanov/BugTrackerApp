@@ -43,9 +43,6 @@ function loadProjects(projects) {
         tbody += `
         <tr>
             <td>
-                <h6>${item.key}</h6>
-            </td>
-            <td>
                 ${item.title}
                 <br />
                 <small>Created ${item.createdDate}</small>

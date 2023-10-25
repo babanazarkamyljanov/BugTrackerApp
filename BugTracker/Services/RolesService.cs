@@ -18,57 +18,57 @@ public class RolesService : IRolesService
         _logger = logger;
     }
 
-    public async Task CreateDefaultRoles(User user, Guid orgId)
+    public async Task CreateDefaultRoles(User user, Organization organization)
     {
-        var defaultRoles = DefaultRoles.GenerateDefaultRolesList();
+        List<string> defaultRoles = DefaultRoles.GenerateDefaultRolesList();
         foreach (var roleName in defaultRoles)
         {
-            string uniqueName = roleName + "_" + orgId.ToString();
+            string uniqueName = roleName + "_" + organization.Name;
             if (!await _roleManager.Roles
-                .Where(r => r.Name == uniqueName && r.OrganizationId == orgId)
+                .Where(r => r.Name == uniqueName && r.OrganizationId == organization.Id)
                 .AnyAsync())
             {
                 try
                 {
-                    await _roleManager.CreateAsync(new Role() { Name = uniqueName, OrganizationId = orgId });
+                    await _roleManager.CreateAsync(new Role() { Name = uniqueName, OrganizationId = organization.Id });
                 }
                 catch
                 {
-                    throw new InvalidOperationException($"Create role failed {nameof(RolesService)}.{nameof(CreateDefaultRoles)}");
+                    throw new ArgumentException("Create default roles was failed for organization", nameof(organization));
                 }
             }
         }
 
-        var orgRoles = await _roleManager.Roles
-            .Where(r => r.OrganizationId == orgId)
+        List<Role> orgRoles = await _roleManager.Roles
+            .Where(r => r.OrganizationId == organization.Id)
             .ToListAsync();
         foreach (var role in orgRoles)
         {
             List<string> operations = new();
-            if (role.Name == DefaultRoles.Admin + "_" + orgId.ToString())
+            if (role.Name == DefaultRoles.Admin + "_" + organization.Name)
             {
                 operations = AdminPermissions.Generate();
             }
-            else if (role.Name == DefaultRoles.ProjectManager + "_" + orgId.ToString())
+            else if (role.Name == DefaultRoles.ProjectManager + "_" + organization.Name)
             {
                 operations = ProjectManagerPermissions.Generate();
             }
-            else if (role.Name == DefaultRoles.Developer + "_" + orgId.ToString())
+            else if (role.Name == DefaultRoles.Developer + "_" + organization.Name)
             {
                 operations = DeveloperPermissions.Generate();
             }
-            else if (role.Name == DefaultRoles.Tester + "_" + orgId.ToString())
+            else if (role.Name == DefaultRoles.Tester + "_" + organization.Name)
             {
                 operations = TesterPermissions.Generate();
             }
-            else if (role.Name == DefaultRoles.Submitter + "_" + orgId.ToString())
+            else if (role.Name == DefaultRoles.Submitter + "_" + organization.Name)
             {
                 operations = SubmitterPermissions.Generate();
             }
 
             await AddClaim(role, operations);
         }
-        string admin = DefaultRoles.Admin + "_" + orgId;
+        string admin = DefaultRoles.Admin + "_" + organization.Name;
         await _userManager.AddToRoleAsync(user, admin);
 
         _logger.LogInformation("Default roles created successfully");

@@ -37,7 +37,6 @@ public class ProjectsService : IProjectsService
             {
                 Id = p.Id,
                 Title = p.Title,
-                Key = p.Key,
                 Priority = p.Priority,
                 Status = p.Status,
                 CreatedDate = p.CreatedDate.ToShortDateString(),
@@ -60,7 +59,6 @@ public class ProjectsService : IProjectsService
                 Id = p.Id,
                 Title = p.Title,
                 Description = p.Description,
-                Key = p.Key,
                 Priority = p.Priority,
                 Status = p.Status,
                 CreatedDate = p.CreatedDate,
@@ -108,7 +106,6 @@ public class ProjectsService : IProjectsService
                 {
                     Id = p.Id,
                     Title = p.Title,
-                    Key = p.Key,
                     Priority = p.Priority,
                     Status = p.Status,
                     CreatedDate = p.CreatedDate.ToShortDateString(),
@@ -133,7 +130,6 @@ public class ProjectsService : IProjectsService
                 {
                     Id = p.Id,
                     Title = p.Title,
-                    Key = p.Key,
                     Priority = p.Priority,
                     Status = p.Status,
                     CreatedDate = p.CreatedDate.ToShortDateString(),
@@ -152,23 +148,21 @@ public class ProjectsService : IProjectsService
         CancellationToken ct)
     {
         // TODO validate dto
-
-        Project project = new Project()
-        {
-            Title = dto.Title.Trim(),
-            Key = dto.Key.Trim(),
-            Description = dto.Description.Trim(),
-            Priority = dto.Priority.Trim(),
-            Status = dto.Status.Trim(),
-            ManagerId = dto.ManagerId.Trim(),
-        };
-
         string claim = _usersService.GetCurrentUserId();
         User? currentUser = await GetCurrentUser(claim);
         if (currentUser == null)
         {
             throw new InvalidOperationException("Current logged in user wasn't found");
         }
+
+        Project project = new Project()
+        {
+            Title = dto.Title.Trim(),
+            Description = dto.Description.Trim(),
+            Priority = dto.Priority.Trim(),
+            Status = dto.Status.Trim(),
+            ManagerId = dto.ManagerId.Trim(),
+        };
 
         project.CreatedById = currentUser.Id;
         project.OrganizationId = currentUser.OrganizationId;

@@ -15,26 +15,27 @@
             </div>
         </div>
         <div class="card-body">
-            <div class="row">
+            <div class="row mt-2">
                 <div class="col-sm-6 col-lg-4">
                     <label class="text-lg">
                         Project
                     </label>
-                    <h4 class="text-secondary fw-bold">@Model.Project.Title</h4>
+                    <h5>@Model.Project.Title</h5>
                 </div>
                 <div class="col-sm-6 col-lg-4">
                     <label class="text-lg">
                         Priority
                     </label>
-                    <h4 class="text-secondary fw-bold">@Model.Priority</h4>
+                    <h5>@Model.Priority</h5>
                 </div>
                 <div class="col-sm-6 col-lg-4">
                     <label class="text-lg">
                         Status
                     </label>
-                    <h4 class="text-secondary fw-bold">@Model.Status</h4>
+                    <h5>@Model.Status</h5>
                 </div>
-
+            </div>
+            <div class="row mt-2">
                 <div class="col-sm-6 col-lg-4">
                     <label class="text-lg">
                         Assignee
@@ -52,7 +53,7 @@
                             }
                         </li>
                         <li class="list-inline-item">
-                            <h4 class="text-secondary fw-bold">@Model.Assignee.UserName</h4>
+                            <h5>@Model.Assignee.UserName</h5>
                         </li>
                     </ul>
                 </div>
@@ -74,7 +75,7 @@
                             }
                         </li>
                         <li class="list-inline-item">
-                            <h4 class="text-secondary fw-bold">@Model.CreatedBy.UserName</h4>
+                            <h5>@Model.CreatedBy.UserName</h5>
                         </li>
                     </ul>
                 </div>
@@ -83,14 +84,16 @@
                     <label class="text-lg">
                         Created Date
                     </label>
-                    <h4 class="text-secondary fw-bold">@Model.CreatedDate</h4>
+                    <h5>@Model.CreatedDate</h5>
                 </div>
+            </div>
 
+            <div class="row mt-2">
                 <div class="col-12">
                     <label class="text-lg">
                         Description
                     </label>
-                    <h4 class="text-secondary fw-bold">@Html.Raw(Model.Description)</h4>
+                    <h5>@Html.Raw(Model.Description)</h5>
                 </div>
             </div>
         </div>

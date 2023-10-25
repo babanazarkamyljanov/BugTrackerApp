@@ -8,5 +8,7 @@ public interface IViewsService
 
     Task<List<UserDTO>> GetOrganizationUsers();
 
+    Task<List<string>> GetOrganizationRoles();
+
     Task<List<SharedProjectDTO>> GetOrganizationProjects();
 }

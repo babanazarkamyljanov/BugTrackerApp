@@ -28,5 +28,7 @@ public class RegisterViewModel
     [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
     public string ConfirmPassword { get; set; } = string.Empty;
 
-    public List<string> Roles { get; set; } = new List<string>();
+    public string OrganizationName { get; set; } = string.Empty;
+
+    public string Role { get; set; } = string.Empty;
 }

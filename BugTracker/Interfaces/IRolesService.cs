@@ -2,5 +2,5 @@
 
 public interface IRolesService
 {
-    Task CreateDefaultRoles(User user, Guid orgId);
+    Task CreateDefaultRoles(User user, Organization organization);
 }

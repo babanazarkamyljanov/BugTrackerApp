@@ -8,7 +8,7 @@ public class UserDTO
 
     public string UserName { get; set; } = string.Empty;
 
-    public List<string> Roles { get; set; } = new List<string>();
+    public string Roles { get; set; } = string.Empty;
 
     public byte[]? AvatarPhoto { get; set; }
 }
