@@ -60,6 +60,24 @@
 
                     <div class="col-sm-12 col-lg-6">
                         <div class="form-group">
+                            <label asp-for="@Model.Status">Status</label>
+                            <select asp-for="@Model.Status" class="form-control custom-select">
+                                <option selected disabled>Select Status</option>
+                                <option>Open</option>
+                                <option>Build In Progress</option>
+                                <option>Code Review</option>
+                                <option>Functional Testing</option>
+                                <option>Fixed</option>
+                                <option>Closed</option>
+                            </select>
+                            <span asp-validation-for="@Model.Status" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-12 col-lg-6">
+                        <div class="form-group">
                             @{
                                 var projectList = new List<SelectListItem>();
                                 foreach (var project in projects)

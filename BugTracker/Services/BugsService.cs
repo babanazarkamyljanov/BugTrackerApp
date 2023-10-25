@@ -138,10 +138,10 @@ public class BugsService : IBugsService
     {
         Bug bug = new Bug()
         {
-            Title = dto.Title,
+            Title = dto.Title.Trim(),
             Description = dto.Description,
-            Priority = dto.Priority,
-            Status = "Open",
+            Priority = dto.Priority.Trim(),
+            Status = dto.Status.Trim(),
             ProjectId = dto.ProjectId,
             AssigneeId = dto.AssigneeId
         };
