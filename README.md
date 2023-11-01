@@ -1,1 +1,8 @@
-Bug Tracking web application. Created using .Net 6 and VS 2022.
+Bug Tracking System - web based application
+
+Technologies:
+ASP.NET Core MVC
+.NET 6
+SQL SERVER
+Visual Studio 2022
+SSMS
