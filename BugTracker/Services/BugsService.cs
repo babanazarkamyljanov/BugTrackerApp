@@ -53,7 +53,7 @@ public class BugsService : IBugsService
                 },
                 Assignee = new UserDTO()
                 {
-                    UserName = b.Assignee.UserName,
+                    Email = b.Assignee.Email,
                     AvatarPhoto = b.Assignee.AvatarPhoto
                 }
             }).ToListAsync(ct);
@@ -89,7 +89,7 @@ public class BugsService : IBugsService
                     },
                     Assignee = new UserDTO()
                     {
-                        UserName = b.Assignee.UserName,
+                        Email = b.Assignee.Email,
                         AvatarPhoto = b.Assignee.AvatarPhoto
                     }
                 }).ToListAsync(ct);
@@ -118,7 +118,7 @@ public class BugsService : IBugsService
                     },
                     Assignee = new UserDTO()
                     {
-                        UserName = b.Assignee.UserName,
+                        Email = b.Assignee.Email,
                         AvatarPhoto = b.Assignee.AvatarPhoto
                     }
                 }).ToListAsync(ct);
@@ -316,12 +316,12 @@ public class BugsService : IBugsService
                 Assignee = new UserDTO()
                 {
                     Id = b.AssigneeId,
-                    UserName = b.Assignee.UserName
+                    Email = b.Assignee.Email,
                 },
                 CreatedBy = new UserDTO()
                 {
                     Id = b.CreatedById,
-                    UserName = b.CreatedBy.UserName
+                    Email = b.CreatedBy.Email,
                 },
                 History = b.History.Select(h => new BugHistoryDTO()
                 {
@@ -331,7 +331,7 @@ public class BugsService : IBugsService
                     UpdatedBy = new UserDTO()
                     {
                         Id = h.UpdatedBy.Id,
-                        UserName = h.UpdatedBy.UserName,
+                        Email = h.UpdatedBy.Email,
                     },
                     UpdatedDate = h.UpdatedDate
                 }).ToList()
@@ -360,7 +360,7 @@ public class BugsService : IBugsService
                 Message = c.Message,
                 Author = new UserDTO()
                 {
-                    UserName = c.Author.UserName,
+                    Email = c.Author.Email,
                 },
                 CreatedDate = c.CreatedDate,
             }).ToListAsync(ct);

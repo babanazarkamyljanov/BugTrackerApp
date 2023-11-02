@@ -57,8 +57,9 @@ public class OrganizationService : IOrganizationService
             Users = organization.OrganizationUsers.Select(u => new UserDTO
             {
                 Id = u.Id,
+                FullName = u.FirstName + " " + u.LastName,
+                PhoneNumber = u.PhoneNumber,
                 Email = u.Email,
-                UserName = u.UserName,
                 AvatarPhoto = u.AvatarPhoto,
                 Roles = string.Join(",", _userManager.GetRolesAsync(u).Result
                                         .Select(r => r.Replace(("_" + organization.Name), "")))

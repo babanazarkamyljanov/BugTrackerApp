@@ -51,7 +51,7 @@
                                 }
                             </li>
                             <li class="list-inline-item">
-                                <p class="fw-medium">@Model.Assignee.UserName</p>
+                                <p class="fw-medium">@Model.Assignee.Email</p>
                             </li>
                         </ul>
                     </div>
@@ -73,7 +73,7 @@
                                 }
                             </li>
                             <li class="list-inline-item">
-                                <p class="fw-medium">@Model.CreatedBy.UserName</p>
+                                <p class="fw-medium">@Model.CreatedBy.Email</p>
                             </li>
                         </ul>
                     </div>
@@ -170,7 +170,7 @@
                                                 @Html.Raw(hist.NewValue)
                                             </td>
                                             <td>
-                                                @hist.UpdatedBy.UserName
+                                                @hist.UpdatedBy.Email
                                             </td>
                                             <td>
                                                 @hist.UpdatedDate

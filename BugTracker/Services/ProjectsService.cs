@@ -42,7 +42,7 @@ public class ProjectsService : IProjectsService
                 CreatedDate = p.CreatedDate.ToShortDateString(),
                 Manager = new UserDTO()
                 {
-                    UserName = p.Manager.UserName,
+                    Email = p.Manager.Email,
                     AvatarPhoto = p.Manager.AvatarPhoto
                 }
             }).ToListAsync(ct);
@@ -64,12 +64,12 @@ public class ProjectsService : IProjectsService
                 CreatedDate = p.CreatedDate,
                 Manager = new UserDTO()
                 {
-                    UserName = p.Manager.UserName,
+                    Email = p.Manager.Email,
                     AvatarPhoto = p.Manager.AvatarPhoto
                 },
                 CreatedBy = new UserDTO()
                 {
-                    UserName = p.CreatedBy.UserName,
+                    Email = p.CreatedBy.Email,
                     AvatarPhoto = p.CreatedBy.AvatarPhoto
                 },
                 Bugs = p.Bugs.Select(b => new SharedBugDTO()
@@ -111,7 +111,7 @@ public class ProjectsService : IProjectsService
                     CreatedDate = p.CreatedDate.ToShortDateString(),
                     Manager = new UserDTO()
                     {
-                        UserName = p.Manager.UserName,
+                        Email = p.Manager.Email,
                         AvatarPhoto = p.Manager.AvatarPhoto
                     }
                 }).ToListAsync(ct);
@@ -135,7 +135,7 @@ public class ProjectsService : IProjectsService
                     CreatedDate = p.CreatedDate.ToShortDateString(),
                     Manager = new UserDTO()
                     {
-                        UserName = p.Manager.UserName,
+                        Email = p.Manager.Email,
                         AvatarPhoto = p.Manager.AvatarPhoto
                     }
                 }).ToListAsync(ct);
