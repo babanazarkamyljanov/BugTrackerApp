@@ -43,9 +43,6 @@ function loadProjects(projects) {
         tbody += `
         <tr>
             <td>
-                <h6>${item.key}</h6>
-            </td>
-            <td>
                 ${item.title}
                 <br />
                 <small>Created ${item.createdDate}</small>
@@ -71,7 +68,7 @@ function loadProjects(projects) {
                     <i class="fa-solid fa-eye">
                     </i>
                 </a>
-                <a class="btn btn-secondary btn-sm" href="${editSrc}">
+                <a class="btn btn-warning btn-sm" href="${editSrc}">
                     <i class="fas fa-pencil-alt">
                     </i>
                 </a>

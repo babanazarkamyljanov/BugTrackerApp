@@ -14,6 +14,10 @@ public class CreateBugDTO
     public string Priority { get; set; } = string.Empty;
 
     [Required]
+    [StringLength(50, ErrorMessage = "Status should have a maximum of 50 characters")]
+    public string Status { get; set; } = string.Empty;
+
+    [Required]
     public string AssigneeId { get; set; } = string.Empty;
 
     [Required]

@@ -28,12 +28,10 @@ function loadBugs(bugs) {
     var tbody = '';
     var src = '';
     
-
-
     bugs.map(item => {
         var detailsSrc = '/Bugs/Details/' + item.id;
         var editSrc = '/Bugs/Edit/' + item.id;
-        var projectSrc = 'Projects/Details/' + item.projectId;
+        var projectSrc = 'Projects/Details/' + item.project.id;
         if (item.assignee.avatarPhoto === null) {
             src = '/img/default-avatar.png';
         } else {
@@ -51,7 +49,7 @@ function loadBugs(bugs) {
                 <small>Created ${item.createdDate}</small>
             </td>
             <td>
-                <a href="${projectSrc}">${item.projectKey}</a>
+                <a href="${projectSrc}">${item.project.title}</a>
             </td>
             <td>
                 <ul class="list-inline">
@@ -75,7 +73,7 @@ function loadBugs(bugs) {
                     </i>
                                         
                 </a>
-                <a title="edit" class="btn btn-secondary btn-sm" href="${editSrc}">
+                <a title="edit" class="btn btn-warning btn-sm" href="${editSrc}">
                     <i class="fas fa-pencil-alt">
                     </i> 
                 </a>

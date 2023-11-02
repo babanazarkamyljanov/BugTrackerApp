@@ -7,11 +7,13 @@
       enctype="multipart/form-data">
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
     <input type="hidden" asp-for="BugId" />
+
     <div class="form-group">
         <input asp-for="@Model.FileHolder" accept="file/*" />
         <span asp-validation-for="@Model.FileHolder" class="text-danger"></span>
     </div>
-    <div class="form-group">
+
+    <div class="form-group mt-2">
         <input type="submit" value="Upload" class="btn custom-btn-primary btn-md" />
     </div>
 </form>

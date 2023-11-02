@@ -8,141 +8,138 @@
     var projects = await ViewsService.GetOrganizationProjects();
 }
 
-<section class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1>Create a new Bug</h1>
-            </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a asp-controller="Projects" asp-action="Index">Bugs</a></li>
-                    <li class="breadcrumb-item active">Create</li>
-                </ol>
-            </div>
-        </div>
+<div class="row mb-2">
+    <div class="col">
+        <h1 class="text-center">Edit Bug</h1>
     </div>
-</section>
+</div>
 
-<section class="content">
-    <form asp-action="Edit">
-        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-        <input type="hidden" asp-for="@Model.Id" />
-        <div class="row px-2 py-2">
-            <!-- General details -->
-            <div class="col-md-7">
-                <div class="card card-primary">
-                    <div class="card-header">
-                        <h3 class="card-title">General</h3>
+<div class="row">
+    <div class="col">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="@Model.Id" />
 
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                        </div>
+            <div class="row mt-2">
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        <label asp-for="@Model.Title" class="form-label">Title</label>
+                        <input asp-for="@Model.Title" type="text" class="form-control">
+                        <span asp-validation-for="@Model.Title" class="text-danger"></span>
                     </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label asp-for="@Model.Title">Title</label>
-                            <input asp-for="@Model.Title" type="text" class="form-control">
-                            <span asp-validation-for="@Model.Title" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="@Model.Priority">Priority</label>
-                            <select asp-for="@Model.Priority" class="form-control custom-select">
-                                <option selected disabled>Select Priority</option>
-                                <option>Low</option>
-                                <option>Medium</option>
-                                <option>High</option>
-                            </select>
-                            <span asp-validation-for="@Model.Priority" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="@Model.Status">Status</label>
-                            <select asp-for="@Model.Status" class="form-control custom-select">
-                                <option selected disabled>Select Status</option>
-                                <option>Open</option>
-                                <option>Build In Progress</option>
-                                <option>Code Review</option>
-                                <option>Functional Testing</option>
-                                <option>Fixed</option>
-                                <option>Closed</option>
-                            </select>
-                            <span asp-validation-for="@Model.Status" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            <label asp-for="@Model.Description"> Description</label>
-                            <textarea id="descriptionEditor" asp-for="@Model.Description" class="form-control" rows="4"></textarea>
-                            <span asp-validation-for="@Model.Description" class="text-danger"></span>
-                        </div>
+                </div>
+
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        <label asp-for="@Model.Priority" class="form-label">Priority</label>
+                        <select asp-for="@Model.Priority" class="form-control custom-select">
+                            <option selected disabled>Select Priority</option>
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                        </select>
+                        <span asp-validation-for="@Model.Priority" class="text-danger"></span>
                     </div>
                 </div>
             </div>
 
-            <!-- select Assignee and Project -->
-            <div class="col-md-5">
-                <div class="card card-secondary">
-                    <div class="card-header">
-                        <h3 class="card-title">Other Details</h3>
-
-                        <div class="card-tools">
-                            <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                        </div>
+            <div class="row mt-2">
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        @{
+                            var assigneeList = new List<SelectListItem>();
+                            foreach (var user in users)
+                            {
+                                assigneeList.Add(new SelectListItem { Value = user.Id.ToString(), Text = user.Email });
+                            }
+                        }
+                        <label asp-for="@Model.AssigneeId" class="form-label">Assignee</label>
+                        <select asp-for="@Model.AssigneeId" asp-items="@assigneeList" class="form-control custom-select"></select>
+                        <span asp-validation-for="@Model.AssigneeId" class="text-danger"></span>
                     </div>
-                    <div class="card-body">
-                        <div class="form-group">
-                            @{
-                                var assigneeList = new List<SelectListItem>();
-                                foreach (var user in users)
-                                {
-                                    assigneeList.Add(new SelectListItem { Value = user.Id.ToString(), Text = user.Email });
-                                }
-                            }
-                            <label asp-for="@Model.AssigneeId">Assignee</label>
-                            <select asp-for="@Model.AssigneeId" asp-items="@assigneeList" class="form-control custom-select"></select>
-                            <span asp-validation-for="@Model.AssigneeId" class="text-danger"></span>
-                        </div>
-                        <div class="form-group">
-                            @{
-                                var projectList = new List<SelectListItem>();
-                                foreach (var project in projects)
-                                {
-                                    projectList.Add(new SelectListItem { Value = project.Id.ToString(), Text = project.Title });
-                                }
-                            }
-                            <label asp-for="@Model.ProjectId">Project</label>
-                            <select asp-for="@Model.ProjectId" asp-items="@projectList" class="form-control custom-select"></select>
-                            <span asp-validation-for="@Model.ProjectId" class="text-danger"></span>
-                        </div>
+                </div>
+
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        <label asp-for="@Model.Status" class="form-label">Status</label>
+                        <select asp-for="@Model.Status" class="form-control custom-select">
+                            <option selected disabled>Select Status</option>
+                            <option>Open</option>
+                            <option>Build In Progress</option>
+                            <option>Code Review</option>
+                            <option>Functional Testing</option>
+                            <option>Fixed</option>
+                            <option>Closed</option>
+                        </select>
+                        <span asp-validation-for="@Model.Status" class="text-danger"></span>
                     </div>
                 </div>
             </div>
 
-            <div class="col-8">
-                <button type="submit" class="btn custom-btn-primary btn-lg">Save</button>
-                <a asp-controller="Bugs" asp-action="Index" class="btn btn-secondary btn-lg">Cancel</a>
+            <div class="row mt-2">
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        @{
+                            var projectList = new List<SelectListItem>();
+                            foreach (var project in projects)
+                            {
+                                projectList.Add(new SelectListItem { Value = project.Id.ToString(), Text = project.Title });
+                            }
+                        }
+                        <label asp-for="@Model.ProjectId" class="form-label">Project</label>
+                        <select asp-for="@Model.ProjectId" asp-items="@projectList" class="form-control custom-select"></select>
+                        <span asp-validation-for="@Model.ProjectId" class="text-danger"></span>
+                    </div>
+                </div>
             </div>
 
-            <div class="col-4">
-                <button type="button" class="btn btn-danger float-right btn-lg" onclick="showConfirmDelete()">Delete</button>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <div class="form-group">
+                        <label asp-for="@Model.Description" class="form-label"> Description</label>
+                        <textarea id="descriptionEditor" asp-for="@Model.Description" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="@Model.Description" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row my-4">
+                <div class="col-12">
+                    <button type="submit" class="btn custom-btn-primary btn-lg">Save</button>
+
+                    <a asp-controller="Bugs" asp-action="Index" class="btn btn-secondary btn-lg">Cancel</a>
+
+                    <button type="button"
+                            class="btn btn-danger float-right btn-lg"
+                            data-toggle="modal"
+                            data-target="#deleteModal">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Delete Modal -->
+<div class="modal fade" id="deleteModal"
+    data-backdrop="static"
+    data-keyboard="false" tabindex="-1"
+    aria-labelledby="deleteModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h1 class="modal-title fs-5" id="deleteModalLabel">Delete Bug?</h1>
+            </div>
+            <div class="modal-body">
+                This will delete the bug completely and can't be restored
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger" onclick="deleteBug()">Delete</button>
             </div>
         </div>
-    </form>
-</section>
-
-<!-- delete confirmation dialog -->
-<div class="card card-warning" id="deleteConfirmBox">
-    <div class="card-header">
-        <h3>Delete bug?</h3>
-    </div>
-    <div class="card-body">
-        <h5>This will delete the bug completely and can't be restored</h5>
-    </div>
-    <div class="card-footer d-flex justify-content-end">
-        <button class="btn btn-secondary btn-lg" onclick="hideDeleteConfirm()" style="margin-right: 5px;">Cancel</button>
-        <button class="btn btn-danger btn-lg" onclick="deleteProject()">Delete</button>
     </div>
 </div>
 
@@ -152,23 +149,15 @@
             $('#descriptionEditor').summernote();
         })
 
-        function showConfirmDelete() {
-            $('#deleteConfirmBox').show();
-        }
-
-        function hideDeleteConfirm() {
-            $('#deleteConfirmBox').hide()
-        }
-
-        function deleteProject() {
+        function deleteBug() {
             $.ajax({
                 type: 'POST',
-                url: '/Projects/Delete',
+                url: '/Bugs/Delete',
                 data: { "id": "@Model.Id.ToString()" },
                 success: function (response) {
                     if (response.success) {
-                        hideDeleteConfirm()
-                        window.location.href = '/Projects/Index';
+                        $('#deleteModal').modal('hide');
+                        window.location.href = '/Bugs/Index';
                     } else {
                         alert(response.message);
                     }

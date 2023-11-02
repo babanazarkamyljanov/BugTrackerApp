@@ -70,3 +70,72 @@ button.btn.btn-secondary.custom-btn-primary.addButton {
     background-color: #d6f8ff;
     color: #9c9c9c;
 }
+
+.nav-active {
+    background-color: blue;
+}
+
+.sidebar {
+    height: 100vh;
+    width: 250px;
+    position: fixed;
+    background-color: #212529;
+    padding-top: 20px;
+    padding-left: 15px;
+    color: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar h2 {
+    margin-bottom: 20px;
+}
+
+.sidebar a {
+    margin-top: 15px;
+    padding: 5px 0px;
+    text-decoration: none;
+    font-size: 18px;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    transition: all 0.3s ease-in-out;
+}
+
+.sidebar a:hover {
+    color: #007bff;
+}
+
+.sidebar i {
+    margin-right: 10px;
+    width: 20px;
+    text-align: center;
+}
+
+.wrapper {
+    margin-left: 250px;
+    padding: 0;
+}
+
+.footer {
+    height: 5rem;
+    position: absolute;
+    bottom: 0;
+    left: 250px;
+    right: 0;
+    padding: 10px;
+    text-align: center;
+}
+
+.profile-img {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+img.table-avatar {
+    border-radius: 50%;
+    display: inline;
+    width: 2.5rem;
+}

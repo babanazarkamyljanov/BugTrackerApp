@@ -2,202 +2,83 @@
 @using BugTracker.Authorization;
 @inject IAuthorizationService AuthorizationService
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Organization</title>
-
-    <style>
-        #changeNameForm {
-            z-index: 100;
-            display: none;
-            width: 400px;
-            position: absolute;
-            top: 20%;
-            left: 50%;
-            transform: translate(-20%, -50%);
+<div class="row mt-2">
+    <div class="col-12 d-flex align-items-center gap-3">
+        <h1 id="organizationName">@Model.Name</h1>
+        @if ((AuthorizationService.AuthorizeAsync(User, Permissions.OrganizationManageOperations.Edit)).Result.Succeeded)
+        {
+            <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#commentModal">
+                <i class="fa-solid fa-pen-to-square"></i> Change name
+            </button>
         }
-    </style>
-</head>
-<body>
-    <section style="margin-top: 10px;" class="content">
+    </div>
+</div>
 
-        <!-- About Organization -->
-        <div class="card card-primary">
-            <div class="card-header">
-                <h3 class="card-title">Organization</h3>
-            </div>
-            <!-- /.card-header -->
-            <div class="card-body">
-                <div class="row">
-                    <!-- name box -->
-                    <div class="col-lg-12" style="display: flex; flex-direction: row; gap: 15px; padding-bottom: 15px;">
-                        <h2 class="text-primary" id="organizationName">@Model.Name</h2>
-                        <a style="width: 40px; height: 30px; margin-top: 5px;" class="btn btn-success btn-sm" onclick="showChangeForm('@Model.Id')" title="Change Name">
-                            <i style="margin-top: 3px;" class="fa-solid fa-pen-to-square"></i>
-                        </a>
-                    </div>
+<div class="row mt-4">
+    <div class="col">
+        <h2>All users within the organization</h2>
+    </div>
+</div>
 
-                    <!-- users box -->
-                    <div class="col-lg-3 col-6">
-                        <div class="small-box bg-warning">
-                            <div class="inner">
-                                <h3>@Model.Users.Count</h3>
-                                <p>Users</p>
-                            </div>
-                            <div class="icon">
-                                <i class="fa-sharp fa-solid fa-user-plus"></i>
-                            </div>
-                            @if((AuthorizationService.AuthorizeAsync(User, Permissions.OrganizationManageOperations.CreateUser)).Result.Succeeded)
-                            {
-                                <a asp-action="CreateUser" asp-route-id="@Model.Id" class="small-box-footer">Create User <i class="fas fa-arrow-circle-right"></i></a>
-                            }
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="row mb-4">
+    <div class="col">
+        <div class="table-responsive">
+            <table class="table table-light table-striped table-hover">
+                <thead>
+                    <tr>
+                        <th></th>
+                        <th>Full Name</th>
+                        <th>Email</th>
+                        <th>Phone Number</th>
+                        <th>Roles</th>
+                        <th></th>
+                    </tr>
+                </thead>
 
-        <!-- Organization users -->
-        <div class="card card-solid">
-            <div class="card-header">
-                <h3 class="card-title">All users in the organization</h3>
-            </div>
-            <div class="card-body pb-0">
-                <div class="row">
+                <tbody>
                     @foreach (var user in Model.Users)
                     {
-                        <div class="col-12 col-sm-6 col-md-4 d-flex align-items-stretch flex-column">
-                            <div class="card bg-light d-flex flex-fill">
-                                <div class="card-body">
-                                    <div class="row">
-                                        <div class="col-12" style="display: flex; flex-direction: row;">
-                                            <div class="col-8">
-                                                <h2 class="lead"><b>@user.UserName</b></h2>
-                                                <p class="text-muted text-sm">
-                                                    <b>Roles: </b>@user.Roles
-                                                </p>
-                                            </div>
-                                            <div class="col-4 text-center">
-                                                @if (user.AvatarPhoto is null)
-                                                {
-                                                    <img src="~/img/default-avatar.png" alt="user-avatar" class="img-circle img-fluid">
-                                                }
-                                                else
-                                                {
-                                                    string src = "data:image/png;base64," + Convert.ToBase64String(user.AvatarPhoto, 0, user.AvatarPhoto.Length);
-                                                    <img src="@src" alt="user-avatar" style="width" class="img-circle img-fluid">
-                                                }
-                                            </div>
-                                        </div>
-                                        <div class="col-12" style="margin-top: 5px;">
-                                            <p class="text-muted text-sm ml-2"><b>About: </b> Web Designer / UX / Graphic Artist / Coffee Lover </p>
-                                            <ul class="ml-4 mb-0 fa-ul text-muted">
-                                                <li class="small"><span class="fa-li"><i class="fas fa-lg fa-building"></i></span> Address: Demo Street 123, Demo City 04312, NJ</li>
-                                                <li class="small"><span class="fa-li"><i class="fas fa-lg fa-phone"></i></span> Phone #: + 800 - 12 12 23 52</li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                @if ((AuthorizationService.AuthorizeAsync(User, Permissions.OrganizationManageOperations.OrganizationUserManage)).Result.Succeeded)
+                        <tr>
+                            <td class="align-middle">
+                                @if (user.AvatarPhoto is null)
                                 {
-                                    <div class="card-footer">
-                                        <div class="text-right">
-                                            <a asp-controller="Manage" asp-action="Index" asp-route-id="@user.Id" class="btn btn-sm btn-primary">
-                                                <i class="fa-solid fa-gear"></i> Manage
-                                            </a>
-                                        </div>
-                                    </div>
+                                    <img src="~/img/default-avatar.png" class="table-avatar" alt="User Image">
                                 }
-                            </div>
-                        </div>
+                                else
+                                {
+                                    string src = "data:image/png;base64,"
+                                    + Convert.ToBase64String(user.AvatarPhoto, 0, user.AvatarPhoto.Length);
+                                    <img src="@src" class="table-avatar" alt="User Image">
+                                }
+                            </td>
+                            <td class="align-middle">@user.FullName</td>
+
+                            <td class="align-middle">@user.Email</td>
+
+                            <td class="align-middle">@user.PhoneNumber</td>
+
+                            <td class="align-middle">@user.Roles</td>
+
+                            <td class="align-middle text-end">
+                                <a title="View"
+                                    class="btn btn-info btn-sm"
+                                    asp-controller="Manage"
+                                    asp-action="Index"
+                                    asp-route-id="@user.Id">
+                                    <i class="fa-solid fa-gear"></i> Manage
+                                </a>
+                            </td>
+                        </tr>
                     }
-                </div>
-            </div>
-
-            <div class="card-footer">
-                <nav aria-label="Contacts Page Navigation">
-                    <ul class="pagination justify-content-center m-0">
-                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
-                        <li class="page-item"><a class="page-link" href="#">2</a></li>
-                        <li class="page-item"><a class="page-link" href="#">3</a></li>
-                        <li class="page-item"><a class="page-link" href="#">4</a></li>
-                        <li class="page-item"><a class="page-link" href="#">5</a></li>
-                        <li class="page-item"><a class="page-link" href="#">6</a></li>
-                        <li class="page-item"><a class="page-link" href="#">7</a></li>
-                        <li class="page-item"><a class="page-link" href="#">8</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
-
-    </section>
-
-    <!-- change name form, initially hidden -->
-    <div class="card shadow-lg" id="changeNameForm">
-        <div class="card-header">
-            <h4>Change Organization Name</h4>
-        </div>
-        <div class="card-body">
-            <div class="form-group">
-                <input class="form-control" id="organizationNameInput" type="text" value="@Model.Name" />
-                <span id="validationForOrgName" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <button onclick="submitChange()" class="btn btn-success btn-sm">Change</button>
-                <a href="#" class="btn btn-danger btn-sm" onclick="hideChangeForm()">Cancel</a>
-            </div>
+                </tbody>
+            </table>
         </div>
     </div>
-    <input type="hidden" id="organizationId" />
+</div>
 
-    @section Scripts {
-        <script>
-            $(function () {
-                $("#example1").DataTable({
-                    "responsive": true, "lengthChange": false, "autoWidth": false,
-                    "buttons": [
-                        { extend: 'csv', className: 'btn-info csvButton' },
-                        { extend: 'excel', className: 'excelButton' },
-                        {
-                            text: 'Add new project',
-                            className: 'btn-success addButton',
-                            action: function (e, dt, node, config) {
-                                window.location.href = "/Projects/Create"
-                            }
-                        }]
-                }).buttons().container().appendTo('#example1_wrapper .col-md-6:eq(0)');
-            });
+<!-- edit form modal -->
+<partial name="_EditOrganizationForm" model="new EditOrganizationDTO { Id = Model.Id }"></partial>
 
-            function showChangeForm(id) {
-                document.getElementById("organizationId").value = id
-                $('#changeNameForm').show()
-            }
-            function hideChangeForm() {
-                $('#changeNameForm').hide()
-            }
-            function submitChange() {
-                var id = document.getElementById("organizationId").value
-                var newName = document.getElementById("organizationNameInput").value
-                console.log("newName", newName)
-                $.ajax({
-                    type: 'POST',
-                    url: '/Organization/ChangeName',
-                    data: { "id": id, "newName": newName },
-                    success: function (response) {
-                        if (response == 'ValidationInvalid') {
-                            document.getElementById("validationForOrgName").textContent = "Name cannot be empty"
-                        } else {
-                            hideChangeForm()
-                            document.getElementById("organizationName").textContent = newName
-                        }
-                    },
-                    error: function (response) {
-                        console.log(response)
-                    }
-                })
-            }
-        </script>
-    } 
-</body>
-</html>
+@section Scripts {
+    <script src="~/js/loadOrganization.js"></script>
+}

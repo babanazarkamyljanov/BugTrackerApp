@@ -7,10 +7,6 @@ public class CreateProjectDTO
     public string Title { get; set; } = string.Empty;
 
     [Required]
-    [StringLength(50, ErrorMessage = "Key should have a maximum of 50 characters")]
-    public string Key { get; set; } = string.Empty;
-
-    [Required]
     public string Description { get; set; } = string.Empty;
 
     [Required]

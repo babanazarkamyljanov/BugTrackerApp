@@ -6,7 +6,7 @@ public static class NavigationIndicatorHelper
     {
         try
         {
-            string result = "active";
+            string result = "nav-active";
             var controllerName = urlHelper?.ActionContext?.RouteData?.Values["controller"]?.ToString();
             var methodName = urlHelper?.ActionContext?.RouteData?.Values["action"]?.ToString();
 

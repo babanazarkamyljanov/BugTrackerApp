@@ -16,6 +16,8 @@ builder.Services.AddScoped<IProjectsService, ProjectsService>();
 builder.Services.AddScoped<IBugsService, BugsService>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IPermissionsService, PermissionsService>();
+builder.Services.AddScoped<IAccountsService, AccountsService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddTransient<IViewsService, ViewsService>();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
@@ -85,5 +87,6 @@ app.MapRazorPages();
 app.MapHub<BugDetailsHub>("/bugDetailsHub");
 app.MapHub<LoadProjectsHub>("/loadProjectsHub");
 app.MapHub<LoadBugsHub>("/loadBugsHub");
+app.MapHub<LoadOrganizationHub>("/loadOrganizationHub");
 
 app.Run();

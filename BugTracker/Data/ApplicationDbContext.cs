@@ -26,10 +26,6 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, string>
     protected override void OnModelCreating(ModelBuilder builder)
     {
         builder.Entity<Project>()
-            .HasIndex(p => p.Key)
-            .IsUnique();
-
-        builder.Entity<Project>()
             .HasOne(p => p.Manager)
             .WithMany()
             .OnDelete(DeleteBehavior.NoAction);
@@ -68,6 +64,10 @@ public class ApplicationDbContext : IdentityDbContext<User, Role, string>
             .HasOne(f => f.Bug)
             .WithMany(b => b.Files)
             .OnDelete(DeleteBehavior.NoAction);
+
+        builder.Entity<Organization>()
+            .HasIndex(o => o.Name)
+            .IsUnique();
 
         base.OnModelCreating(builder);
     }

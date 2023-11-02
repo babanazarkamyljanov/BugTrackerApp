@@ -46,11 +46,14 @@ public class BugsService : IBugsService
                 CreatedDate = b.CreatedDate.ToShortDateString(),
                 Priority = b.Priority,
                 Status = b.Status,
-                ProjectKey = b.Project.Key,
-                ProjectId = b.Project.Id,
+                Project = new SharedProjectDTO()
+                {
+                    Id = b.ProjectId,
+                    Title = b.Project.Title
+                },
                 Assignee = new UserDTO()
                 {
-                    UserName = b.Assignee.UserName,
+                    Email = b.Assignee.Email,
                     AvatarPhoto = b.Assignee.AvatarPhoto
                 }
             }).ToListAsync(ct);
@@ -79,11 +82,14 @@ public class BugsService : IBugsService
                     CreatedDate = b.CreatedDate.ToShortDateString(),
                     Priority = b.Priority,
                     Status = b.Status,
-                    ProjectKey = b.Project.Key,
-                    ProjectId = b.Project.Id,
+                    Project = new SharedProjectDTO()
+                    {
+                        Id = b.ProjectId,
+                        Title = b.Project.Title
+                    },
                     Assignee = new UserDTO()
                     {
-                        UserName = b.Assignee.UserName,
+                        Email = b.Assignee.Email,
                         AvatarPhoto = b.Assignee.AvatarPhoto
                     }
                 }).ToListAsync(ct);
@@ -105,11 +111,14 @@ public class BugsService : IBugsService
                     CreatedDate = b.CreatedDate.ToShortDateString(),
                     Priority = b.Priority,
                     Status = b.Status,
-                    ProjectKey = b.Project.Key,
-                    ProjectId = b.Project.Id,
+                    Project = new SharedProjectDTO()
+                    {
+                        Id = b.ProjectId,
+                        Title = b.Project.Title
+                    },
                     Assignee = new UserDTO()
                     {
-                        UserName = b.Assignee.UserName,
+                        Email = b.Assignee.Email,
                         AvatarPhoto = b.Assignee.AvatarPhoto
                     }
                 }).ToListAsync(ct);
@@ -129,10 +138,10 @@ public class BugsService : IBugsService
     {
         Bug bug = new Bug()
         {
-            Title = dto.Title,
+            Title = dto.Title.Trim(),
             Description = dto.Description,
-            Priority = dto.Priority,
-            Status = "Open",
+            Priority = dto.Priority.Trim(),
+            Status = dto.Status.Trim(),
             ProjectId = dto.ProjectId,
             AssigneeId = dto.AssigneeId
         };
@@ -307,12 +316,12 @@ public class BugsService : IBugsService
                 Assignee = new UserDTO()
                 {
                     Id = b.AssigneeId,
-                    UserName = b.Assignee.UserName
+                    Email = b.Assignee.Email,
                 },
                 CreatedBy = new UserDTO()
                 {
                     Id = b.CreatedById,
-                    UserName = b.CreatedBy.UserName
+                    Email = b.CreatedBy.Email,
                 },
                 History = b.History.Select(h => new BugHistoryDTO()
                 {
@@ -322,7 +331,7 @@ public class BugsService : IBugsService
                     UpdatedBy = new UserDTO()
                     {
                         Id = h.UpdatedBy.Id,
-                        UserName = h.UpdatedBy.UserName,
+                        Email = h.UpdatedBy.Email,
                     },
                     UpdatedDate = h.UpdatedDate
                 }).ToList()
@@ -351,7 +360,7 @@ public class BugsService : IBugsService
                 Message = c.Message,
                 Author = new UserDTO()
                 {
-                    UserName = c.Author.UserName,
+                    Email = c.Author.Email,
                 },
                 CreatedDate = c.CreatedDate,
             }).ToListAsync(ct);

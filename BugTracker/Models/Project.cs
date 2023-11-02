@@ -1,6 +1,5 @@
 ﻿namespace BugTracker.Models;
 
-[Index(nameof(Key), IsUnique = true)]
 public class Project
 {
     [Key]
@@ -8,9 +7,6 @@ public class Project
 
     [Required]
     public string Title { get; set; } = string.Empty;
-
-    [Required]
-    public string Key { get; set; } = string.Empty;
 
     [Required]
     public string Description { get; set; } = string.Empty;

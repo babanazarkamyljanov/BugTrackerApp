@@ -9,32 +9,19 @@ public class OrganizationService : IOrganizationService
     private readonly IUsersService _usersService;
     private readonly RoleManager<Role> _roleManager;
     private readonly UserManager<User> _userManager;
+    private readonly IHubContext<LoadOrganizationHub> _loadOrganizationHubContext;
 
     public OrganizationService(ApplicationDbContext context,
         IUsersService usersService,
         RoleManager<Role> roleManager,
-        UserManager<User> userManager)
+        UserManager<User> userManager,
+        IHubContext<LoadOrganizationHub> loadOrganizationHubContext)
     {
         _context = context;
         _usersService = usersService;
         _roleManager = roleManager;
         _userManager = userManager;
-    }
-
-    public async Task<Organization> Create(string name, CancellationToken cancellationToken)
-    {
-        if (string.IsNullOrWhiteSpace(name))
-        {
-            throw new ArgumentException("Must have an organization name", nameof(name));
-        }
-
-        var model = new Organization()
-        {
-            Name = name.Trim()
-        };
-        _context.Organizations.Add(model);
-        await _context.SaveChangesAsync(cancellationToken);
-        return model;
+        _loadOrganizationHubContext = loadOrganizationHubContext;
     }
 
     public async Task<GetOrganizationDTO> GetOrganization(CancellationToken ct)
@@ -48,36 +35,89 @@ public class OrganizationService : IOrganizationService
             throw new InvalidOperationException("Current logged in user wasn't found");
         }
 
-        GetOrganizationDTO? organization = await _context.Organizations
+        Organization? organization = await _context.Organizations
             .Where(o => o.Id == currentUser.OrganizationId)
-            .Select(o => new GetOrganizationDTO()
+            .Select(o => new Organization()
             {
                 Id = o.Id,
                 Name = o.Name,
-                Users = o.OrganizationUsers
-                .Select(u => new UserDTO()
-                {
-                    Id = u.Id,
-                    Email = u.Email,
-                    UserName = u.UserName,
-                    AvatarPhoto = u.AvatarPhoto,
-                    Roles = _userManager.GetRolesAsync(u).Result.ToList()
-                })
-                .ToList()
+                OrganizationUsers = o.OrganizationUsers
             })
-            .FirstOrDefaultAsync(ct);
+            .FirstOrDefaultAsync();
 
         if (organization == null)
         {
-            throw new ArgumentException("organization wasn't found");
+            throw new ArgumentException("Organization wasn't found");
         }
 
-        return organization;
+        GetOrganizationDTO dto = new GetOrganizationDTO()
+        {
+            Id = organization.Id,
+            Name = organization.Name,
+            Users = organization.OrganizationUsers.Select(u => new UserDTO
+            {
+                Id = u.Id,
+                FullName = u.FirstName + " " + u.LastName,
+                PhoneNumber = u.PhoneNumber,
+                Email = u.Email,
+                AvatarPhoto = u.AvatarPhoto,
+                Roles = string.Join(",", _userManager.GetRolesAsync(u).Result
+                                        .Select(r => r.Replace(("_" + organization.Name), "")))
+            }).ToList()
+        };
+
+        return dto;
+    }
+
+    public async Task<Organization> Create(string name, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(name))
+        {
+            throw new ArgumentException("Must have an organization name", nameof(name));
+        }
+
+        if (await _context.Organizations.AnyAsync(o => o.Name == name, ct))
+        {
+            throw new ArgumentException("Name is already taken, try another name", nameof(name));
+        }
+
+        Organization model = new Organization()
+        {
+            Name = name.Trim()
+        };
+        _context.Organizations.Add(model);
+        await _context.SaveChangesAsync(ct);
+        return model;
+    }
+
+    public async Task Edit(EditOrganizationDTO dto, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(dto.Name))
+        {
+            throw new ArgumentException("Organization name can't be empty", nameof(dto.Name));
+        }
+
+        if (await _context.Organizations.AnyAsync(o => o.Name == dto.Name, ct))
+        {
+            throw new ArgumentException("Name is already taken, try another name", nameof(dto.Name));
+        }
+
+        Organization? organization = await _context.Organizations.FindAsync(dto.Id);
+        if (organization == null)
+        {
+            throw new ArgumentException("Organization by id wasn't found", nameof(dto.Id));
+        }
+
+        organization.Name = dto.Name.Trim();
+        _context.Organizations.Update(organization);
+        await _context.SaveChangesAsync(ct);
+
+        await _loadOrganizationHubContext.Clients.All.SendAsync("refreshOrganization", organization.Name, ct);
     }
 
     public async Task Delete(Guid id, CancellationToken cancellationToken)
     {
-        var organization = await _context.Organizations
+        Organization? organization = await _context.Organizations
             .Where(o => o.Id == id)
             .FirstOrDefaultAsync(cancellationToken);
 
@@ -88,5 +128,17 @@ public class OrganizationService : IOrganizationService
 
         _context.Organizations.Remove(organization);
         await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public async Task<bool> IsAlreadyExists(string name, CancellationToken ct)
+    {
+        if (await _context.Organizations.AnyAsync(o => o.Name == name, ct))
+        {
+            return true;
+        }
+        else
+        {
+            return false;
+        }
     }
 }

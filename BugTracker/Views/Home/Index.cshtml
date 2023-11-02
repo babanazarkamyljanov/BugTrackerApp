@@ -1,127 +1,107 @@
 ﻿@model DashboardDTO
 
-<div class="content-header">
-    <div class="container-fluid">
-        <div class="row mb-2">
-            <div class="col-sm-6">
-                <h1 class="m-0">Dashboard</h1>
+
+<div class="row">
+    <div class="col-lg-3 col-6">
+        <div class="card bg-info">
+            <div class="card-body">
+                <h2>@Model.ProjectsCount</h2>
+                <h4>Projects</h4>
             </div>
-            <div class="col-sm-6">
-                <ol class="breadcrumb float-sm-right">
-                    <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
-                    <li class="breadcrumb-item active">Dashboard</li>
-                </ol>
+            <div class="card-footer">
+                <a style="color: white" href="#">More info <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+        <div class="card bg-danger">
+            <div class="card-body">
+                <h2>@Model.BugsCount</h2>
+                <h4>Bugs</h4>
+            </div>
+            <div class="card-footer">
+                <a style="color: white" href="#">More info <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+        <div class="card bg-warning">
+            <div class="card-body">
+                <h2>@Model.UsersCount</h2>
+                <h4>Users</h4>
+            </div>
+            <div class="card-footer">
+                <a style="color: white" href="#">More info <i class="fas fa-arrow-circle-right"></i></a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-3 col-6">
+        <div class="card bg-secondary">
+            <div class="card-body">
+                <h2>5</h2>
+                <h4>Roles</h4>
+            </div>
+            <div class="card-footer">
+                <a style="color: white" href="#">More info <i class="fas fa-arrow-circle-right"></i></a>
             </div>
         </div>
     </div>
 </div>
 
-<section class="content">
-    <div class="container-fluid">
-        <div class="row">
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-info">
-                    <div class="inner">
-                        <h3>@Model.ProjectsCount</h3>
-                        <p>Projects</p>
-                    </div>
-                    <div class="icon">
-                        <i class="ion ion-briefcase"></i>
-                    </div>
-                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-                </div>
+<div class="row g-4 mt-2">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Projects by status</h3>
             </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-success">
-                    <div class="inner">
-                        <h3>@Model.BugsCount</h3>
-                        <p>Bugs</p>
-                    </div>
-                    <div class="icon">
-                        <i class="ion ion-bug"></i>
-                    </div>
-                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-                </div>
+            <div class="card-body">
+                <canvas id="projectsStatusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
             </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-warning">
-                    <div class="inner">
-                        <h3>@Model.UsersCount</h3>
-                        <p>Users</p>
-                    </div>
-                    <div class="icon">
-                        <i class="ion ion-person-add"></i>
-                    </div>
-                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-                </div>
-            </div>
-
-            <div class="col-lg-3 col-6">
-                <div class="small-box bg-danger">
-                    <div class="inner">
-                        <h3>65</h3>
-                        <p>Unique Visitors</p>
-                    </div>
-                    <div class="icon">
-                        <i class="ion ion-pie-graph"></i>
-                    </div>
-                    <a href="#" class="small-box-footer">More info <i class="fas fa-arrow-circle-right"></i></a>
-                </div>
-            </div>
-        </div>
-
-        <div class="row">
-            <section class="col-lg-7">
-                <!-- PROJECTS STATUS CHART -->
-                <div class="card card-danger">
-                    <div class="card-header">
-                        <h3 class="card-title">Projects by status</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="projectsStatusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                    </div>
-                </div>
-                <!-- BUGS STATUS CHART -->
-                <div class="card card-danger">
-                    <div class="card-header">
-                        <h3 class="card-title">Bugs by status</h3>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="bugsStatusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                    </div>
-                </div>
-            </section>
-
-            <section class="col-lg-5">
-                <!-- PROJECTS PRIORITY CHART -->
-                <div class="card card-danger">
-                    <div class="card-header">
-                        <h3 class="card-title">Projects by priority</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart">
-                            <canvas id="projectsPriorityChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- BUGS PRIORITY CHART -->
-                <div class="card card-danger">
-                    <div class="card-header">
-                        <h3 class="card-title">Bugs by priority</h3>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart">
-                            <canvas id="bugsPriorityChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </section>
         </div>
     </div>
-</section>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Projects by priority</h3>
+            </div>
+            <div class="card-body">
+                <div class="chart">
+                    <canvas id="projectsPriorityChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-2 mb-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Bugs by status</h3>
+            </div>
+            <div class="card-body">
+                <canvas id="bugsStatusChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">Bugs by priority</h3>
+            </div>
+            <div class="card-body">
+                <div class="chart">
+                    <canvas id="bugsPriorityChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <script>

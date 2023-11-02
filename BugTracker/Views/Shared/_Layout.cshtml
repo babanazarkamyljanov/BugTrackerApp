@@ -1,0 +1,235 @@
+﻿@using BugTracker.Authorization;
+@using Microsoft.AspNetCore.Identity
+@using static BugTracker.Helpers.NavigationIndicatorHelper;
+@inject SignInManager<User> SignInManager
+@inject UserManager<User> UserManager
+@inject IAuthorizationService AuthorizationService
+
+@{
+    User? currentUser = await UserManager.GetUserAsync(User);
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Bug Tracker</title>
+
+    <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-T3c6CoIi6uLrA9TneNEoa7RxnatzjcDSCmG1MXxSR1GAsXEV/Dwwykc2MPK8M2HN"
+          crossorigin="anonymous" />
+    
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
+    <link
+        href="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs5.min.css"
+        rel="stylesheet"
+        integrity="sha512-ngQ4IGzHQ3s/Hh8kMyG4FC74wzitukRMIcTOoKT3EyzFZCILOPF0twiXOQn75eDINUfKBYmzYn2AA8DkAk8veQ=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer" />
+
+    <link
+        href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback"
+        rel="stylesheet" />
+</head>
+<body>
+    <div class="sidebar">
+        <h2>Bug Tracker</h2>
+        <a href="#"><i class="fas fa-home"></i> Home</a>
+
+        <a asp-controller="Home" asp-action="Index" class="d-flex align-items-center @Url.MakeActiveClass("Home","Index")">
+            <i class="nav-icon fa-solid fa-gauge"></i> Dashboard
+        </a>
+
+        <a asp-controller="Projects" asp-action="Index" class="@Url.MakeActiveClass("Projects","Index")">
+            <i class="nav-icon fa-solid fa-diagram-project"></i> Projects
+        </a>
+
+        <a asp-controller="Bugs" asp-action="Index" class="@Url.MakeActiveClass("Bugs","Index")">
+            <i class="nav-icon fa-solid fa-bug"></i> Bugs
+        </a>
+
+        <a asp-controller="Organization" asp-action="Index" class="@Url.MakeActiveClass("Organization","Index")">
+            <i class="nav-icon fa-solid fa-users"></i> Organization
+        </a>
+
+
+        <a asp-controller="Manage" asp-action="Index" asp-route-id="@currentUser.Id" class="@Url.MakeActiveClass("Manage","Index")">
+            <i class="nav-icon fa-solid fa-user"></i> Manage Account
+        </a>
+
+        @if ((AuthorizationService.AuthorizeAsync(User, Permissions.RoleManageOperations.Read)).Result.Succeeded)
+        {
+            <a asp-controller="Roles" asp-action="Index" class="@Url.MakeActiveClass("Roles","Index")">
+                <i class="nav-icon fa-solid fa-wrench"></i> Manage Roles
+            </a>
+        }
+    </div>
+
+    <div class="wrapper">
+        <header>
+            <nav class="navbar navbar-expand bg-body-tertiary">
+                <div class="container-fluid">
+                    <div class="navbar-collapse d-flex justify-content-end">
+                        <ul class="navbar-nav d-flex align-items-center gap-4">
+                            <li class="nav-item dropdown">
+                                <a class="nav-link" href="#" type="button" data-bs-toggle="dropdown">
+                                    <i class="far fa-bell"></i>
+                                    <span class="position-absolute top-25 start-100 translate-middle badge rounded-pill bg-warning">
+                                        99+
+                                    </span>
+                                </a>
+
+                                <div class="dropdown-menu">
+                                    <span class="dropdown-item dropdown-header">15 Notifications</span>
+                                    <div class="dropdown-divider"></div>
+
+                                    <a href="#" class="dropdown-item">
+                                        <i class="fas fa-envelope mr-2"></i> 4 new messages
+                                        <span class="float-right text-muted text-sm">3 mins</span>
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+
+                                    <a href="#" class="dropdown-item">
+                                        <i class="fas fa-users mr-2"></i> 8 friend requests
+                                        <span class="float-right text-muted text-sm">12 hours</span>
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+
+                                    <a href="#" class="dropdown-item">
+                                        <i class="fas fa-file mr-2"></i> 3 new reports
+                                        <span class="float-right text-muted text-sm">2 days</span>
+                                    </a>
+                                    <div class="dropdown-divider"></div>
+
+                                    <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
+                                </div>
+                            </li>
+
+                            @if (SignInManager.IsSignedIn(User))
+                            {
+                                var firstName = (await @UserManager.GetUserAsync(User)).FirstName;
+                                var lastName = (await @UserManager.GetUserAsync(User)).LastName;
+                                var fullName = firstName + " " + lastName;
+
+                                <li class="nav-item dropdown">
+                                    <a 
+                                        class="nav-link dropdown-toggle"
+                                        href="#"
+                                        type="button"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                    >
+                                        <img 
+                                            src="~/img/default-avatar.png"
+                                            alt="Profile"
+                                            class="profile-img" />
+                                        @fullName
+                                    </a>
+
+                                    <ul class="dropdown-menu">
+                                        <li>
+                                            <a class="dropdown-item nav-link" id="manage"
+                                               asp-area="Identity"
+                                               asp-page="/Account/Manage/Index"
+                                               title="Manage"
+                                            >Manage</a>
+                                        </li>
+                                        <li>
+                                            <form 
+                                                id="logoutForm" 
+                                                class="form-inline" 
+                                                asp-area="Identity" 
+                                                asp-page="/Account/Logout" 
+                                                asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })">
+                                                <button 
+                                                    style="border: 0px; background: white;" 
+                                                    id="logout" type="submit" 
+                                                    class="nav-link"
+                                                >Logout</button>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="nav-item">
+                                    <a
+                                        class="nav-link"
+                                        id="register"
+                                        asp-controller="Account"
+                                        asp-action="Register"
+                                    >Register</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a
+                                        class="nav-link"
+                                        id="login"
+                                        asp-controller="Account"
+                                        asp-action="Login"
+                                    >Login</a>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+        </header>
+
+        <div class="container">
+            <main role="main" class="px-4 py-4">
+                @RenderBody()
+            </main>
+        </div>
+
+        <footer class="footer border-top bg-body-tertiary">
+            <div class="container">
+                <span class="text-body-secondary">Place sticky footer content here.</span>
+            </div>
+        </footer>
+    </div>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"
+        integrity="sha512-v2CJ7UaYy4JwqLDIrZUI/4hqeoQieOmAZNXBeQyjo21dadnwR+8ZaIJVT8EE2iyI61OV8e6M8PP2/4hpQINQ/g=="
+        crossorigin="anonymous" 
+        referrerpolicy="no-referrer"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jquery-ajax-unobtrusive/3.2.6/jquery.unobtrusive-ajax.min.js"
+        integrity="sha512-DedNBWPF0hLGUPNbCYfj8qjlEnNE92Fqn7xd3Sscfu7ipy7Zu33unHdugqRD3c4Vj7/yLv+slqZhMls/4Oc7Zg=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"
+        integrity="sha512-57oZ/vW8ANMjR/KQ6Be9v/+/h6bq9/l3f0Oc7vn6qMqyhvPd1cvKBRWWpzu0QoneImqr2SkmO4MSqU+RpHom3Q=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
+            crossorigin="anonymous"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script src="https://kit.fontawesome.com/1d896aecf2.js" crossorigin="anonymous"></script>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"
+        integrity="sha512-SIMGYRUjwY8+gKg7nn9EItdD8LCADSDfJNutF9TPrvEo86sQmFMh6MyralfIyhADlajSxqc7G0gs7+MwWF/ogQ=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
+
+    <script
+        src="https://cdnjs.cloudflare.com/ajax/libs/summernote/0.8.20/summernote-bs5.min.js"
+        integrity="sha512-6F1RVfnxCprKJmfulcxxym1Dar5FsT/V2jiEUvABiaEiFWoQ8yHvqRM/Slf0qJKiwin6IDQucjXuolCfCKnaJQ=="
+        crossorigin="anonymous"
+        referrerpolicy="no-referrer"></script>
+
+    <script src="~/lib/microsoft/signalr/dist/browser/signalr.js"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

@@ -6,13 +6,11 @@ public class GetAllProjectDTO
 
     public string Title { get; set; } = string.Empty;
 
-    public string Key { get; set; } = string.Empty;
-
     public string Priority { get; set; } = string.Empty;
 
     public string Status { get; set; } = string.Empty;
 
-    public string CreatedDate { get; set; }
+    public string CreatedDate { get; set; } = string.Empty;
 
     public UserDTO Manager { get; set; } = new UserDTO();
 }

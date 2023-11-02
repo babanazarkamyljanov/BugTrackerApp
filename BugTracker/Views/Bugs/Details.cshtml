@@ -3,178 +3,192 @@
     ViewData["id"] = @Model.Id;
 }
 
-<section class="content p-2">
-    <div class="card card-secondary">
-        <div class="card-header">
-            <h1 class="card-title">@Model.Title</h1>
-
-            <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse" title="Collapse">
-                    <i class="fas fa-minus"></i>
-                </button>
+<div class="row mt-2">
+    <div class="col">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">@Model.Title</h3>
             </div>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-sm-6 col-lg-4">
-                    <label class="text-lg">
-                        Project
-                    </label>
-                    <h4 class="text-secondary fw-bold">@Model.Project.Title</h4>
-                </div>
-                <div class="col-sm-6 col-lg-4">
-                    <label class="text-lg">
-                        Priority
-                    </label>
-                    <h4 class="text-secondary fw-bold">@Model.Priority</h4>
-                </div>
-                <div class="col-sm-6 col-lg-4">
-                    <label class="text-lg">
-                        Status
-                    </label>
-                    <h4 class="text-secondary fw-bold">@Model.Status</h4>
-                </div>
-
-                <div class="col-sm-6 col-lg-4">
-                    <label class="text-lg">
-                        Assignee
-                    </label>
-                    <ul class="list-inline">
-                        <li class="list-inline-item">
-                            @if (@Model.Assignee.AvatarPhoto is null)
-                            {
-                                <img src="~/img/default-avatar.png" class="table-avatar" width="30" height="30" alt="User Image">
-                            }
-                            else
-                            {
-                                string src = "data:image/png;base64," + Convert.ToBase64String(Model.Assignee.AvatarPhoto, 0, Model.Assignee.AvatarPhoto.Length);
-                                <img src="@src" class="table-avatar" width="30" height="30" alt="User Image">
-                            }
-                        </li>
-                        <li class="list-inline-item">
-                            <h4 class="text-secondary fw-bold">@Model.Assignee.UserName</h4>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="col-sm-6 col-lg-4">
-                    <label class="text-lg">
-                        Created by
-                    </label>
-                    <ul class="list-inline">
-                        <li class="list-inline-item">
-                            @if (@Model.CreatedBy.AvatarPhoto is null)
-                            {
-                                <img src="~/img/default-avatar.png" class="table-avatar" width="30" height="30" alt="User Image">
-                            }
-                            else
-                            {
-                                string src = "data:image/png;base64," + Convert.ToBase64String(Model.CreatedBy.AvatarPhoto, 0, Model.CreatedBy.AvatarPhoto.Length);
-                                <img src="@src" class="table-avatar" width="30" height="30" alt="User Image">
-                            }
-                        </li>
-                        <li class="list-inline-item">
-                            <h4 class="text-secondary fw-bold">@Model.CreatedBy.UserName</h4>
-                        </li>
-                    </ul>
-                </div>
-
-                <div class="col-sm-6 col-lg-4">
-                    <label class="text-lg">
-                        Created Date
-                    </label>
-                    <h4 class="text-secondary fw-bold">@Model.CreatedDate</h4>
-                </div>
-
-                <div class="col-12">
-                    <label class="text-lg">
-                        Description
-                    </label>
-                    <h4 class="text-secondary fw-bold">@Html.Raw(Model.Description)</h4>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bug attached files -->
-    <div class="card card-secondary w-100">
-        <div class="card-header">
-            <h3 class="card-title">Attached files</h3>
-        </div>
-
-        <div class="card-body">
-            <partial name="_AddFileForm" model="new AddFileDTO { BugId = Model.Id }"></partial>
-            <br />
-
-            <div style="display: flex; gap: 15px;" id="filesDiv">
-                @* SignalR will handle to get files *@
-            </div>
-        </div>
-    </div>
-
-    <!--- Bug comments and history -->
-    <div class="card w-100">
-        <div class="card-header">
-            <ul class="nav nav-tabs">
-                <li class="nav-item"><a class="nav-link active" href="#comments" data-toggle="tab">Comments</a></li>
-                <li class="nav-item"><a class="nav-link" href="#history" data-toggle="tab">History</a></li>
-            </ul>
-        </div>
-
-        <div class="card-body">
-            <div class="tab-content">
-                <div class="active tab-pane" id="comments">
-                    <partial name="_AddComment" model="new AddCommentDTO { BugId = Model.Id }"></partial>
-                    <br />
-                    <div id="commentsCount">
-                        @* SignalR will handle comments count *@
+            <div class="card-body">
+                <div class="row mt-2">
+                    <div class="col-sm-6 col-lg-4">
+                        <h4 class="fw-semibold">
+                            Project
+                        </h4>
+                        <p class="fw-medium">@Model.Project.Title</p>
                     </div>
 
-                    <div class="post" id="commentPost">
-                        @* SignalR will handle to get comments *@
+                    <div class="col-sm-6 col-lg-4">
+                        <h4 class="fw-semibold">
+                            Priority
+                        </h4>
+                        <p class="fw-medium">@Model.Priority</p>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-4">
+                        <h4 class="fw-semibold">
+                            Status
+                        </h4>
+                        <p class="fw-medium">@Model.Status</p>
                     </div>
                 </div>
 
-                <div class="tab-pane" id="history">
-                    <table class="table table-striped" id="roleTable">
-                        <thead>
-                            <tr>
-                                <th>Property</th>
-                                <th>Old Value</th>
-                                <th>New Value</th>
-                                <th>Updated By</th>
-                                <th>Updated Date</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var hist in Model.History)
-                            {
-                                <tr>
-                                    <td>
-                                        @hist.Property
-                                    </td>
-                                    <td>
-                                        @Html.Raw(hist.OldValue)
-                                    </td>
-                                    <td>
-                                        @Html.Raw(hist.NewValue)
-                                    </td>
-                                    <td>
-                                        @hist.UpdatedBy.UserName
-                                    </td>
-                                    <td>
-                                        @hist.UpdatedDate
-                                    </td>
-                                </tr>
-                            }
-                        </tbody>
-                    </table>
+                <div class="row mt-2">
+                    <div class="col-sm-6 col-lg-4">
+                        <h4 class="fw-semibold">
+                            Assignee
+                        </h4>
+                        <ul class="list-inline">
+                            <li class="list-inline-item">
+                                @if (@Model.Assignee.AvatarPhoto is null)
+                                {
+                                    <img src="~/img/default-avatar.png" class="table-avatar" width="30" height="30" alt="User Image">
+                                }
+                                else
+                                {
+                                    string src = "data:image/png;base64," + Convert.ToBase64String(Model.Assignee.AvatarPhoto, 0, Model.Assignee.AvatarPhoto.Length);
+                                    <img src="@src" class="table-avatar" width="30" height="30" alt="User Image">
+                                }
+                            </li>
+                            <li class="list-inline-item">
+                                <p class="fw-medium">@Model.Assignee.Email</p>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-4">
+                        <h4 class="fw-semibold">
+                            Created by
+                        </h4>
+                        <ul class="list-inline">
+                            <li class="list-inline-item">
+                                @if (@Model.CreatedBy.AvatarPhoto is null)
+                                {
+                                    <img src="~/img/default-avatar.png" class="table-avatar" width="30" height="30" alt="User Image">
+                                }
+                                else
+                                {
+                                    string src = "data:image/png;base64," + Convert.ToBase64String(Model.CreatedBy.AvatarPhoto, 0, Model.CreatedBy.AvatarPhoto.Length);
+                                    <img src="@src" class="table-avatar" width="30" height="30" alt="User Image">
+                                }
+                            </li>
+                            <li class="list-inline-item">
+                                <p class="fw-medium">@Model.CreatedBy.Email</p>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="col-sm-6 col-lg-4">
+                        <h4 class="fw-semibold">
+                            Created Date
+                        </h4>
+                        <p class="fw-medium">@Model.CreatedDate</p>
+                    </div>
+                </div>
+
+                <div class="row mt-2">
+                    <div class="col-12">
+                        <h4 class="fw-semibold">
+                            Description
+                        </h4>
+                        <p class="fw-medium">@Html.Raw(Model.Description)</p>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
-    <input type="hidden" id="bugId" value="@Model.Id" />
-</section>
+</div>
+
+<!-- Bug attached files -->
+<div class="row mt-2">
+    <div class="col">
+        <div class="card w-100">
+            <div class="card-header">
+                <h3 class="card-title">Attached files</h3>
+            </div>
+
+            <div class="card-body">
+                <partial name="_AddFileForm" model="new AddFileDTO { BugId = Model.Id }"></partial>
+                <br />
+
+                <div style="display: flex; gap: 15px;" id="filesDiv">
+                    @* SignalR will handle to get files *@
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!--- Bug comments and history -->
+<div class="row mt-2 mb-4">
+    <div class="col">
+        <div class="card w-100">
+            <div class="card-header">
+                <ul class="nav nav-tabs">
+                    <li class="nav-item"><a class="nav-link active" href="#comments" data-bs-toggle="tab">Comments</a></li>
+                    <li class="nav-item"><a class="nav-link" href="#history" data-bs-toggle="tab">History</a></li>
+                </ul>
+            </div>
+
+            <div class="card-body">
+                <div class="tab-content">
+                    <div class="active tab-pane" id="comments">
+                        <partial name="_AddComment" model="new AddCommentDTO { BugId = Model.Id }"></partial>
+                        <br />
+                        <div id="commentsCount">
+                            @* SignalR will handle comments count *@
+                        </div>
+
+                        <div class="post" id="commentPost">
+                            @* SignalR will handle to get comments *@
+                        </div>
+                    </div>
+
+                    <div class="tab-pane" id="history">
+                        <div class="table-responsive">
+                            <table class="table table-striped" id="roleTable">
+                                <thead>
+                                    <tr>
+                                        <th>Property</th>
+                                        <th>Old Value</th>
+                                        <th>New Value</th>
+                                        <th>Updated By</th>
+                                        <th>Updated Date</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var hist in Model.History)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @hist.Property
+                                            </td>
+                                            <td>
+                                                @Html.Raw(hist.OldValue)
+                                            </td>
+                                            <td>
+                                                @Html.Raw(hist.NewValue)
+                                            </td>
+                                            <td>
+                                                @hist.UpdatedBy.Email
+                                            </td>
+                                            <td>
+                                                @hist.UpdatedDate
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="bugId" value="@Model.Id" />
 
 @section Scripts {
     <script src="~/js/loadBugDetails.js"></script>
