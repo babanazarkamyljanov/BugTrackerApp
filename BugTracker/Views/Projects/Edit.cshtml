@@ -15,100 +15,98 @@
     }
 }
 
-<div class="container px-4 py-2">
-    <div class="row mb-2">
-        <div class="col-12">
-            <h1 class="text-center">Edit Project</h1>
-        </div>
+<div class="row mb-2">
+    <div class="col-12">
+        <h1 class="text-center">Edit Project</h1>
     </div>
+</div>
 
-    <div class="row">
-        <div class="col">
-            <form asp-action="Edit">
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-                <input type="hidden" asp-for="@Model.Id" />
+<div class="row">
+    <div class="col">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="@Model.Id" />
 
-                <div class="row">
-                    <div class="col-sm-12 col-lg-6">
-                        <div class="form-group">
-                            <label asp-for="@Model.Title">Project Title</label>
-                            <input asp-for="@Model.Title" type="text" class="form-control">
-                            <span asp-validation-for="@Model.Title" class="text-danger"></span>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-12 col-lg-6">
-                        <div class="form-group">
-                            <label asp-for="@Model.Priority">Priority</label>
-                            <select asp-for="@Model.Priority" class="form-control custom-select">
-                                <option selected disabled>Select Priority</option>
-                                <option>Low</option>
-                                <option>Medium</option>
-                                <option>High</option>
-                            </select>
-                            <span asp-validation-for="@Model.Priority" class="text-danger"></span>
-                        </div>
+            <div class="row mt-2">
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        <label asp-for="@Model.Title" class="form-label">Project Title</label>
+                        <input asp-for="@Model.Title" type="text" class="form-control">
+                        <span asp-validation-for="@Model.Title" class="text-danger"></span>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-sm-12 col-lg-6">
-                        <div class="form-group">
-                            @{
-                                var managerList = new List<SelectListItem>();
-                                foreach (var user in managers)
-                                {
-                                    managerList.Add(new SelectListItem { Value = user.Id.ToString(), Text = user.Email });
-                                }
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        <label asp-for="@Model.Priority" class="form-label">Priority</label>
+                        <select asp-for="@Model.Priority" class="form-control custom-select">
+                            <option selected disabled>Select Priority</option>
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                        </select>
+                        <span asp-validation-for="@Model.Priority" class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-2">
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        @{
+                            var managerList = new List<SelectListItem>();
+                            foreach (var user in managers)
+                            {
+                                managerList.Add(new SelectListItem { Value = user.Id.ToString(), Text = user.Email });
                             }
-                            <label asp-for="@Model.ManagerId">Project Manager</label>
-                            <select asp-for="@Model.ManagerId" asp-items="@managerList" class="form-control custom-select"></select>
-                            <span asp-validation-for="@Model.ManagerId" class="text-danger"></span>
-                        </div>
-                    </div>
-
-                    <div class="col-sm-12 col-lg-6">
-                        <div class="form-group">
-                            <label asp-for="@Model.Status">Status</label>
-                            <select asp-for="@Model.Status" class="form-control custom-select">
-                                <option selected disabled>Select Status</option>
-                                <option>Open</option>
-                                <option>In Progress</option>
-                                <option>Completed</option>
-                                <option>Closed</option>
-                            </select>
-                            <span asp-validation-for="@Model.Status" class="text-danger"></span>
-                        </div>
+                        }
+                        <label asp-for="@Model.ManagerId" class="form-label">Project Manager</label>
+                        <select asp-for="@Model.ManagerId" asp-items="@managerList" class="form-control custom-select"></select>
+                        <span asp-validation-for="@Model.ManagerId" class="text-danger"></span>
                     </div>
                 </div>
 
-
-                <div class="row">
-                    <div class="col-12">
-                        <div class="form-group">
-                            <label asp-for="@Model.Description">Project Description</label>
-                            <textarea id="descriptionEditor" asp-for="@Model.Description" class="form-control" rows="4"></textarea>
-                            <span asp-validation-for="@Model.Description" class="text-danger"></span>
-                        </div>
+                <div class="col-sm-12 col-lg-6">
+                    <div class="form-group">
+                        <label asp-for="@Model.Status" class="form-label">Status</label>
+                        <select asp-for="@Model.Status" class="form-control custom-select">
+                            <option selected disabled>Select Status</option>
+                            <option>Open</option>
+                            <option>In Progress</option>
+                            <option>Completed</option>
+                            <option>Closed</option>
+                        </select>
+                        <span asp-validation-for="@Model.Status" class="text-danger"></span>
                     </div>
                 </div>
+            </div>
 
-                <div class="row">
-                    <div class="col-12">
-                        <button type="submit" class="btn custom-btn-primary btn-lg">Save</button>
 
-                        <a asp-controller="Projects" asp-action="Index" class="btn btn-secondary btn-lg">Cancel</a>
-
-                        <button type="button"
-                                class="btn btn-danger btn-lg float-right"
-                                data-toggle="modal"
-                                data-target="#deleteModal">
-                            Delete
-                        </button>
+            <div class="row mt-2">
+                <div class="col-12">
+                    <div class="form-group">
+                        <label asp-for="@Model.Description" class="form-label">Project Description</label>
+                        <textarea id="descriptionEditor" asp-for="@Model.Description" class="form-control" rows="4"></textarea>
+                        <span asp-validation-for="@Model.Description" class="text-danger"></span>
                     </div>
                 </div>
-            </form>
-        </div>
+            </div>
+
+            <div class="row my-4">
+                <div class="col-12">
+                    <button type="submit" class="btn custom-btn-primary btn-lg">Save</button>
+
+                    <a asp-controller="Projects" asp-action="Index" class="btn btn-secondary btn-lg">Cancel</a>
+
+                    <button type="button"
+                            class="btn btn-danger btn-lg float-right"
+                            data-toggle="modal"
+                            data-target="#deleteModal">
+                        Delete
+                    </button>
+                </div>
+            </div>
+        </form>
     </div>
 </div>
 
