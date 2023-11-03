@@ -7,19 +7,16 @@ public class OrganizationService : IOrganizationService
 {
     private readonly ApplicationDbContext _context;
     private readonly IUsersService _usersService;
-    private readonly RoleManager<Role> _roleManager;
     private readonly UserManager<User> _userManager;
     private readonly IHubContext<LoadOrganizationHub> _loadOrganizationHubContext;
 
     public OrganizationService(ApplicationDbContext context,
         IUsersService usersService,
-        RoleManager<Role> roleManager,
         UserManager<User> userManager,
         IHubContext<LoadOrganizationHub> loadOrganizationHubContext)
     {
         _context = context;
         _usersService = usersService;
-        _roleManager = roleManager;
         _userManager = userManager;
         _loadOrganizationHubContext = loadOrganizationHubContext;
     }

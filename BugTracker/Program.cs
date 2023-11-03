@@ -1,9 +1,6 @@
 using BugTracker.Authorization;
 using BugTracker.Interfaces;
 using System.Text.Json.Serialization;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using BugTracker.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,13 +11,11 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddSignalR();
 builder.Services.AddScoped<IUsersService, UsersService>();
-builder.Services.AddScoped<IRolesService, RolesService>();
 builder.Services.AddScoped<IProjectsService, ProjectsService>();
 builder.Services.AddScoped<IBugsService, BugsService>();
 builder.Services.AddScoped<IOrganizationService, OrganizationService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IPermissionsService, PermissionsService>();
-builder.Services.AddScoped<IAccountsService, AccountsService>();
 builder.Services.AddScoped<NotificationService>();
 builder.Services.AddTransient<IViewsService, ViewsService>();
 builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();

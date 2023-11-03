@@ -1,4 +1,5 @@
 ﻿using BugTracker.Authorization;
+using BugTracker.Models.DTOs;
 using BugTracker.ViewModels.ManageAccount;
 using Microsoft.AspNetCore.WebUtilities;
 using System.Text;
@@ -8,6 +9,7 @@ namespace BugTracker.Controllers;
 public class ManageController : Controller
 {
     private readonly UserManager<User> userManager;
+    private readonly RoleManager<Role> _roleManager;
     private readonly SignInManager<User> signInManager;
     private readonly ILogger logger;
     private readonly ApplicationDbContext context;
@@ -16,6 +18,7 @@ public class ManageController : Controller
 
     public ManageController(
         UserManager<User> userManager,
+        RoleManager<Role> roleManager,
         SignInManager<User> signInManager,
         ILoggerFactory loggerFactory,
         ApplicationDbContext context,
@@ -23,11 +26,111 @@ public class ManageController : Controller
         IAuthorizationService authorizationService)
     {
         this.userManager = userManager;
+        _roleManager = roleManager;
         this.signInManager = signInManager;
         this.logger = loggerFactory.CreateLogger<ManageController>();
         this.context = context;
         this.hostEnvironment = hostEnvironment;
         this.authorizationService = authorizationService;
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Index1(string id, CancellationToken ct = default)
+    {
+        User? user = await userManager.FindByIdAsync(id);
+        if (user == null)
+        {
+            throw new ArgumentException("User by id wasn't found", nameof(id));
+        }
+
+        string? organization = await context.Organizations
+            .Where(o => o.Id == user.OrganizationId)
+            .Select(o => o.Name)
+            .FirstOrDefaultAsync(ct);
+        if ( organization == null)
+        {
+            throw new ArgumentException("Organization wasn't found", nameof(id));
+        }
+
+        IList<string>? roles = await userManager.GetRolesAsync(user);
+        if (roles == null)
+        {
+            throw new ArgumentException("Roles for user wasn't found", nameof(id));
+        }
+
+        if(user.AvatarPhoto != null)
+        {
+            ViewBag.ProfilePhotoSrc = "data:image/png;base64," + Convert.ToBase64String(user.AvatarPhoto, 0, user.AvatarPhoto.Length);
+        }
+
+        EditAccountDTO dto = new EditAccountDTO()
+        {
+            Id = id,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Username = user.UserName,
+            Email = user.Email,
+            ProfilePhotoInBytes = user.AvatarPhoto,
+            Organization = organization,
+            RoleName = roles[0],
+            PhoneNumber = user.PhoneNumber,
+            Address = ""
+        };
+
+        return View(dto);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Index1(EditAccountDTO dto, CancellationToken ct = default)
+    {
+        if (dto.ProfilePhoto == null || dto.ProfilePhoto.Length == 0)
+        {
+            throw new ArgumentException("No photo is uploaded", nameof(dto.ProfilePhoto));
+        }
+
+        User? user = await userManager.FindByIdAsync(dto.Id);
+        if (user == null)
+        {
+            throw new ArgumentException("User by id wasn't found", nameof(dto.Id));
+        }
+
+        try
+        {
+            user.FirstName = dto.FirstName;
+            user.LastName = dto.LastName;
+            user.PhoneNumber = dto.PhoneNumber;
+
+            if (await userManager.IsInRoleAsync(user, dto.RoleName) == false)
+            {
+                await userManager.AddToRoleAsync(user, dto.RoleName);
+            }
+
+            using (var image = await Image.LoadAsync<Rgba32>(dto.ProfilePhoto.OpenReadStream()))
+            {
+                //image.Mutate(x => x.Resize(300, 300));
+
+                using (var memoryStream = new MemoryStream())
+                {
+                    await image.SaveAsJpegAsync(memoryStream);
+                    memoryStream.Position = 0;
+                    user.AvatarPhoto = memoryStream.ToArray();
+                }
+            }
+
+            IdentityResult? result = await userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                return RedirectToAction(nameof(Index1), new { dto.Id });
+            }
+            else
+            {
+                return View(dto);
+            }
+        }
+        catch (Exception)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "An while editing account");
+        }
     }
 
     // GET: /Manage/Index
@@ -52,7 +155,7 @@ public class ManageController : Controller
             : message == ManageMessageId.AddPhoneSuccess ? "Your phone number was added."
             : message != null ? message
             : "";
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.FindByIdAsync(id);
 
         if (user == null)
         {
@@ -74,7 +177,8 @@ public class ManageController : Controller
     [ActionName("Index")]
     public async Task<IActionResult> AddPhoneNumber(IndexViewModel model)
     {
-        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.AccountManageOperations.ChangeEmail);
+        var isAuthorized = await authorizationService
+            .AuthorizeAsync(User, Permissions.AccountManageOperations.ChangeEmail);
         if (!isAuthorized.Succeeded)
         {
             return LocalRedirect("/Account/AccessDenied");
@@ -85,7 +189,7 @@ public class ManageController : Controller
             return View(model);
         }
 
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == model.Id);
+        var user = await userManager.FindByIdAsync(model.Id);
         if (user == null)
         {
             return NotFound();
@@ -105,7 +209,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> ChangeEmail(string id)
     {
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id== id);
+        var user = await userManager.FindByIdAsync(id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
@@ -132,7 +236,7 @@ public class ManageController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ChangeEmail(string id, ChangeEmailViewModel model)
     {
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.FindByIdAsync(id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
@@ -175,7 +279,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> ChangePassword(string id)
     {
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.FindByIdAsync(id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
@@ -204,7 +308,7 @@ public class ManageController : Controller
         {
             return View("Index", id);
         }
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.FindByIdAsync(id);
         if (user != null)
         {
             var result = await userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
@@ -223,7 +327,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> ChangeAvatar(string id)
     {
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.FindByIdAsync(id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
@@ -252,7 +356,7 @@ public class ManageController : Controller
         {
             return View(model);
         }
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.FindByIdAsync(id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
@@ -283,7 +387,7 @@ public class ManageController : Controller
     public async Task<IActionResult> PersonalData(string id)
     {
         ViewData["id"] = id;
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.FindByIdAsync(id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
@@ -302,7 +406,7 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> Delete(string id)
     {
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == id);
+        var user = await userManager.FindByIdAsync(id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{id}'");
@@ -321,7 +425,7 @@ public class ManageController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> DeleteConfirm(DeleteAccountViewModel model)
     {
-        var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id == model.Id);
+        var user = await userManager.FindByIdAsync(model.Id);
         if (user == null)
         {
             return NotFound($"Unable to load user with ID '{model.Id}'.");
