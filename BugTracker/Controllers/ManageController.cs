@@ -34,7 +34,8 @@ public class ManageController : Controller
     [HttpGet]
     public async Task<IActionResult> Index(string id, ManageMessageId? message = null)
     {
-        var isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.AccountManageOperations.View);
+        var isAuthorized = await authorizationService
+            .AuthorizeAsync(User, Permissions.AccountManageOperations.View);
         if (!isAuthorized.Succeeded)
         {
             return LocalRedirect("/Account/AccessDenied");
@@ -52,6 +53,12 @@ public class ManageController : Controller
             : message != null ? message
             : "";
         var user = await userManager.Users.SingleOrDefaultAsync(u => u.Id.ToString() == id);
+
+        if (user == null)
+        {
+            throw new ArgumentException("User by id wasn't found", nameof(id));
+        }
+
         var model = new IndexViewModel
         {
             Id = user.Id.ToString(),

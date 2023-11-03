@@ -1,6 +1,9 @@
 using BugTracker.Authorization;
 using BugTracker.Interfaces;
 using System.Text.Json.Serialization;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using BugTracker.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -84,6 +87,7 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.MapRazorPages();
+
 app.MapHub<BugDetailsHub>("/bugDetailsHub");
 app.MapHub<LoadProjectsHub>("/loadProjectsHub");
 app.MapHub<LoadBugsHub>("/loadBugsHub");
