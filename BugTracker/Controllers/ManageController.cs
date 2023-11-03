@@ -58,11 +58,6 @@ public class ManageController : Controller
             throw new ArgumentException("Roles for user wasn't found", nameof(id));
         }
 
-        if(user.AvatarPhoto != null)
-        {
-            ViewBag.ProfilePhotoSrc = "data:image/png;base64," + Convert.ToBase64String(user.AvatarPhoto, 0, user.AvatarPhoto.Length);
-        }
-
         EditAccountDTO dto = new EditAccountDTO()
         {
             Id = id,

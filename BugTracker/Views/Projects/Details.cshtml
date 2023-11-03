@@ -1,5 +1,22 @@
 ﻿@model GetProjectDTO
 
+@{
+    string createdBySrc = "~/img/default-avatar.png";
+    string managerSrc = "~/img/default-avatar.png";
+
+    if (Model.Manager.AvatarPhoto != null)
+    {
+        string imageBase64 = Convert.ToBase64String(Model.Manager.AvatarPhoto);
+        managerSrc = $"data:image/jpeg;base64,{imageBase64}";
+    }
+
+    if (Model.CreatedBy.AvatarPhoto != null)
+    {
+        string imageBase64 = Convert.ToBase64String(Model.CreatedBy.AvatarPhoto);
+        createdBySrc = $"data:image/jpeg;base64,{imageBase64}";
+    }
+}
+
 <div class="row mt-2">
     <div class="col">
         <div class="card">
@@ -28,15 +45,12 @@
                         </h4>
                         <ul class="list-inline">
                             <li class="list-inline-item">
-                                @if (@Model.Manager.AvatarPhoto is null)
-                                {
-                                    <img src="~/img/default-avatar.png" class="table-avatar" alt="User Image">
-                                }
-                                else
-                                {
-                                    string src = "data:image/png;base64," + Convert.ToBase64String(Model.Manager.AvatarPhoto, 0, Model.Manager.AvatarPhoto.Length);
-                                    <img src="@src" class="table-avatar" alt="User Image">
-                                }
+                                <img
+                                    src="@managerSrc"
+                                    class="profile-img"
+                                    style="min-width: 40px; min-height: 40px;"
+                                    alt="User Image"
+                                />
                             </li>
                             <li class="list-inline-item">
                                 <p class="fw-medium">@Model.Manager.Email</p>
@@ -49,16 +63,13 @@
                             Created By
                         </h4>
                         <ul class="list-inline">
-                            <li class="list-inline-item">
-                                @if (@Model.CreatedBy.AvatarPhoto is null)
-                                {
-                                    <img src="~/img/default-avatar.png" class="table-avatar" alt="User Image">
-                                }
-                                else
-                                {
-                                    string src = "data:image/png;base64," + Convert.ToBase64String(Model.CreatedBy.AvatarPhoto, 0, Model.CreatedBy.AvatarPhoto.Length);
-                                    <img src="@src" class="table-avatar" alt="User Image">
-                                }
+                            <li class="list-inline-item">  
+                                <img
+                                    src="@createdBySrc"
+                                    class="profile-img"
+                                    style="min-width: 40px; min-height: 40px;"
+                                    alt="User Image"
+                                />
                             </li>
                             <li class="list-inline-item">
                                 <p class="fw-medium">@Model.CreatedBy.Email</p>
