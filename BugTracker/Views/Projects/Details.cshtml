@@ -1,8 +1,8 @@
 ﻿@model GetProjectDTO
 
 @{
-    string createdBySrc = "~/img/default-avatar.png";
     string managerSrc = "~/img/default-avatar.png";
+    string createdBySrc = "~/img/default-avatar.png";
 
     if (Model.Manager.AvatarPhoto != null)
     {
@@ -26,23 +26,17 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Status
-                        </h4>
+                        <h4 class="fw-semibold">Status</h4>
                         <p class="fw-medium">@Model.Status</p>
                     </div>
 
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Priority
-                        </h4>
+                        <h4 class="fw-semibold">Priority</h4>
                         <p class="fw-medium">@Model.Priority</p>
                     </div>
 
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Project Manager
-                        </h4>
+                        <h4 class="fw-semibold">Project Manager</h4>
                         <ul class="list-inline">
                             <li class="list-inline-item">
                                 <img
@@ -59,9 +53,7 @@
                     </div>
 
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Created By
-                        </h4>
+                        <h4 class="fw-semibold">Created By</h4>
                         <ul class="list-inline">
                             <li class="list-inline-item">  
                                 <img
@@ -78,16 +70,12 @@
                     </div>
 
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Created Date
-                        </h4>
+                        <h4 class="fw-semibold">Created Date</h4>
                         <p class="fw-medium">@Model.CreatedDate</p>
                     </div>
 
                     <div class="col-12">
-                        <h4 class="fw-semibold">
-                            Description
-                        </h4>
+                        <h4 class="fw-semibold">Description</h4>
                         <p class="fw-medium">@Html.Raw(Model.Description)</p>
                     </div>
                 </div>

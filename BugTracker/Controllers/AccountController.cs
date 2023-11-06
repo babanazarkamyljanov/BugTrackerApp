@@ -1,7 +1,5 @@
 ﻿using BugTracker.Authorization;
 using BugTracker.Interfaces;
-using BugTracker.Models;
-using Microsoft.AspNetCore.Identity;
 
 namespace BugTracker.Controllers;
 

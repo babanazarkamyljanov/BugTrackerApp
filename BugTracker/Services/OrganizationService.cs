@@ -112,11 +112,11 @@ public class OrganizationService : IOrganizationService
         await _loadOrganizationHubContext.Clients.All.SendAsync("refreshOrganization", organization.Name, ct);
     }
 
-    public async Task Delete(Guid id, CancellationToken cancellationToken)
+    public async Task Delete(Guid id, CancellationToken ct)
     {
         Organization? organization = await _context.Organizations
             .Where(o => o.Id == id)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(ct);
 
         if (organization == null)
         {
@@ -124,7 +124,7 @@ public class OrganizationService : IOrganizationService
         }
 
         _context.Organizations.Remove(organization);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task<bool> IsAlreadyExists(string name, CancellationToken ct)

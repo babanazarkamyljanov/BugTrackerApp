@@ -100,13 +100,13 @@ public class ManageController : Controller
                 await userManager.AddToRoleAsync(user, dto.RoleName);
             }
 
-            using (var image = await Image.LoadAsync<Rgba32>(dto.ProfilePhoto.OpenReadStream()))
+            using (var image = await Image.LoadAsync<Rgba32>(dto.ProfilePhoto.OpenReadStream(), ct))
             {
                 //image.Mutate(x => x.Resize(300, 300));
 
                 using (var memoryStream = new MemoryStream())
                 {
-                    await image.SaveAsJpegAsync(memoryStream);
+                    await image.SaveAsJpegAsync(memoryStream, ct);
                     memoryStream.Position = 0;
                     user.AvatarPhoto = memoryStream.ToArray();
                 }
@@ -124,7 +124,7 @@ public class ManageController : Controller
         }
         catch (Exception)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, "An while editing account");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Error occured while updating the account");
         }
     }
 

@@ -9,7 +9,7 @@ namespace BugTracker.Controllers;
 public class BugsController : Controller
 {
     private readonly IBugsService _bugsService;
-    private readonly IAuthorizationService authorizationService;
+    private readonly IAuthorizationService _authorizationService;
     private readonly ILogger<ProjectsController> _logger;
 
     public BugsController(IBugsService bugsService,
@@ -17,7 +17,7 @@ public class BugsController : Controller
         ILogger<ProjectsController> logger)
     {
         _bugsService = bugsService;
-        this.authorizationService = authorizationService;
+        _authorizationService = authorizationService;
         _logger = logger;
     }
 
@@ -33,12 +33,17 @@ public class BugsController : Controller
             _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Index)}");
             return StatusCode(StatusCodes.Status400BadRequest, ex.Message);
         }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, $"{nameof(BugsController)}.{nameof(Index)}");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Something went wrong");
+        }
     }
 
     [HttpGet]
     public async Task<IActionResult> Details(int id, CancellationToken ct = default)
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Read);
         if (!isAuthorized.Succeeded)
         {
@@ -85,7 +90,7 @@ public class BugsController : Controller
     [HttpGet]
     public async Task<IActionResult> GetBugDetails(int id, CancellationToken ct = default)
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Read);
         if (!isAuthorized.Succeeded)
         {
@@ -112,7 +117,7 @@ public class BugsController : Controller
     [HttpGet]
     public async Task<ActionResult<List<BugCommentDTO>>> GetBugComments(int id, CancellationToken ct = default)
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Read);
         if (!isAuthorized.Succeeded)
         {
@@ -139,7 +144,7 @@ public class BugsController : Controller
     [HttpGet]
     public async Task<ActionResult<List<BugFileDTO>>> GetBugFiles(int id, CancellationToken ct = default)
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Read);
         if (!isAuthorized.Succeeded)
         {
@@ -218,7 +223,7 @@ public class BugsController : Controller
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Create);
         if (!isAuthorized.Succeeded)
         {
@@ -234,7 +239,7 @@ public class BugsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<ActionResult<EditBugDTO>> Create(CreateBugDTO dto, CancellationToken ct = default)
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Create);
         if (!isAuthorized.Succeeded)
         {
@@ -265,7 +270,7 @@ public class BugsController : Controller
     [HttpGet]
     public async Task<IActionResult> Edit(int id, CancellationToken ct = default)
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Update);
         if (!isAuthorized.Succeeded)
         {
@@ -293,7 +298,7 @@ public class BugsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<ActionResult<EditBugDTO>> Edit(int id, EditBugDTO dto, CancellationToken ct = default)
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Update);
         if (!isAuthorized.Succeeded)
         {
@@ -329,7 +334,7 @@ public class BugsController : Controller
     [HttpPost]
     public async Task<ActionResult> Delete(int id, CancellationToken ct = default)
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.BugOperations.Delete);
         if (!isAuthorized.Succeeded)
         {

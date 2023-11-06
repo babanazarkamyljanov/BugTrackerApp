@@ -118,7 +118,7 @@
                             @if (SignInManager.IsSignedIn(User))
                             {
                                 var firstName = currentUser?.FirstName;
-                                var lastName = currentUser.LastName;
+                                var lastName = currentUser?.LastName;
                                 var fullName = firstName + " " + lastName;
 
                                 <li class="nav-item dropdown">

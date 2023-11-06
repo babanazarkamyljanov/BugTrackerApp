@@ -4,8 +4,6 @@
 
 @{
     User? user = await UserManager.FindByIdAsync(Model.Id);
-    string profilePhotoUrl = "~/img/default-avatar.png";
-
     var roles = RoleManager.Roles.Where(r => r.OrganizationId == user.OrganizationId);
     var rolesList = new List<SelectListItem>();
     foreach (var role in roles)
@@ -13,6 +11,7 @@
         rolesList.Add(new SelectListItem { Value = role.Name, Text = role.Name });
     }
 
+    string profilePhotoUrl = "~/img/default-avatar.png";
     if (user != null && user.AvatarPhoto != null)
     {
         string imageBase64 = Convert.ToBase64String(user.AvatarPhoto);
