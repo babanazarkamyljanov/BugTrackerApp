@@ -48,7 +48,7 @@
                                 {
                                     string src = "data:image/png;base64,"
                                     + Convert.ToBase64String(user.AvatarPhoto, 0, user.AvatarPhoto.Length);
-                                    <img src="@src" class="table-avatar" alt="User Image">
+                                    <img src="@src" class="table-avatar" height="45" alt="User Image">
                                 }
                             </td>
                             <td class="align-middle">@user.FullName</td>

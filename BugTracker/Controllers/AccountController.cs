@@ -10,7 +10,7 @@ public class AccountController : Controller
     private readonly RoleManager<Role> _roleManager;
     private readonly IUserStore<User> _userStore;
     private readonly IUserEmailStore<User> _emailStore;
-    private readonly ILogger<RegisterViewModel> _logger;
+    private readonly ILogger<AccountController> _logger;
     private readonly IOrganizationService _organizationService;
 
     public AccountController(
@@ -18,7 +18,7 @@ public class AccountController : Controller
         RoleManager<Role> roleManager,
         IUserStore<User> userStore,
         SignInManager<User> signInManager,
-        ILogger<RegisterViewModel> logger,
+        ILogger<AccountController> logger,
         IOrganizationService organizationService)
     {
         _userManager = userManager;
@@ -56,7 +56,7 @@ public class AccountController : Controller
             if (result.Succeeded)
             {
                 _logger.LogInformation("User logged in.");
-                return RedirectToAction(returnUrl);
+                return RedirectToLocal(returnUrl);
             }
             if (result.IsLockedOut)
             {
