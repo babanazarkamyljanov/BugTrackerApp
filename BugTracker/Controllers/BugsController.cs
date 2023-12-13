@@ -230,7 +230,7 @@ public class BugsController : Controller
             return RedirectToAction("AccessDenied", "Account");
         }
 
-        CreateBugDTO dto = _bugsService.CreateGet();
+        CreateBugDTO dto = new CreateBugDTO();
         return View(dto);
     }
 

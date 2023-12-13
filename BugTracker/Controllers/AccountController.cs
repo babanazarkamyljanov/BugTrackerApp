@@ -58,7 +58,7 @@ public class AccountController : Controller
                 _logger.LogInformation("User logged in.");
                 return RedirectToLocal(returnUrl);
             }
-            if (result.IsLockedOut)
+            else if (result.IsLockedOut)
             {
                 _logger.LogWarning("User account locked out.");
                 return View("Lockout");

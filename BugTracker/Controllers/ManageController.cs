@@ -1,10 +1,5 @@
-﻿using BugTracker.Authorization;
-using BugTracker.Models.DTOs;
+﻿using BugTracker.Models.DTOs;
 using BugTracker.ViewModels.ManageAccount;
-using Humanizer;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.Win32;
-using System.Text;
 
 namespace BugTracker.Controllers;
 
@@ -49,7 +44,7 @@ public class ManageController : Controller
             .Where(o => o.Id == user.OrganizationId)
             .Select(o => o.Name)
             .FirstOrDefaultAsync(ct);
-        if ( organization == null)
+        if (organization == null)
         {
             throw new ArgumentException("Organization wasn't found", nameof(id));
         }
