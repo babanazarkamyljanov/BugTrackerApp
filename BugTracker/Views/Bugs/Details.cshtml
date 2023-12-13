@@ -12,32 +12,24 @@
             <div class="card-body">
                 <div class="row mt-2">
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Project
-                        </h4>
+                        <h4 class="fw-semibold">Project</h4>
                         <p class="fw-medium">@Model.Project.Title</p>
                     </div>
 
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Priority
-                        </h4>
+                        <h4 class="fw-semibold">Priority</h4>
                         <p class="fw-medium">@Model.Priority</p>
                     </div>
 
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Status
-                        </h4>
+                        <h4 class="fw-semibold">Status</h4>
                         <p class="fw-medium">@Model.Status</p>
                     </div>
                 </div>
 
                 <div class="row mt-2">
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Assignee
-                        </h4>
+                        <h4 class="fw-semibold">Assignee</h4>
                         <ul class="list-inline">
                             <li class="list-inline-item">
                                 @if (@Model.Assignee.AvatarPhoto is null)
@@ -57,9 +49,7 @@
                     </div>
 
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Created by
-                        </h4>
+                        <h4 class="fw-semibold">Created by</h4>
                         <ul class="list-inline">
                             <li class="list-inline-item">
                                 @if (@Model.CreatedBy.AvatarPhoto is null)
@@ -79,18 +69,14 @@
                     </div>
 
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Created Date
-                        </h4>
+                        <h4 class="fw-semibold">Created Date</h4>
                         <p class="fw-medium">@Model.CreatedDate</p>
                     </div>
                 </div>
 
                 <div class="row mt-2">
                     <div class="col-12">
-                        <h4 class="fw-semibold">
-                            Description
-                        </h4>
+                        <h4 class="fw-semibold">Description</h4>
                         <p class="fw-medium">@Html.Raw(Model.Description)</p>
                     </div>
                 </div>
@@ -140,7 +126,7 @@
                         </div>
 
                         <div class="post" id="commentPost">
-                            @* SignalR will handle to get comments *@
+                            @* SignalR will handle to loading comments *@
                         </div>
                     </div>
 
@@ -160,27 +146,16 @@
                                     @foreach (var hist in Model.History)
                                     {
                                         <tr>
-                                            <td>
-                                                @hist.Property
-                                            </td>
-                                            <td>
-                                                @Html.Raw(hist.OldValue)
-                                            </td>
-                                            <td>
-                                                @Html.Raw(hist.NewValue)
-                                            </td>
-                                            <td>
-                                                @hist.UpdatedBy.Email
-                                            </td>
-                                            <td>
-                                                @hist.UpdatedDate
-                                            </td>
+                                            <td>@hist.Property</td>
+                                            <td>@Html.Raw(hist.OldValue)</td>
+                                            <td>@Html.Raw(hist.NewValue)</td>
+                                            <td>@hist.UpdatedBy.Email</td>
+                                            <td>@hist.UpdatedDate</td>
                                         </tr>
                                     }
                                 </tbody>
                             </table>
                         </div>
-                        
                     </div>
                 </div>
             </div>

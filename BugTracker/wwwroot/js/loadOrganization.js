@@ -25,7 +25,6 @@ connection.on("refreshOrganization", function (title) {
 });
 
 function refreshOrganization(title) {
-    console.log(title);
     var h = document.getElementById('organizationName');
     h.innerText = title;
 

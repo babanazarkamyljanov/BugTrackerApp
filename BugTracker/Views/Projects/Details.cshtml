@@ -1,5 +1,22 @@
 ﻿@model GetProjectDTO
 
+@{
+    string managerSrc = "~/img/default-avatar.png";
+    string createdBySrc = "~/img/default-avatar.png";
+
+    if (Model.Manager.AvatarPhoto != null)
+    {
+        string imageBase64 = Convert.ToBase64String(Model.Manager.AvatarPhoto);
+        managerSrc = $"data:image/jpeg;base64,{imageBase64}";
+    }
+
+    if (Model.CreatedBy.AvatarPhoto != null)
+    {
+        string imageBase64 = Convert.ToBase64String(Model.CreatedBy.AvatarPhoto);
+        createdBySrc = $"data:image/jpeg;base64,{imageBase64}";
+    }
+}
+
 <div class="row mt-2">
     <div class="col">
         <div class="card">
@@ -9,34 +26,25 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Status
-                        </h4>
+                        <h4 class="fw-semibold">Status</h4>
                         <p class="fw-medium">@Model.Status</p>
                     </div>
 
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Priority
-                        </h4>
+                        <h4 class="fw-semibold">Priority</h4>
                         <p class="fw-medium">@Model.Priority</p>
                     </div>
 
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Project Manager
-                        </h4>
+                        <h4 class="fw-semibold">Project Manager</h4>
                         <ul class="list-inline">
                             <li class="list-inline-item">
-                                @if (@Model.Manager.AvatarPhoto is null)
-                                {
-                                    <img src="~/img/default-avatar.png" class="table-avatar" alt="User Image">
-                                }
-                                else
-                                {
-                                    string src = "data:image/png;base64," + Convert.ToBase64String(Model.Manager.AvatarPhoto, 0, Model.Manager.AvatarPhoto.Length);
-                                    <img src="@src" class="table-avatar" alt="User Image">
-                                }
+                                <img
+                                    src="@managerSrc"
+                                    class="profile-img"
+                                    style="min-width: 40px; min-height: 40px;"
+                                    alt="User Image"
+                                />
                             </li>
                             <li class="list-inline-item">
                                 <p class="fw-medium">@Model.Manager.Email</p>
@@ -45,20 +53,15 @@
                     </div>
 
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Created By
-                        </h4>
+                        <h4 class="fw-semibold">Created By</h4>
                         <ul class="list-inline">
-                            <li class="list-inline-item">
-                                @if (@Model.CreatedBy.AvatarPhoto is null)
-                                {
-                                    <img src="~/img/default-avatar.png" class="table-avatar" alt="User Image">
-                                }
-                                else
-                                {
-                                    string src = "data:image/png;base64," + Convert.ToBase64String(Model.CreatedBy.AvatarPhoto, 0, Model.CreatedBy.AvatarPhoto.Length);
-                                    <img src="@src" class="table-avatar" alt="User Image">
-                                }
+                            <li class="list-inline-item">  
+                                <img
+                                    src="@createdBySrc"
+                                    class="profile-img"
+                                    style="min-width: 40px; min-height: 40px;"
+                                    alt="User Image"
+                                />
                             </li>
                             <li class="list-inline-item">
                                 <p class="fw-medium">@Model.CreatedBy.Email</p>
@@ -67,16 +70,12 @@
                     </div>
 
                     <div class="col-sm-6 col-lg-4">
-                        <h4 class="fw-semibold">
-                            Created Date
-                        </h4>
+                        <h4 class="fw-semibold">Created Date</h4>
                         <p class="fw-medium">@Model.CreatedDate</p>
                     </div>
 
                     <div class="col-12">
-                        <h4 class="fw-semibold">
-                            Description
-                        </h4>
+                        <h4 class="fw-semibold">Description</h4>
                         <p class="fw-medium">@Html.Raw(Model.Description)</p>
                     </div>
                 </div>

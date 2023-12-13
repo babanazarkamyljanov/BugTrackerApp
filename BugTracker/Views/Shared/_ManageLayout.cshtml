@@ -1,16 +1,10 @@
 ﻿@using BugTracker.Helpers;
 @{
-    Layout = "~/Views/Shared/MyLayout/_AdminLayout.cshtml";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Manage Account</title>
-</head>
-<body>
-    <!-- Main content -->
-    <section style="margin-top: 10px;" class="content">
+<div class="row">
+    <div class="col">
         <div class="card card-primary card-outline">
             <div class="card-header">
                 <h3 class="card-title">
@@ -39,8 +33,5 @@
                 </div>
             </div>
         </div>
-    </section>
-
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
-</html>
+    </div>
+</div>

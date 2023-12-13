@@ -7,7 +7,7 @@ namespace BugTracker.Controllers;
 [Authorize]
 public class ProjectsController : Controller
 {
-    private readonly IAuthorizationService authorizationService;
+    private readonly IAuthorizationService _authorizationService;
     private readonly IProjectsService _projectsService;
     private readonly ILogger<ProjectsController> _logger;
 
@@ -16,7 +16,7 @@ public class ProjectsController : Controller
         IProjectsService projectsService,
         ILogger<ProjectsController> logger)
     {
-        this.authorizationService = authorizationService;
+        _authorizationService = authorizationService;
         _projectsService = projectsService;
         _logger = logger;
     }
@@ -44,7 +44,7 @@ public class ProjectsController : Controller
     [HttpGet]
     public async Task<ActionResult<GetProjectDTO>> Details(Guid id, CancellationToken ct = default)
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Read);
         if (!isAuthorized.Succeeded)
         {
@@ -96,7 +96,7 @@ public class ProjectsController : Controller
     [HttpGet]
     public async Task<ActionResult<CreateProjectDTO>> Create()
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Create);
         if (!isAuthorized.Succeeded)
         {
@@ -112,7 +112,7 @@ public class ProjectsController : Controller
     public async Task<ActionResult<CreateProjectDTO>> Create(CreateProjectDTO dto,
         CancellationToken ct = default)
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Create);
         if (!isAuthorized.Succeeded)
         {
@@ -129,7 +129,7 @@ public class ProjectsController : Controller
             catch (ArgumentException ex)
             {
                 _logger.LogError(ex, $"{nameof(ProjectsController)}.{nameof(Create)}");
-                NotFound(ex.Message);
+                return NotFound(ex.Message);
             }
             catch (Exception ex)
             {
@@ -143,7 +143,7 @@ public class ProjectsController : Controller
     [HttpGet]
     public async Task<ActionResult<EditProjectDTO>> Edit(Guid id, CancellationToken ct = default)
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Update);
 
         if (!isAuthorized.Succeeded)
@@ -172,7 +172,7 @@ public class ProjectsController : Controller
     [ValidateAntiForgeryToken]
     public async Task<ActionResult<EditProjectDTO>> Edit(Guid id, EditProjectDTO dto, CancellationToken ct = default)
     {
-        AuthorizationResult isAuthorized = await authorizationService
+        AuthorizationResult isAuthorized = await _authorizationService
             .AuthorizeAsync(User, Permissions.ProjectOperations.Update);
         if (!isAuthorized.Succeeded)
         {
@@ -205,7 +205,8 @@ public class ProjectsController : Controller
     [HttpPost]
     public async Task<ActionResult> Delete(Guid id, CancellationToken ct = default)
     {
-        AuthorizationResult isAuthorized = await authorizationService.AuthorizeAsync(User, Permissions.ProjectOperations.Delete);
+        AuthorizationResult isAuthorized = await _authorizationService
+            .AuthorizeAsync(User, Permissions.ProjectOperations.Delete);
         if (!isAuthorized.Succeeded)
         {
             return RedirectToAction("AccessDenied", "Account");

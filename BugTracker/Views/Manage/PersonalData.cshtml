@@ -3,22 +3,14 @@
     ViewData["userId"] = ViewData["id"];
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Personal Data</title>
-</head>
-<body>
-    <div class="row">
-        <div class="col-md-6">
-            <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
-            <p>
-                <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
-            </p>
-            <p>
-                <a id="delete" role="button" asp-asp-controller="Manage" asp-action="Delete" asp-route-id="@ViewData["id"]" class="btn btn-danger">Delete</a>
-            </p>
-        </div>
+<div class="row">
+    <div class="col-md-6">
+        <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
+        <p>
+            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+        </p>
+        <p>
+            <a id="delete" role="button" asp-asp-controller="Manage" asp-action="Delete" asp-route-id="@ViewData["id"]" class="btn btn-danger">Delete</a>
+        </p>
     </div>
-</body>
-</html>
+</div>

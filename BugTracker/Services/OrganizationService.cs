@@ -7,19 +7,16 @@ public class OrganizationService : IOrganizationService
 {
     private readonly ApplicationDbContext _context;
     private readonly IUsersService _usersService;
-    private readonly RoleManager<Role> _roleManager;
     private readonly UserManager<User> _userManager;
     private readonly IHubContext<LoadOrganizationHub> _loadOrganizationHubContext;
 
     public OrganizationService(ApplicationDbContext context,
         IUsersService usersService,
-        RoleManager<Role> roleManager,
         UserManager<User> userManager,
         IHubContext<LoadOrganizationHub> loadOrganizationHubContext)
     {
         _context = context;
         _usersService = usersService;
-        _roleManager = roleManager;
         _userManager = userManager;
         _loadOrganizationHubContext = loadOrganizationHubContext;
     }
@@ -115,11 +112,11 @@ public class OrganizationService : IOrganizationService
         await _loadOrganizationHubContext.Clients.All.SendAsync("refreshOrganization", organization.Name, ct);
     }
 
-    public async Task Delete(Guid id, CancellationToken cancellationToken)
+    public async Task Delete(Guid id, CancellationToken ct)
     {
         Organization? organization = await _context.Organizations
             .Where(o => o.Id == id)
-            .FirstOrDefaultAsync(cancellationToken);
+            .FirstOrDefaultAsync(ct);
 
         if (organization == null)
         {
@@ -127,7 +124,7 @@ public class OrganizationService : IOrganizationService
         }
 
         _context.Organizations.Remove(organization);
-        await _context.SaveChangesAsync(cancellationToken);
+        await _context.SaveChangesAsync(ct);
     }
 
     public async Task<bool> IsAlreadyExists(string name, CancellationToken ct)

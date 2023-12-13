@@ -5,25 +5,16 @@
     ViewData["userId"] = Model.Id;
 }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Change Email</title>
-</head>
-<body>
-    <!-- Email -->
-    <form id="email-form" asp-controller="Manage" asp-action="ChangeEmail" method="post">
-        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
-        <div class="form-group">
-            <label asp-for="@Model.Email" class="form-label"></label>
-            <input asp-for="@Model.Email" class="form-control" placeholder="Please enter your email." disabled />
-        </div>
-        <div class="form-group">
-            <label asp-for="@Model.NewEmail" class="form-label"></label>
-            <input asp-for="@Model.NewEmail" class="form-control" autocomplete="email" aria-required="true" placeholder="Please enter new email." />
-            <span asp-validation-for="@Model.NewEmail" class="text-danger"></span>
-        </div>
-        <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" class="btn btn-md btn-primary">Change email</button>
-    </form>
-</body>
-</html>
+<form id="email-form" asp-controller="Manage" asp-action="ChangeEmail" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+    <div class="form-group">
+        <label asp-for="@Model.Email" class="form-label"></label>
+        <input asp-for="@Model.Email" class="form-control" placeholder="Please enter your email." disabled />
+    </div>
+    <div class="form-group">
+        <label asp-for="@Model.NewEmail" class="form-label"></label>
+        <input asp-for="@Model.NewEmail" class="form-control" autocomplete="email" aria-required="true" placeholder="Please enter new email." />
+        <span asp-validation-for="@Model.NewEmail" class="text-danger"></span>
+    </div>
+    <button id="change-email-button" type="submit" asp-page-handler="ChangeEmail" class="btn btn-md btn-primary">Change email</button>
+</form>

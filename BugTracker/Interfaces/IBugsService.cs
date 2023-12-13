@@ -9,8 +9,6 @@ public interface IBugsService
 
     Task Search(string searchTerm, CancellationToken ct);
 
-    CreateBugDTO CreateGet();
-
     Task<CreateBugDTO> CreatePost(CreateBugDTO dto, CancellationToken cancellationToken);
 
     Task<EditBugDTO> EditGet(int id, CancellationToken cancellationToken);

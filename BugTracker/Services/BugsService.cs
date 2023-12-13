@@ -128,12 +128,6 @@ public class BugsService : IBugsService
         }
     }
 
-    public CreateBugDTO CreateGet()
-    {
-        var dto = new CreateBugDTO();
-        return dto;
-    }
-
     public async Task<CreateBugDTO> CreatePost(CreateBugDTO dto, CancellationToken ct)
     {
         Bug bug = new Bug()

@@ -7,6 +7,13 @@
 
 @{
     User? currentUser = await UserManager.GetUserAsync(User);
+    string profilePhotoUrl = "~/img/default-avatar.png";
+
+    if(currentUser != null && currentUser.AvatarPhoto != null)
+    {
+        string imageBase64 = Convert.ToBase64String(currentUser.AvatarPhoto);
+        profilePhotoUrl = $"data:image/jpeg;base64,{imageBase64}";
+    }
 }
 
 <!DOCTYPE html>
@@ -56,8 +63,7 @@
             <i class="nav-icon fa-solid fa-users"></i> Organization
         </a>
 
-
-        <a asp-controller="Manage" asp-action="Index" asp-route-id="@currentUser.Id" class="@Url.MakeActiveClass("Manage","Index")">
+        <a asp-controller="Manage" asp-action="Index1" asp-route-id="@currentUser?.Id" class="@Url.MakeActiveClass("Manage","Index1")">
             <i class="nav-icon fa-solid fa-user"></i> Manage Account
         </a>
 
@@ -111,8 +117,8 @@
 
                             @if (SignInManager.IsSignedIn(User))
                             {
-                                var firstName = (await @UserManager.GetUserAsync(User)).FirstName;
-                                var lastName = (await @UserManager.GetUserAsync(User)).LastName;
+                                var firstName = currentUser?.FirstName;
+                                var lastName = currentUser?.LastName;
                                 var fullName = firstName + " " + lastName;
 
                                 <li class="nav-item dropdown">
@@ -123,10 +129,11 @@
                                         data-bs-toggle="dropdown"
                                         aria-expanded="false"
                                     >
-                                        <img 
-                                            src="~/img/default-avatar.png"
+                                        <img
+                                            src="@profilePhotoUrl"
                                             alt="Profile"
-                                            class="profile-img" />
+                                            class="profile-img"
+                                        />
                                         @fullName
                                     </a>
 
@@ -212,7 +219,6 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"
             integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL"
             crossorigin="anonymous"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
 
     <script src="https://kit.fontawesome.com/1d896aecf2.js" crossorigin="anonymous"></script>
 
